@@ -22,9 +22,16 @@ extern void *_gp;
 static int imgThread(void* data)
 {
 	char* text = (char*)data;
+	int file = open(text, O_RDONLY, 0777);
 	bool delayed = asyncDelayed;
-	GSTEXTURE* image = load_image(text, delayed);
-	if (image == NULL) 
+	uint16_t magic;
+	read(file, &magic, 2);
+	close(file);
+	GSTEXTURE* image = NULL;
+	if (magic == 0x4D42) image = luaP_loadbmp(text, delayed);
+	else if (magic == 0xD8FF) image = luaP_loadjpeg(text, false, delayed);
+	else if (magic == 0x5089) image = luaP_loadpng(text, delayed);
+	else 
 	{
 		imgThreadResult = 1;
 		ExitDeleteThread();
@@ -57,7 +64,7 @@ static int lua_print(lua_State *L) {
     float x = luaL_checknumber(L, 2);
 	float y = luaL_checknumber(L, 3);
     float scale =  luaL_checknumber(L, 4);
-    const char* text = luaL_checkstring(L, 5);
+    char* text = (char*)(luaL_checkstring(L, 5));
 	Color color = 0x80808080;
 	if (argc == 6) color = luaL_checkinteger(L, 6);
 	printFontText(font, text, x, y, scale, color);
@@ -150,7 +157,7 @@ static int lua_fmprint(lua_State *L) {
     float x = luaL_checknumber(L, 1);
 	float y = luaL_checknumber(L, 2);
     float scale =  luaL_checknumber(L, 3);
-    const char* text = luaL_checkstring(L, 4);
+    char* text = (char*)(luaL_checkstring(L, 4));
 	Color color = 0x80808080;
 	if (argc == 5) color =  luaL_checkinteger(L, 5);
 	printFontMText(text, x, y, scale, color);
@@ -216,9 +223,17 @@ static int lua_loadimg(lua_State *L) {
 	int argc = lua_gettop(L);
 	if (argc != 1 && argc != 2) return luaL_error(L, "wrong number of arguments");
 	const char* text = luaL_checkstring(L, 1);
+	int file = open(text, O_RDONLY, 0777);
 	bool delayed = true;
 	if (argc == 2) delayed = lua_toboolean(L, 2);
-	GSTEXTURE* image = load_image(text, delayed);
+	uint16_t magic;
+	read(file, &magic, 2);
+	close(file);
+	GSTEXTURE* image = NULL;
+	if (magic == 0x4D42) image = luaP_loadbmp(text, delayed);
+	else if (magic == 0xD8FF) image = luaP_loadjpeg(text, false, delayed);
+	else if (magic == 0x5089) image = luaP_loadpng(text, delayed);
+	else return luaL_error(L, "Error loading image (invalid magic).");
 
 	lua_pushinteger(L, (uint32_t)(image));
 	return 1;

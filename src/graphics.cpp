@@ -19,23 +19,24 @@ static const u64 TEXTURE_RGBAQ = GS_SETREG_RGBAQ(0x80,0x80,0x80,0x80,0x00);
 GSGLOBAL *gsGlobal = NULL;
 GSFONTM *gsFontM = NULL;
 
-static bool vsync = true;
-static int vsync_sema_id = 0;
-static clock_t curtime = 0;
-static float fps = 0.0f;
+#ifdef ftoi4
+ #undef ftoi4
+ #define ftoi4(F) ((int)(((float)F)*16.0f))
+#else
+ #define ftoi4(F) ((int)(((float)F)*16.0f))
+#endif
 
-static int frames = 0;
-static int frame_interval = -1;
 
 //2D drawing functions
-GSTEXTURE* loadpng(FILE* File, bool delayed)
+GSTEXTURE* luaP_loadpng(const char *path, bool delayed)
 {
 	GSTEXTURE* tex = (GSTEXTURE*)malloc(sizeof(GSTEXTURE));
 	tex->Delayed = delayed;
 
+	FILE* File = fopen(path, "rb");
 	if (File == NULL)
 	{
-		printf("Failed to load PNG file\n");
+		printf("Failed to load PNG file: %s\n", path);
 		return NULL;
 	}
 
@@ -82,9 +83,16 @@ GSTEXTURE* loadpng(FILE* File, bool delayed)
 
 	png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type,&interlace_type, NULL, NULL);
 
-	if (bit_depth == 16) png_set_strip_16(png_ptr);
-	if (color_type == PNG_COLOR_TYPE_GRAY || bit_depth < 4) png_set_expand(png_ptr);
-	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS)) png_set_tRNS_to_alpha(png_ptr);
+	png_set_strip_16(png_ptr);
+
+	if (color_type == PNG_COLOR_TYPE_PALETTE)
+		png_set_expand(png_ptr);
+
+	if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
+		png_set_expand(png_ptr);
+
+	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS))
+		png_set_tRNS_to_alpha(png_ptr);
 
 	png_set_filler(png_ptr, 0xff, PNG_FILLER_AFTER);
 
@@ -93,8 +101,8 @@ GSTEXTURE* loadpng(FILE* File, bool delayed)
 	tex->Width = width;
 	tex->Height = height;
 
-    tex->VramClut = 0;
-    tex->Clut = NULL;
+        tex->VramClut = 0;
+        tex->Clut = NULL;
 
 	if(png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_RGB_ALPHA)
 	{
@@ -146,121 +154,6 @@ GSTEXTURE* loadpng(FILE* File, bool delayed)
 		for(row = 0; row < height; row++) free(row_pointers[row]);
 
 		free(row_pointers);
-	}
-	else if(png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_PALETTE){
-
-		struct png_clut { u8 r, g, b, a; };
-
-		png_colorp palette = NULL;
-		int num_pallete = 0;
-		png_bytep trans = NULL;
-		int num_trans = 0;
-
-        png_get_PLTE(png_ptr, info_ptr, &palette, &num_pallete);
-        png_get_tRNS(png_ptr, info_ptr, &trans, &num_trans, NULL);
-        tex->ClutPSM = GS_PSM_CT32;
-
-		if (bit_depth == 4) {
-
-			int row_bytes = png_get_rowbytes(png_ptr, info_ptr);
-			tex->PSM = GS_PSM_T4;
-			tex->Mem = (u32*)memalign(128, gsKit_texture_size_ee(tex->Width, tex->Height, tex->PSM));
-
-			row_pointers = (png_byte**)calloc(height, sizeof(png_bytep));
-
-			for(row = 0; row < height; row++) row_pointers[row] = (png_bytep)malloc(row_bytes);
-
-			png_read_image(png_ptr, row_pointers);
-
-            tex->Clut = (u32*)memalign(128, gsKit_texture_size_ee(8, 2, GS_PSM_CT32));
-            memset(tex->Clut, 0, gsKit_texture_size_ee(8, 2, GS_PSM_CT32));
-
-            unsigned char *pixel = (unsigned char *)tex->Mem;
-    		struct png_clut *clut = (struct png_clut *)tex->Clut;
-
-    		int i, j, k = 0;
-
-    		for (i = num_pallete; i < 16; i++) {
-    		    memset(&clut[i], 0, sizeof(clut[i]));
-    		}
-
-    		for (i = 0; i < num_pallete; i++) {
-    		    clut[i].r = palette[i].red;
-    		    clut[i].g = palette[i].green;
-    		    clut[i].b = palette[i].blue;
-    		    clut[i].a = 0x80;
-    		}
-
-    		for (i = 0; i < num_trans; i++)
-    		    clut[i].a = trans[i] >> 1;
-
-    		for (i = 0; i < tex->Height; i++) {
-    		    for (j = 0; j < tex->Width / 2; j++)
-    		        memcpy(&pixel[k++], &row_pointers[i][1 * j], 1);
-    		}
-
-    		int byte;
-    		unsigned char *tmpdst = (unsigned char *)tex->Mem;
-    		unsigned char *tmpsrc = (unsigned char *)pixel;
-
-    		for (byte = 0; byte < gsKit_texture_size_ee(tex->Width, tex->Height, tex->PSM); byte++) tmpdst[byte] = (tmpsrc[byte] << 4) | (tmpsrc[byte] >> 4);
-
-			for(row = 0; row < height; row++) free(row_pointers[row]);
-
-			free(row_pointers);
-
-        } else if (bit_depth == 8) {
-			int row_bytes = png_get_rowbytes(png_ptr, info_ptr);
-			tex->PSM = GS_PSM_T8;
-			tex->Mem = (u32*)memalign(128, gsKit_texture_size_ee(tex->Width, tex->Height, tex->PSM));
-
-			row_pointers = (png_byte**)calloc(height, sizeof(png_bytep));
-
-			for(row = 0; row < height; row++) row_pointers[row] = (png_bytep)malloc(row_bytes);
-
-			png_read_image(png_ptr, row_pointers);
-
-            tex->Clut = (u32*)memalign(128, gsKit_texture_size_ee(16, 16, GS_PSM_CT32));
-            memset(tex->Clut, 0, gsKit_texture_size_ee(16, 16, GS_PSM_CT32));
-
-            unsigned char *pixel = (unsigned char *)tex->Mem;
-    		struct png_clut *clut = (struct png_clut *)tex->Clut;
-
-    		int i, j, k = 0;
-
-    		for (i = num_pallete; i < 256; i++) {
-    		    memset(&clut[i], 0, sizeof(clut[i]));
-    		}
-
-    		for (i = 0; i < num_pallete; i++) {
-    		    clut[i].r = palette[i].red;
-    		    clut[i].g = palette[i].green;
-    		    clut[i].b = palette[i].blue;
-    		    clut[i].a = 0x80;
-    		}
-
-    		for (i = 0; i < num_trans; i++)
-    		    clut[i].a = trans[i] >> 1;
-
-    		// rotate clut
-    		for (i = 0; i < num_pallete; i++) {
-    		    if ((i & 0x18) == 8) {
-    		        struct png_clut tmp = clut[i];
-    		        clut[i] = clut[i + 8];
-    		        clut[i + 8] = tmp;
-    		    }
-    		}
-
-    		for (i = 0; i < tex->Height; i++) {
-    		    for (j = 0; j < tex->Width; j++) {
-    		        memcpy(&pixel[k++], &row_pointers[i][1 * j], 1);
-    		    }
-    		}
-
-			for(row = 0; row < height; row++) free(row_pointers[row]);
-
-			free(row_pointers);
-        }
 	}
 	else
 	{
@@ -317,7 +210,8 @@ GSTEXTURE* loadpng(FILE* File, bool delayed)
 
 }
 
-GSTEXTURE* loadbmp(FILE* File, bool delayed)
+
+GSTEXTURE* luaP_loadbmp(const char *Path, bool delayed)
 {
 	GSBITMAP Bitmap;
 	int x, y;
@@ -329,21 +223,22 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
     GSTEXTURE* tex = (GSTEXTURE*)malloc(sizeof(GSTEXTURE));
 	tex->Delayed = delayed;
 
+	FILE* File = fopen(Path, "rb");
 	if (File == NULL)
 	{
-		printf("BMP: Failed to load bitmap\n");
+		printf("BMP: Failed to load bitmap: %s\n", Path);
 		return NULL;
 	}
 	if (fread(&Bitmap.FileHeader, sizeof(Bitmap.FileHeader), 1, File) <= 0)
 	{
-		printf("BMP: Could not load bitmap\n");
+		printf("BMP: Could not load bitmap: %s\n", Path);
 		fclose(File);
 		return NULL;
 	}
 
 	if (fread(&Bitmap.InfoHeader, sizeof(Bitmap.InfoHeader), 1, File) <= 0)
 	{
-		printf("BMP: Could not load bitmap\n");
+		printf("BMP: Could not load bitmap: %s\n", Path);
 		fclose(File);
 		return NULL;
 	}
@@ -366,7 +261,7 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 				free(tex->Clut);
 				tex->Clut = NULL;
 			}
-			printf("BMP: Could not load bitmap\n");
+			printf("BMP: Could not load bitmap: %s\n", Path);
 			fclose(File);
 			return NULL;
 		}
@@ -401,7 +296,7 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 				free(tex->Clut);
 				tex->Clut = NULL;
 			}
-			printf("BMP: Could not load bitmap\n");
+			printf("BMP: Could not load bitmap: %s\n", Path);
 			fclose(File);
 			return NULL;
 		}
@@ -683,13 +578,14 @@ static void  _ps2_load_JPEG_generic(GSTEXTURE *Texture, struct jpeg_decompress_s
 	jpeg_finish_decompress(cinfo);
 }
 
-GSTEXTURE* loadjpeg(FILE* fp, bool scale_down, bool delayed)
+GSTEXTURE* luaP_loadjpeg(const char *Path, bool scale_down, bool delayed)
 {
 
 	
     GSTEXTURE* tex = (GSTEXTURE*)malloc(sizeof(GSTEXTURE));
 	tex->Delayed = delayed;
 
+	FILE *fp;
 	struct jpeg_decompress_struct cinfo;
 	struct my_error_mgr jerr;
 
@@ -698,9 +594,10 @@ GSTEXTURE* loadjpeg(FILE* fp, bool scale_down, bool delayed)
 		return NULL;
 	}
 
+	fp = fopen(Path, "rb");
 	if (fp == NULL)
 	{
-		printf("jpeg: Failed to load file\n");
+		printf("jpeg: Failed to load file: %s\n", Path);
 		return NULL;
 	}
 
@@ -773,19 +670,6 @@ GSTEXTURE* loadjpeg(FILE* fp, bool scale_down, bool delayed)
 
 }
 
-GSTEXTURE* load_image(const char* path, bool delayed){
-	FILE* file = fopen(path, "rb");
-	uint16_t magic;
-	fread(&magic, 1, 2, file);
-	fseek(file, 0, SEEK_SET);
-	GSTEXTURE* image = NULL;
-	if (magic == 0x4D42) image =      loadbmp(file, delayed);
-	else if (magic == 0xD8FF) image = loadjpeg(file, false, delayed);
-	else if (magic == 0x5089) image = loadpng(file, delayed);
-	if (image == NULL) printf("Failed to load image %s.", path);
-
-	return image;
-}
 
 void gsKit_clear_screens()
 {
@@ -812,10 +696,10 @@ void loadFontM()
 	gsFontM->Spacing = 0.70f;
 }
 
-void printFontMText(const char* text, float x, float y, float scale, Color color)
+void printFontMText(char* text, float x, float y, float scale, Color color)
 {
 	gsKit_set_test(gsGlobal, GS_ATEST_ON);
-	gsKit_fontm_print_scaled(gsGlobal, gsFontM, x-0.5f, y-0.5f, 1, scale, color, text);
+	gsKit_fontm_print_scaled(gsGlobal, gsFontM, x, y, 1, scale, color, text);
 }
 
 void unloadFontM()
@@ -823,9 +707,19 @@ void unloadFontM()
 	gsKit_free_fontm(gsGlobal, gsFontM);
 }
 
-float FPSCounter(int interval)
+int FPSCounter(clock_t prevtime, clock_t curtime)
 {
-	frame_interval = interval;
+	float fps = 0.0f;
+
+	if (prevtime != 0) {
+	        clock_t diff = curtime - prevtime;
+	        float rawfps = ((100 * CLOCKS_PER_SEC) / diff) / 100.0f;
+
+	        if (fps == 0.0f)
+	            fps = rawfps;
+	        else
+	            fps = fps * 0.9f + rawfps / 10.0f;
+	    }
 	return fps;
 }
 
@@ -849,7 +743,7 @@ GSFONT* loadFont(const char* path){
 	return font;
 }
 
-void printFontText(GSFONT* font, const char* text, float x, float y, float scale, Color color)
+void printFontText(GSFONT* font, char* text, float x, float y, float scale, Color color)
 {
 	gsKit_set_test(gsGlobal, GS_ATEST_ON);
 	gsKit_font_print_scaled(gsGlobal, font, x-0.5f, y-0.5f, 1, scale, color, text);
@@ -1019,7 +913,7 @@ int GetInterlacedFrameMode()
 
 GSGLOBAL *getGSGLOBAL(){return gsGlobal;}
 
-void setVideoMode(s16 mode, int width, int height, int psm, s16 interlace, s16 field, bool zbuffering, int psmz) {
+void setVideoMode(s16 mode, int width, int height, int psm, s16 interlace, s16 field) {
 	gsGlobal->Mode = mode;
 	gsGlobal->Width = width;
 	if ((interlace == GS_INTERLACED) && (field == GS_FRAME))
@@ -1028,9 +922,9 @@ void setVideoMode(s16 mode, int width, int height, int psm, s16 interlace, s16 f
 		gsGlobal->Height = height;
 
 	gsGlobal->PSM = psm;
-	gsGlobal->PSMZ = psmz;
+	gsGlobal->PSMZ = GS_PSMZ_16;
 
-	gsGlobal->ZBuffering = zbuffering;
+	gsGlobal->ZBuffering = GS_SETTING_OFF;
 	gsGlobal->DoubleBuffering = GS_SETTING_ON;
 	gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
 	gsGlobal->Dithering = GS_SETTING_OFF;
@@ -1064,52 +958,8 @@ void fntDrawQuad(rm_quad_t *q)
 }
 
 
-/* PRIVATE METHODS */
-static int vsync_handler()
-{
-   iSignalSema(vsync_sema_id);
-
-   ExitHandler();
-   return 0;
-}
-
-void setVSync(bool vsync_flag){ vsync = vsync_flag;}
-
-/* Copy of gsKit_sync_flip, but without the 'flip' */
-static void gsKit_sync(GSGLOBAL *gsGlobal)
-{
-   if (!gsGlobal->FirstFrame) WaitSema(vsync_sema_id);
-   while (PollSema(vsync_sema_id) >= 0)
-   	;
-}
-
-/* Copy of gsKit_sync_flip, but without the 'sync' */
-static void gsKit_flip(GSGLOBAL *gsGlobal)
-{
-   if (!gsGlobal->FirstFrame)
-   {
-      if (gsGlobal->DoubleBuffering == GS_SETTING_ON)
-      {
-         GS_SET_DISPFB2( gsGlobal->ScreenBuffer[
-               gsGlobal->ActiveBuffer & 1] / 8192,
-               gsGlobal->Width / 64, gsGlobal->PSM, 0, 0 );
-
-         gsGlobal->ActiveBuffer ^= 1;
-      }
-
-   }
-
-   gsKit_setactive(gsGlobal);
-}
-
-
 void initGraphics()
 {
-	ee_sema_t sema;
-    sema.init_count = 0;
-    sema.max_count = 1;
-    sema.option = 0;
-    vsync_sema_id = CreateSema(&sema);
 
 	gsGlobal = gsKit_init_global();
 
@@ -1121,7 +971,7 @@ void initGraphics()
 	}
 
 	gsGlobal->PSM  = GS_PSM_CT24;
-	gsGlobal->PSMZ = GS_PSMZ_16S;
+	gsGlobal->PSMZ = GS_PSMZ_16;
 	gsGlobal->ZBuffering = GS_SETTING_OFF;
 	gsGlobal->DoubleBuffering = GS_SETTING_ON;
 	gsGlobal->PrimAlphaEnable = GS_SETTING_ON;
@@ -1132,7 +982,7 @@ void initGraphics()
 	dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC, D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
 	dmaKit_chan_init(DMA_CHANNEL_GIF);
 
-	printf("\nGraphics: created %ix%i video surface\n",
+	printf("\nGraphics: created video surface of (%d, %d)\n",
 		gsGlobal->Width, gsGlobal->Height);
 
 	gsKit_set_clamp(gsGlobal, GS_CMODE_REPEAT);
@@ -1141,9 +991,7 @@ void initGraphics()
 
 	gsKit_init_screen(gsGlobal);
 
-	gsKit_TexManager_init(gsGlobal);
-
-	gsKit_add_vsync_handler(vsync_handler);
+	//gsKit_TexManager_init(gsGlobal);
 
 	gsKit_mode_switch(gsGlobal, GS_ONESHOT);
 
@@ -1159,27 +1007,10 @@ void initGraphics()
 void flipScreen()
 {	
 	//gsKit_set_finish(gsGlobal);
-	if (gsGlobal->DoubleBuffering == GS_SETTING_OFF) {
-        if(vsync) 
-			gsKit_sync(gsGlobal);
-		gsKit_queue_exec(gsGlobal);
-    } else {
-		gsKit_queue_exec(gsGlobal);
-		gsKit_finish();
-		if(vsync) 
-			gsKit_sync(gsGlobal);
-		gsKit_flip(gsGlobal);
-	}
+	gsKit_queue_exec(gsGlobal);
+	gsKit_finish();
+	gsKit_sync_flip(gsGlobal);
 	gsKit_TexManager_nextFrame(gsGlobal);
-	if (frames > frame_interval && frame_interval != -1) {
-		clock_t prevtime = curtime;
-		curtime = clock();
-
-		fps = ((float)(frame_interval)) / (((float)(curtime - prevtime)) / ((float)CLOCKS_PER_SEC));
-
-		frames = 0;
-	}
-	frames++;
 }
 
 void graphicWaitVblankStart(){

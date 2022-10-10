@@ -1,10 +1,5 @@
+#include <stdlib.h>
 #include "include/luaplayer.h"
-#include "include/pad.h"
-
-extern "C"{
-#include <libds34bt.h>
-#include <libds34usb.h>
-}
 
 static int lua_gettype(lua_State *L) {
 	int argc = lua_gettop(L);
@@ -27,35 +22,8 @@ static int lua_getpad(lua_State *L) {
 		port = luaL_checkinteger(L, 1);
 		if (port > 1) return luaL_error(L, "wrong port number.");
 	}
-
-	padButtonStatus buttons;
-	u32 paddata = 0;
-	int ret;
-
-	int state = padGetState(port, 0);
-
-	if ((state == PAD_STATE_STABLE) || (state == PAD_STATE_FINDCTP1)) {
-        // pad is connected. Read pad button information.
-        ret = padRead(port, 0, &buttons); // port, slot, buttons
-        if (ret != 0) {
-            paddata = 0xffff ^ buttons.btns;
-        }
-    } 
-
-	if (ds34bt_get_status(port) & DS34BT_STATE_RUNNING) {
-        ret = ds34bt_get_data(port, (u8 *)&buttons.btns);
-        if (ret != 0) {
-            paddata |= 0xffff ^ buttons.btns;
-        }
-    }
-
-	if (ds34usb_get_status(port) & DS34USB_STATE_RUNNING) {
-        ret = ds34usb_get_data(port, (u8 *)&buttons.btns);
-        if (ret != 0) {
-            paddata |= 0xffff ^ buttons.btns;
-        }
-    }
-
+	padButtonStatus buttons = readPad(port, 0);
+	u32 paddata = 0xffff ^ buttons.btns;  
 	lua_pushinteger(L, paddata);
 	return 1;
 }
@@ -68,15 +36,7 @@ static int lua_getleft(lua_State *L){
 		port = luaL_checkinteger(L, 1);
 		if (port > 1) return luaL_error(L, "wrong port number.");
 	}
-
-	padButtonStatus buttons;
-
-	int state = padGetState(port, 0);
-
-	if ((state == PAD_STATE_STABLE) || (state == PAD_STATE_FINDCTP1)) padRead(port, 0, &buttons);
-	if (ds34bt_get_status(port) & DS34BT_STATE_RUNNING) ds34bt_get_data(port, (u8 *)&buttons.btns);
-	if (ds34usb_get_status(port) & DS34USB_STATE_RUNNING) ds34usb_get_data(port, (u8 *)&buttons.btns);
-
+	padButtonStatus buttons = readPad(port, 0);
 	lua_pushinteger(L, buttons.ljoy_h-127);
 	lua_pushinteger(L, buttons.ljoy_v-127);
 	return 2;
@@ -90,15 +50,7 @@ static int lua_getright(lua_State *L){
 		port = luaL_checkinteger(L, 1);
 		if (port > 1) return luaL_error(L, "wrong port number.");
 	}
-
-	padButtonStatus buttons;
-
-	int state = padGetState(port, 0);
-
-	if ((state == PAD_STATE_STABLE) || (state == PAD_STATE_FINDCTP1)) padRead(port, 0, &buttons);
-	if (ds34bt_get_status(port) & DS34BT_STATE_RUNNING) ds34bt_get_data(port, (u8 *)&buttons.btns);
-	if (ds34usb_get_status(port) & DS34USB_STATE_RUNNING) ds34usb_get_data(port, (u8 *)&buttons.btns);
-
+	padButtonStatus buttons = readPad(port, 0);
 	lua_pushinteger(L, buttons.rjoy_h-127);
 	lua_pushinteger(L, buttons.rjoy_v-127);
 	return 2;
@@ -111,62 +63,55 @@ static int lua_getpressure(lua_State *L){
 	int button;
 	if (argc == 2) {
 		port = luaL_checkinteger(L, 1);
+		if (port > 1) return luaL_error(L, "wrong port number.");
 		button = luaL_checkinteger(L, 2);
 	} else {
 		button = luaL_checkinteger(L, 1);
 	}
 	
-	padButtonStatus pad;
-
-	unsigned char pressure = 255;
-
-	int state = padGetState(port, 0);
-
-	if ((state == PAD_STATE_STABLE) || (state == PAD_STATE_FINDCTP1)) padRead(port, 0, &pad);
-	if (ds34bt_get_status(port) & DS34BT_STATE_RUNNING) ds34bt_get_data(port, (u8 *)&pad.btns);
-	if (ds34usb_get_status(port) & DS34USB_STATE_RUNNING) ds34usb_get_data(port, (u8 *)&pad.btns);
-
+	padButtonStatus pad = readPad(port, 0);
+	unsigned char pressure;
 	switch (button) {
-	    case PAD_RIGHT:
-	        pressure = pad.right_p;
-	        break;
-	    case PAD_LEFT:
-	        pressure = pad.left_p;
-	        break;
-	    case PAD_UP:
-	        pressure = pad.up_p;
-	        break;
-		case PAD_DOWN:
-	        pressure = pad.down_p;
-	        break;
-		case PAD_TRIANGLE:
-	        pressure = pad.triangle_p;
-	        break;
-		case PAD_CIRCLE:
-	        pressure = pad.circle_p;
-	        break;
-		case PAD_CROSS:
-	        pressure = pad.cross_p;
-	        break;
-		case PAD_SQUARE:
-	        pressure = pad.square_p;
-	        break;
-		case PAD_L1:
-	        pressure = pad.l1_p;
-	        break;
-		case PAD_R1:
-	        pressure = pad.r1_p;
-	        break;
-		case PAD_L2:
-	        pressure = pad.l2_p;
-	        break;
-		case PAD_R2:
-	        pressure = pad.r2_p;
-	        break;
-	    default:
-	        pressure = 0;
-	        break;
-    }
+            case PAD_RIGHT:
+                pressure = pad.right_p;
+                break;
+            case PAD_LEFT:
+                pressure = pad.left_p;
+                break;
+            case PAD_UP:
+                pressure = pad.up_p;
+                break;
+			case PAD_DOWN:
+                pressure = pad.down_p;
+                break;
+			case PAD_TRIANGLE:
+                pressure = pad.triangle_p;
+                break;
+			case PAD_CIRCLE:
+                pressure = pad.circle_p;
+                break;
+			case PAD_CROSS:
+                pressure = pad.cross_p;
+                break;
+			case PAD_SQUARE:
+                pressure = pad.square_p;
+                break;
+			case PAD_L1:
+                pressure = pad.l1_p;
+                break;
+			case PAD_R1:
+                pressure = pad.r1_p;
+                break;
+			case PAD_L2:
+                pressure = pad.l2_p;
+                break;
+			case PAD_R2:
+                pressure = pad.r2_p;
+                break;
+            default:
+                pressure = 0;
+                break;
+        }
 
 	lua_pushinteger(L, (uint32_t)pressure);
 	return 1;
@@ -185,12 +130,9 @@ static int lua_rumble(lua_State *L){
 		actAlign[0] = luaL_checkinteger(L, 1);
 		actAlign[1] = luaL_checkinteger(L, 2);
 	}
-
-	int state = padGetState(port, 0);
-	if ((state == PAD_STATE_STABLE) || (state == PAD_STATE_FINDCTP1)) padSetActDirect(port, 0, actAlign);
-	if (ds34bt_get_status(port) & DS34BT_STATE_RUNNING) ds34bt_set_rumble(port, actAlign[1], actAlign[1]);
-	if (ds34usb_get_status(port) & DS34USB_STATE_RUNNING) ds34usb_set_rumble(port, actAlign[1], actAlign[1]);
-
+	
+	
+	padSetActDirect(port, 0, actAlign);
 	return 0;
 }
 
@@ -203,31 +145,6 @@ static int lua_check(lua_State *L){
 	return 1;
 }
 
-
-static int lua_set_led(lua_State *L){
-	int argc = lua_gettop(L);
-	if (argc != 3 && argc != 4) return luaL_error(L, "wrong number of arguments.");
-	u8 led[4];
-	int port = 0;
-	if (argc == 4){
-		port = luaL_checkinteger(L, 1);
-		led[0] = luaL_checkinteger(L, 2);
-		led[1] = luaL_checkinteger(L, 3);
-		led[2] = luaL_checkinteger(L, 4);
-	} else {
-		led[0] = luaL_checkinteger(L, 1);
-		led[1] = luaL_checkinteger(L, 2);
-		led[2] = luaL_checkinteger(L, 3);
-	}
-
-	led[3] = 0;
-
-	if (ds34bt_get_status(port) & DS34BT_STATE_RUNNING) ds34bt_set_led(port, led);
-	if (ds34usb_get_status(port) & DS34USB_STATE_RUNNING) ds34usb_set_led(port, led);
-
-	return 0;
-}
-
 //Register our Screen Functions
 static const luaL_Reg Pads_functions[] = {
   {"get",              lua_getpad},
@@ -236,7 +153,6 @@ static const luaL_Reg Pads_functions[] = {
   {"getType",         lua_gettype},
   {"getPressure", lua_getpressure},
   {"rumble",           lua_rumble},
-  {"setLED",          lua_set_led},
   {"check",             lua_check},
   {0, 0}
 };

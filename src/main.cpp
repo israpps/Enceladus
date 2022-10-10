@@ -10,9 +10,6 @@
 #include <iopcontrol.h>
 #include <smod.h>
 #include <audsrv.h>
-#include <sys/stat.h>
-
-#include <dirent.h>
 
 #include <sbv_patches.h>
 #include <smem.h>
@@ -20,40 +17,9 @@
 #include "include/graphics.h"
 #include "include/sound.h"
 #include "include/luaplayer.h"
-#include "include/pad.h"
-
-#define NEWLIB_PORT_AWARE
-#include <fileXio_rpc.h>
-#include <fileio.h>
-
-extern "C"{
-#include <libds34bt.h>
-#include <libds34usb.h>
-}
 
 extern char bootString[];
 extern unsigned int size_bootString;
-
-extern unsigned char iomanX_irx[];
-extern unsigned int size_iomanX_irx;
-
-extern unsigned char fileXio_irx[];
-extern unsigned int size_fileXio_irx;
-
-extern unsigned char sio2man_irx;
-extern unsigned int size_sio2man_irx;
-
-extern unsigned char mcman_irx;
-extern unsigned int size_mcman_irx;
-
-extern unsigned char mcserv_irx;
-extern unsigned int size_mcserv_irx;
-
-extern unsigned char padman_irx;
-extern unsigned int size_padman_irx;
-
-extern unsigned char libsd_irx;
-extern unsigned int size_libsd_irx;
 
 extern unsigned char cdfs_irx;
 extern unsigned int size_cdfs_irx;
@@ -73,13 +39,29 @@ extern unsigned int size_usbmass_bd_irx;
 extern unsigned char audsrv_irx;
 extern unsigned int size_audsrv_irx;
 
-extern unsigned char ds34usb_irx;
-extern unsigned int size_ds34usb_irx;
-
-extern unsigned char ds34bt_irx;
-extern unsigned int size_ds34bt_irx;
-
 char boot_path[255];
+
+void initMC(void)
+{
+   int ret;
+   // mc variables
+   int mc_Type, mc_Free, mc_Format;
+
+   
+   printf("Initializing Memory Card\n");
+
+   ret = mcInit(MC_TYPE_XMC);
+   
+   if( ret < 0 ) {
+	printf("MC_Init : failed to initialize memcard server.\n");
+	dbgprintf("MC_Init : failed to initialize memcard server.\n");
+   }
+   
+   // Since this is the first call, -1 should be returned.
+   // makes me sure that next ones will work !
+   mcGetInfo(0, 0, &mc_Type, &mc_Free, &mc_Format); 
+   mcSync(MC_WAIT, NULL, &ret);
+}
 
 void setLuaBootPath(int argc, char ** argv, int idx)
 {
@@ -116,28 +98,6 @@ void setLuaBootPath(int argc, char ** argv, int idx)
 }
 
 
-void initMC(void)
-{
-   int ret;
-   // mc variables
-   int mc_Type, mc_Free, mc_Format;
-
-   
-   printf("initMC: Initializing Memory Card\n");
-
-   ret = mcInit(MC_TYPE_XMC);
-   
-   if( ret < 0 ) {
-	printf("initMC: failed to initialize memcard server.\n");
-   } else {
-       printf("initMC: memcard server started successfully.\n");
-   }
-   
-   // Since this is the first call, -1 should be returned.
-   // makes me sure that next ones will work !
-   mcGetInfo(0, 0, &mc_Type, &mc_Free, &mc_Format); 
-   mcSync(MC_WAIT, NULL, &ret);
-}
 
 int main(int argc, char * argv[])
 {
@@ -151,44 +111,22 @@ int main(int argc, char * argv[])
     #endif
     
     // install sbv patch fix
-    printf("Installing SBV Patches...\n");
+    printf("Installing SBV Patch...\n");
     sbv_patch_enable_lmb();
     sbv_patch_disable_prefix_check(); 
     sbv_patch_fileio(); 
 
-	DIR *directorytoverify;
-	directorytoverify = opendir("host:.");
-	if(directorytoverify==NULL){
-		SifExecModuleBuffer(&iomanX_irx, size_iomanX_irx, 0, NULL, NULL);
-		SifExecModuleBuffer(&fileXio_irx, size_fileXio_irx, 0, NULL, NULL);
-	}
-	SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, NULL, NULL);
-	if(directorytoverify==NULL){
-		fileXioInit();
-	}
-	if(directorytoverify!=NULL){
-		closedir(directorytoverify);
-	}
-    SifExecModuleBuffer(&mcman_irx, size_mcman_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&mcserv_irx, size_mcserv_irx, 0, NULL, NULL);
-    initMC();
-
-    SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&libsd_irx, size_libsd_irx, 0, NULL, NULL);
+    SifLoadModule("rom0:SIO2MAN", 0, NULL);
+    SifLoadModule("rom0:MCMAN", 0, NULL);
+	SifLoadModule("rom0:MCSERV", 0, NULL);
+	SifLoadModule("rom0:PADMAN", 0, NULL);
+    SifLoadModule("rom0:LIBSD", 0, NULL);
 
     // load pad & mc modules 
     printf("Installing Pad & MC modules...\n");
 
     // load USB modules    
     SifExecModuleBuffer(&usbd_irx, size_usbd_irx, 0, NULL, NULL);
-
-    
-    int ds3pads = 1;
-    SifExecModuleBuffer(&ds34usb_irx, size_ds34usb_irx, 4, (char *)&ds3pads, NULL);
-    SifExecModuleBuffer(&ds34bt_irx, size_ds34bt_irx, 4, (char *)&ds3pads, NULL);
-    ds34usb_init();
-    ds34bt_init();
-
     SifExecModuleBuffer(&bdm_irx, size_bdm_irx, 0, NULL, NULL);
     SifExecModuleBuffer(&bdmfs_vfat_irx, size_bdmfs_vfat_irx, 0, NULL, NULL);
     SifExecModuleBuffer(&usbmass_bd_irx, size_usbmass_bd_irx, 0, NULL, NULL);
@@ -197,20 +135,10 @@ int main(int argc, char * argv[])
 
     SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, NULL);
 
-    //waitUntilDeviceIsReady by fjtrujy
+    audsrv_init();
 
-    struct stat buffer;
-    int ret = -1;
-    int retries = 50;
+    initMC();
 
-    while(ret != 0 && retries > 0)
-    {
-        ret = stat("mass:/", &buffer);
-        /* Wait until the device is ready */
-        nopdelay();
-
-        retries--;
-    }
 	
         // if no parameters are specified, use the default boot
 	if (argc < 2)
@@ -252,18 +180,19 @@ int main(int argc, char * argv[])
             errMsg = runScript(argv[1], false);
         }   
 
+        gsKit_clear_screens();
+
         init_scr();
+
+        sleep(1);
 
         if (errMsg != NULL)
         {
-        	while (!isButtonPressed(PAD_START)) {
-				scr_clear();
-				scr_setXY(5, 2);
-				scr_printf("Enceladus ERROR!\n");
-				scr_printf(errMsg);
-				scr_printf("\nPress [start] to restart\n");
-			}
+   	    scr_printf("Error: %s\n", errMsg);
         }
+
+        scr_printf("\nPress [start] to restart\n");
+        while (!isButtonPressed(PAD_START)) graphicWaitVblankStart();
 
     }
 
