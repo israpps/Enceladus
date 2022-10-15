@@ -18,26 +18,25 @@
 #include "include/sound.h"
 #include "include/luaplayer.h"
 
+#define IMPORT_BIN2C(_n) \
+    extern unsigned char _n; \
+    extern unsigned int size_##_n
 extern char bootString[];
 extern unsigned int size_bootString;
 
-extern unsigned char cdfs_irx;
-extern unsigned int size_cdfs_irx;
-
-extern unsigned char usbd_irx;
-extern unsigned int size_usbd_irx;
-
-extern unsigned char bdm_irx;
-extern unsigned int size_bdm_irx;
-
-extern unsigned char bdmfs_vfat_irx;
-extern unsigned int size_bdmfs_vfat_irx;
-
-extern unsigned char usbmass_bd_irx;
-extern unsigned int size_usbmass_bd_irx;
-
-extern unsigned char audsrv_irx;
-extern unsigned int size_audsrv_irx;
+IMPORT_BIN2C(cdfs_irx);
+IMPORT_BIN2C(usbd_irx);
+IMPORT_BIN2C(bdm_irx);
+IMPORT_BIN2C(bdmfs_vfat_irx);
+IMPORT_BIN2C(usbmass_bd_irx);
+IMPORT_BIN2C(audsrv_irx);
+#ifndef USE_ROM_DRIVERS
+IMPORT_BIN2C(sio2man_irx);
+IMPORT_BIN2C(mcserv_irx);
+IMPORT_BIN2C(mcman_irx);
+IMPORT_BIN2C(padman_irx);
+IMPORT_BIN2C(libsd_irx);
+#endif
 
 char boot_path[255];
 
@@ -50,11 +49,13 @@ void initMC(void)
    
    printf("Initializing Memory Card\n");
 
-   ret = mcInit(MC_TYPE_XMC);
-   
+#ifndef USE_ROM_DRIVERS
+    ret = mcInit(MC_TYPE_XMC);
+#else
+    ret = mcInit(MC_TYPE_MC);
+#endif
    if( ret < 0 ) {
 	printf("MC_Init : failed to initialize memcard server.\n");
-	dbgprintf("MC_Init : failed to initialize memcard server.\n");
    }
    
    // Since this is the first call, -1 should be returned.
@@ -98,7 +99,6 @@ void setLuaBootPath(int argc, char ** argv, int idx)
 }
 
 
-
 int main(int argc, char * argv[])
 {
     const char * errMsg;
@@ -116,14 +116,19 @@ int main(int argc, char * argv[])
     sbv_patch_disable_prefix_check(); 
     sbv_patch_fileio(); 
 
+#ifndef USE_ROM_DRIVERS
+    SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, NULL, NULL);
+    SifExecModuleBuffer(&mcman_irx, size_mcman_irx, 0, NULL, NULL);
+    SifExecModuleBuffer(&mcserv_irx, size_mcserv_irx, 0, NULL, NULL);
+    SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, NULL, NULL);
+    SifExecModuleBuffer(&libsd_irx, size_libsd_irx, 0, NULL, NULL);
+#else
     SifLoadModule("rom0:SIO2MAN", 0, NULL);
     SifLoadModule("rom0:MCMAN", 0, NULL);
 	SifLoadModule("rom0:MCSERV", 0, NULL);
 	SifLoadModule("rom0:PADMAN", 0, NULL);
     SifLoadModule("rom0:LIBSD", 0, NULL);
-
-    // load pad & mc modules 
-    printf("Installing Pad & MC modules...\n");
+#endif
 
     // load USB modules    
     SifExecModuleBuffer(&usbd_irx, size_usbd_irx, 0, NULL, NULL);

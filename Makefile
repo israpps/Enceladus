@@ -1,7 +1,7 @@
 .SILENT:                                                                              
 
 define HEADER
-                                                                       
+    \033[1m                                                                   
    @@@@@@@@*#                                                              
   @@@# @@@@@@@ @@@@%                                                    
    @@@.@@@@@@@@@@@@@@@@@@*       &&&&&&&.                                
@@ -23,7 +23,7 @@ define HEADER
 
                                             
                             Enceladus project                                                               
-                                                                                
+    \033[0m                                                                            
 endef
 export HEADER
 
@@ -31,17 +31,19 @@ export HEADER
 #----------------------- Configuration flags ----------------------#
 #------------------------------------------------------------------#
 #-------------------------- Reset the IOP -------------------------#
-RESET_IOP = 1
+RESET_IOP ?= 1
 #---------------------- enable DEBUGGING MODE ---------------------#
-DEBUG = 0
+DEBUG ?= 0
 #----------------------- Set IP for PS2Client ---------------------#
-PS2LINK_IP = 192.168.1.10
+PS2LINK_IP ?= 192.168.1.10
+#--------------------- Use Console ROM drivers --------------------#
+USE_ROM_DRIVERS ?= 0
 #------------------------------------------------------------------#
 
 EE_BIN = enceladus.elf
 EE_BIN_PKD = enceladus_pkd.elf
 
-EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -lpatches -lfileXio -lpad -ldebug -llua -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit -lpng -lz -lmc -laudsrv -lelf-loader
+EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -lpatches -lfileXio -ldebug -llua -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit -lpng -lz -lmc -laudsrv -lelf-loader
 
 EE_INCS += -I$(PS2DEV)/gsKit/include -I$(PS2SDK)/ports/include -I$(PS2SDK)/ports/include/freetype2 -I$(PS2SDK)/ports/include/zlib
 
@@ -58,64 +60,40 @@ endif
 
 BIN2S = $(PS2SDK)/bin/bin2s
 
+EE_SRC_DIR = src/
+EE_OBJS_DIR = obj/
+EE_ASM_DIR = asm/
 #-------------------------- App Content ---------------------------#
-APP_CORE = src/main.o src/graphics.o src/atlas.o \
-		   src/fntsys.o src/md5.o src/secrman_rpc.o
+APP_CORE = main.o graphics.o atlas.o \
+		   fntsys.o md5.o secrman_rpc.o
 
-LUA_LIBS =	src/luaplayer.o src/luasound.o src/luacontrols.o \
-			src/luatimer.o src/luaScreen.o src/luagraphics.o \
-			src/luasystem.o src/luasecrman.o
+LUA_LIBS =	luaplayer.o luasound.o luacontrols.o \
+			luatimer.o luaScreen.o luagraphics.o \
+			luasystem.o luasecrman.o
 
-IOP_MODULES = src/usbd.o src/audsrv.o src/bdm.o src/bdmfs_vfat.o \
-			  src/usbmass_bd.o src/cdfs.o
+IOP_MODULES = usbd.o audsrv.o bdm.o bdmfs_vfat.o \
+			  usbmass_bd.o cdfs.o secrman.o secrsif.o
 
-EMBEDDED_RSC = src/boot.o
+ifeq ($(USE_ROM_DRIVERS),0)
+	IOP_MODULES += sio2man.o mcserv.o mcman.o padman.o libsd.o
+	EE_LIBS += -lpadx
+else
+	EE_LIBS += -lpad
+	EE_CXXFLAGS += -DUSE_ROM_DRIVERS
+endif
+
+EMBEDDED_RSC = boot.o
 
 EE_OBJS = $(IOP_MODULES) $(EMBEDDED_RSC) $(APP_CORE) $(LUA_LIBS)
 
-#------------------------------------------------------------------#
-
-
-#--------------------- Embedded ressources ------------------------#
-
-src/boot.s: etc/boot.lua
-	echo "Embedding boot script..."
-	$(BIN2S) $< $@ bootString
+EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 
 #------------------------------------------------------------------#
 
-
-#-------------------- Embedded IOP Modules ------------------------#
-
-src/usbd.s: $(PS2SDK)/iop/irx/usbd.irx
-	echo "Embedding USB Driver..."
-	$(BIN2S) $< $@ usbd_irx
-
-src/audsrv.s: $(PS2SDK)/iop/irx/audsrv.irx
-	echo "Embedding AUDSRV Driver..."
-	$(BIN2S) $< $@ audsrv_irx
-
-src/bdm.s: $(PS2SDK)/iop/irx/bdm.irx
-	echo "Embedding Block Device Manager(BDM)..."
-	$(BIN2S) $< $@ bdm_irx
-
-src/bdmfs_vfat.s: $(PS2SDK)/iop/irx/bdmfs_vfat.irx
-	echo "Embedding BDM VFAT Driver..."
-	$(BIN2S) $< $@ bdmfs_vfat_irx
-
-src/usbmass_bd.s: $(PS2SDK)/iop/irx/usbmass_bd.irx
-	echo "Embedding BD USB Mass Driver..."
-	$(BIN2S) $< $@ usbmass_bd_irx
-
-src/cdfs.s: $(PS2SDK)/iop/irx/cdfs.irx
-	echo "Embedding CDFS Driver..."
-	$(BIN2S) $< $@ cdfs_irx
-#------------------------------------------------------------------#
-
-all: $(EE_BIN)
+all: $(EE_BIN) $(EE_OBJS_DIR) $(EE_ASM_DIR)
 	@echo "$$HEADER"
 
-	echo "Building $(EE_BIN)..."
+	echo "Stripping $(EE_BIN)..."
 	$(EE_STRIP) $(EE_BIN)
 
 	echo "Compressing $(EE_BIN_PKD)...\n"
@@ -124,40 +102,38 @@ all: $(EE_BIN)
 	mv $(EE_BIN) bin/
 	mv $(EE_BIN_PKD) bin/
 
+
+#--------------------- Embedded ressources ------------------------#
+
+$(EE_ASM_DIR)boot.s: etc/boot.lua
+	echo "Embedding boot script..."
+	$(BIN2S) $< $@ bootString
+
+#------------------------------------------------------------------#
+
+
 debug: $(EE_BIN)
 	echo "Building $(EE_BIN) with debug symbols..."
 
 clean:
 
-	echo "\nCleaning $(EE_BIN)..."
+	echo "Cleaning $(EE_BIN)..."
 	rm -f bin/$(EE_BIN)
 
-	echo "\nCleaning $(EE_BIN_PKD)..."
+	echo "Cleaning $(EE_BIN_PKD)..."
 	rm -f bin/$(EE_BIN_PKD)
 
-	echo "\nCleaning objects..."
-	rm -f $(EE_OBJS)
-	
-	echo "Cleaning Block Device Manager(BDM)..."
-	rm -f src/bdm.s
-	
-	echo "Cleaning USB Driver..."
-	rm -f src/usbd.s
-	
-	echo "Embedding AUDSRV Driver..."
-	rm -f src/audsrv.s
-	
-	echo "Cleaning BDM VFAT Driver..."
-	rm -f src/bdmfs_vfat.s
-	
-	echo "Embedding BD USB Mass Driver..."
-	rm -f src/usbmass_bd.s
-	
-	echo "Cleaning CDFS Driver..."
-	rm -f src/cdfs.s
-	
-	echo "Cleaning embedded boot script..."
-	rm -f src/boot.s
+	echo "Cleaning objects folder..."
+	rm -rf $(EE_OBJS_DIR)
+
+	echo "Cleaning embedded objects folder..."
+	rm -rf $(EE_ASM_DIR)
+
+	echo "Cleaning SECRMAN..."
+	make -C modules-iop/secrman clean 
+
+	echo "Cleaning SECRSIF..."
+	make -C modules-iop/secrsif clean 
 
 rebuild: clean all
 
@@ -167,5 +143,26 @@ run:
 reset:
 	ps2client -h $(PS2LINK_IP) reset   
 
+#-------------- Recipes related to object subfolders ---------------#
+$(EE_ASM_DIR):
+	@mkdir -p $@
+
+$(EE_OBJS_DIR):
+	@mkdir -p $@
+
+$(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c | $(EE_OBJS_DIR)
+	@echo "- $@"
+	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
+
+$(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.cpp | $(EE_OBJS_DIR)
+	@echo "- $@"
+	$(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS) -c $< -o $@
+
+$(EE_OBJS_DIR)%.o: $(EE_ASM_DIR)%.s | $(EE_OBJS_DIR)
+	@echo "- $@"
+	$(EE_AS) $(EE_ASFLAGS) $< -o $@
+#------------------------------------------------------------------#
+
 include $(PS2SDK)/samples/Makefile.pref
 include $(PS2SDK)/samples/Makefile.eeglobal
+include embed.make
