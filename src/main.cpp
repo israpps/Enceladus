@@ -56,14 +56,16 @@ void initMC(void)
 #else
     ret = mcInit(MC_TYPE_MC);
 #endif
+   printf("Done.\n");
    if( ret < 0 ) {
 	printf("MC_Init : failed to initialize memcard server.\n");
    }
-   
    // Since this is the first call, -1 should be returned.
    // makes me sure that next ones will work !
-   mcGetInfo(0, 0, &mc_Type, &mc_Free, &mc_Format); 
+   ret = mcGetInfo(0, 0, &mc_Type, &mc_Free, &mc_Format);
+   printf("mcgetinfo:%d\n", ret);
    mcSync(MC_WAIT, NULL, &ret);
+   printf("\n\n%s: mc_Type=%d, mc_Free=%d, mc_format=%d, SyncRet=%d\n\n", __func__, mc_Type, mc_Free, mc_Format, ret);
 }
 
 void setLuaBootPath(int argc, char ** argv, int idx)
