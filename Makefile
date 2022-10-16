@@ -83,6 +83,10 @@ else
 endif
 
 EMBEDDED_RSC = boot.o
+# Images
+#$(EE_ASM_DIR)%.s: EMBED/%.png
+#	$(BIN2S) $< $@ $(shell basename $< .png)
+#	echo "Embedding $< Image..."
 
 EE_OBJS = $(IOP_MODULES) $(EMBEDDED_RSC) $(APP_CORE) $(LUA_LIBS)
 
@@ -93,10 +97,10 @@ EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%)
 all: $(EE_BIN) $(EE_OBJS_DIR) $(EE_ASM_DIR)
 	@echo "$$HEADER"
 
-	echo "Stripping $(EE_BIN)..."
+	echo "\033[1mStripping $(EE_BIN)...\033[0m"
 	$(EE_STRIP) $(EE_BIN)
 
-	echo "Compressing $(EE_BIN_PKD)...\n"
+	echo "\033[1mCompressing $(EE_BIN_PKD)...\033[0m\n"
 	ps2-packer $(EE_BIN) $(EE_BIN_PKD) > /dev/null
 	
 	mv $(EE_BIN) bin/
@@ -113,7 +117,7 @@ $(EE_ASM_DIR)boot.s: etc/boot.lua
 
 
 debug: $(EE_BIN)
-	echo "Building $(EE_BIN) with debug symbols..."
+	echo "\033[1mBuilding $(EE_BIN) with debug symbols...\033[0m"
 
 clean:
 

@@ -30,6 +30,8 @@ IMPORT_BIN2C(bdm_irx);
 IMPORT_BIN2C(bdmfs_vfat_irx);
 IMPORT_BIN2C(usbmass_bd_irx);
 IMPORT_BIN2C(audsrv_irx);
+IMPORT_BIN2C(secrman_irx);
+IMPORT_BIN2C(secrsif_irx);
 #ifndef USE_ROM_DRIVERS
 IMPORT_BIN2C(sio2man_irx);
 IMPORT_BIN2C(mcserv_irx);
@@ -115,30 +117,51 @@ int main(int argc, char * argv[])
     sbv_patch_enable_lmb();
     sbv_patch_disable_prefix_check(); 
     sbv_patch_fileio(); 
-
+int temp = -10;
 #ifndef USE_ROM_DRIVERS
-    SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&mcman_irx, size_mcman_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&mcserv_irx, size_mcserv_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&libsd_irx, size_libsd_irx, 0, NULL, NULL);
+    temp = SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, NULL, NULL);
+    printf("SIO2MAN: %d\n", temp);
+    temp = SifExecModuleBuffer(&mcman_irx, size_mcman_irx, 0, NULL, NULL);
+    printf("MCMAN: %d\n", temp);
+    temp = SifExecModuleBuffer(&mcserv_irx, size_mcserv_irx, 0, NULL, NULL);
+    printf("MCSERV: %d\n", temp);
+    temp = SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, NULL, NULL);
+    printf("PADMAN: %d\n", temp);
+    temp = SifExecModuleBuffer(&libsd_irx, size_libsd_irx, 0, NULL, NULL);
+    printf("LIBSD: %d\n", temp);
 #else
-    SifLoadModule("rom0:SIO2MAN", 0, NULL);
-    SifLoadModule("rom0:MCMAN", 0, NULL);
-	SifLoadModule("rom0:MCSERV", 0, NULL);
-	SifLoadModule("rom0:PADMAN", 0, NULL);
-    SifLoadModule("rom0:LIBSD", 0, NULL);
+    temp = SifLoadModule("rom0:SIO2MAN", 0, NULL);
+    printf("rom0:SIO2MAN: %d\n", temp);
+    temp = SifLoadModule("rom0:MCMAN", 0, NULL);
+    printf("rom0:MCMAN: %d\n", temp);
+	temp = SifLoadModule("rom0:MCSERV", 0, NULL);
+    printf("rom0:MCSERV: %d\n", temp);
+	temp = SifLoadModule("rom0:PADMAN", 0, NULL);
+    printf("rom0:PADMAN: %d\n", temp);
+    temp = SifLoadModule("rom0:LIBSD", 0, NULL);
+    printf("rom0:LIBSD: %d\n", temp);
 #endif
 
     // load USB modules    
-    SifExecModuleBuffer(&usbd_irx, size_usbd_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&bdm_irx, size_bdm_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&bdmfs_vfat_irx, size_bdmfs_vfat_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&usbmass_bd_irx, size_usbmass_bd_irx, 0, NULL, NULL);
+    temp = SifExecModuleBuffer(&usbd_irx, size_usbd_irx, 0, NULL, NULL);
+    printf("USBD: %d\n", temp);
+    temp = SifExecModuleBuffer(&bdm_irx, size_bdm_irx, 0, NULL, NULL);
+    printf("BDM: %d\n", temp);
+    temp = SifExecModuleBuffer(&bdmfs_vfat_irx, size_bdmfs_vfat_irx, 0, NULL, NULL);
+    printf("BDMFS_VFAT: %d\n", temp);
+    temp = SifExecModuleBuffer(&usbmass_bd_irx, size_usbmass_bd_irx, 0, NULL, NULL);
+    printf("USBMASS_BD: %d\n", temp);
 
-    SifExecModuleBuffer(&cdfs_irx, size_cdfs_irx, 0, NULL, NULL);
+    temp = SifExecModuleBuffer(&cdfs_irx, size_cdfs_irx, 0, NULL, NULL);
+    printf("CDFS: %d\n", temp);
 
-    SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, NULL);
+    temp = SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, NULL);
+    printf("AUDSVR: %d\n", temp);
+
+	temp = SifExecModuleBuffer(&secrman_irx, size_secrman_irx, 0, NULL, NULL);
+    printf("SECRMAN: %d\n", temp);
+	temp = SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, NULL);
+    printf("SECRSIF: %d\n", temp);
 
     audsrv_init();
 

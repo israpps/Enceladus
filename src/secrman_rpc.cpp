@@ -18,13 +18,15 @@ static void SECRMAN_RpcEndFunc(void *AlignmentData){
 }
 
 void InitSECRMAN(void){
-	while((SifBindRpc(&SECRMAN_rpc_cd, 0x80000A00, 0)<0) || (SECRMAN_rpc_cd.server == NULL)) nopdelay();
+	printf("%s()\n", __func__);
+	while((SifBindRpc(&SECRMAN_rpc_cd, 0x80000A00, 0)<0) || (SECRMAN_rpc_cd.server == NULL)) {nopdelay(); printf("\tbinding RPC...\n");}
 
 	TransmitBuffer[0]=(unsigned int)&BufferAlignmentData;
 	SifCallRpc(&SECRMAN_rpc_cd, SECRMAN_Init, 0, TransmitBuffer, sizeof(TransmitBuffer), NULL, 0, NULL, NULL);
 }
 
 void DeinitSECRMAN(void){
+	printf("%s()\n", __func__);
 	memset(&SECRMAN_rpc_cd, 0, sizeof(SifRpcClientData_t));
 }
 

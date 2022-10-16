@@ -15,9 +15,11 @@
 #include "include/graphics.h"
 #include "elf_loader/src/loader.c"
 
+#include "include/secrman_rpc.h"
 
 extern u8 loader_elf[];
 //extern int size_loader_elf;
+
 
 void IOP_Reset(void);
 
@@ -1021,7 +1023,6 @@ static int lua_sifloadmodulebuffer(lua_State *L){
 static const luaL_Reg Sif_functions[] = {
 	{"loadModule",             			   lua_sifloadmodule},
 	{"loadModuleBuffer",             lua_sifloadmodulebuffer},
-
 	{0, 0}
 };
 

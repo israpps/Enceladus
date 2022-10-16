@@ -12,15 +12,16 @@ local right = Graphics.loadImage("pads/right.png")
 
 local start = Graphics.loadImage("pads/start.png")
 local pad_select = Graphics.loadImage("pads/select.png")
+local MC = Graphics.loadImage("pads/MC.png")
 
-local r1 = Graphics.loadImage("pads/r1.png")
-local r2 = Graphics.loadImage("pads/r2.png")
+local r1 = Graphics.loadImage("pads/R1.png")
+local r2 = Graphics.loadImage("pads/R2.png")
 
-local l1 = Graphics.loadImage("pads/l1.png")
-local l2 = Graphics.loadImage("pads/l2.png")
+local l1 = Graphics.loadImage("pads/L1.png")
+local l2 = Graphics.loadImage("pads/L2.png")
 
-local l3 = Graphics.loadImage("pads/l3.png")
-local r3 = Graphics.loadImage("pads/r3.png")
+local l3 = Graphics.loadImage("pads/L3.png")
+local r3 = Graphics.loadImage("pads/R3.png")
 
 local pad = nil
 local rx = nil
@@ -28,6 +29,87 @@ local ry = nil
 local lx = nil
 local ly = nil
 local pressure = nil
+local mcinf0 = {type = 0, freemem = 0, format = 0}
+local mcinf1 = {type = 0, freemem = 0, format = 0}
+function SHIFT(x) return 1 << x end 
+function InstallSYS() end
+function UninstallSYS() end
+
+function PickMC()
+  local has_mc0
+  local has_mc1
+  local ANIM = 0
+  local AUGMENT = 5
+  local MCPORT = 0
+  mcinf0 = System.getMCInfo(0)
+  mcinf1 = System.getMCInfo(1)
+  has_mc0 = mcinf0.type == 2
+  has_mc1 = mcinf1.type == 2
+  while true do
+    Screen.clear()
+    pad = Pads.get()
+    if ANIM > 250 then
+      mcinf0 = System.getMCInfo(0)
+      mcinf1 = System.getMCInfo(1)
+      has_mc0 = mcinf0.type == 2
+      has_mc1 = mcinf1.type == 2
+    end
+    Font.fmPrint(150, 25, 0.7, "\nChoose a memory card slot")
+    Font.fmPrint(100, 390, 0.4, string.format("Slot 0 - type=%d, freemem=%d, format=%d", mcinf0.type, mcinf0.freemem, mcinf0.format))
+    Font.fmPrint(100, 420, 0.4, string.format("Slot 1 - type=%d, freemem=%d, format=%d", mcinf1.type, mcinf1.freemem, mcinf1.format))
+    if Pads.check(pad, PAD_LEFT)  --[[ and has_mc0 ]] then MCPORT = 0 end
+    if Pads.check(pad, PAD_RIGHT) --[[ and has_mc1 ]] then MCPORT = 1 end
+    ANIM = ANIM + AUGMENT
+    if ANIM > 250 then AUGMENT = -5 end
+    if ANIM < 6   then AUGMENT = 5  end
+    if true then
+      if MCPORT == 0 then
+        Graphics.drawImage(MC, 100.0, 190.0, Color.new(128, 128, 128, ANIM))
+      else
+        Graphics.drawImage(MC, 100.0, 190.0)
+      end
+    end
+
+    if true then
+      if MCPORT == 1 then
+        Graphics.drawImage(MC, 400.0, 190.0, Color.new(128, 128, 128, ANIM))
+      else
+        Graphics.drawImage(MC, 400.0, 190.0)
+      end
+    end
+    Screen.flip()
+  end
+end
+
+function MainMenu()
+  local shouldQuit = true
+  while shouldQuit do
+    Screen.clear()
+    Font.fmPrint(150, 25, 0.7, "\nPlayStation System Update Manager\n")
+    Font.fmPrint(100, 390, 0.4, "\nSpecial thanks to: DanielSantos, HWNJ, SP193 and your mother\n")
+    pad = Pads.get()
+    Graphics.drawImage(cross, 120.0, 100.0)
+    Font.fmPrint(160, 110, 0.5, "Install System Update")
+    Graphics.drawImage(triangle, 120.0, 150.0)
+    Font.fmPrint(160, 160, 0.5, "Uninstall System Update")
+
+    if Pads.check(pad, PAD_CROSS) then
+      InstallSYS()
+    end
+
+    if Pads.check(pad, PAD_TRIANGLE) then
+      UninstallSYS()
+    end
+
+    Screen.flip()
+  end
+end
+
+PickMC()
+--Secrman.init()
+  MainMenu()
+  while true do end
+
 
 while true do
   Screen.clear()
@@ -54,84 +136,84 @@ while true do
   end
 
   if Pads.check(pad, PAD_UP) then
-    local pressure = (Pads.getPressure(PAD_UP) + 1) / 2
+    pressure = Pads.getPressure(PAD_UP)
     Graphics.drawImage(up, 120.0, 155.0, Color.new(128, 128, 128, pressure))
   else
     Graphics.drawImage(up, 120.0, 155.0, Color.new(128, 128, 128, 60))
   end
 
   if Pads.check(pad, PAD_DOWN) then
-    local pressure = (Pads.getPressure(PAD_DOWN) + 1) / 2
+    pressure = Pads.getPressure(PAD_DOWN)
     Graphics.drawImage(down, 120.0, 225.0, Color.new(128, 128, 128, pressure))
   else
     Graphics.drawImage(down, 120.0, 225.0, Color.new(128, 128, 128, 60))
   end
 
   if Pads.check(pad, PAD_LEFT) then
-    local pressure = (Pads.getPressure(PAD_LEFT) + 1) / 2
+    pressure = Pads.getPressure(PAD_LEFT)
     Graphics.drawImage(left, 85.0, 190.0, Color.new(128, 128, 128, pressure))
   else
     Graphics.drawImage(left, 85.0, 190.0, Color.new(128, 128, 128, 60))
   end
 
   if Pads.check(pad, PAD_RIGHT) then
-    local pressure = (Pads.getPressure(PAD_RIGHT) + 1) / 2
+    pressure = Pads.getPressure(PAD_RIGHT)
     Graphics.drawImage(right, 155.0, 190.0, Color.new(128, 128, 128, pressure))
   else
     Graphics.drawImage(right, 155.0, 190.0, Color.new(128, 128, 128, 60))
   end
 
   if Pads.check(pad, PAD_TRIANGLE) then
-    local pressure = (Pads.getPressure(PAD_TRIANGLE) + 1) / 2
+    pressure = Pads.getPressure(PAD_TRIANGLE)
     Graphics.drawImage(triangle, 520.0, 155.0, Color.new(128, 128, 128, pressure))
   else
     Graphics.drawImage(triangle, 520.0, 155.0, Color.new(128, 128, 128, 60))
   end
 
   if Pads.check(pad, PAD_CROSS) then
-    local pressure = (Pads.getPressure(PAD_CROSS) + 1) / 2
+    pressure = Pads.getPressure(PAD_CROSS)
     Graphics.drawImage(cross, 520.0, 225.0, Color.new(128, 128, 128, pressure))
   else
     Graphics.drawImage(cross, 520.0, 225.0, Color.new(128, 128, 128, 60))
   end
 
   if Pads.check(pad, PAD_SQUARE) then
-    local pressure = (Pads.getPressure(PAD_SQUARE) + 1) / 2
+    pressure = Pads.getPressure(PAD_SQUARE)
     Graphics.drawImage(square, 485.0, 190.0, Color.new(128, 128, 128, pressure))
   else
     Graphics.drawImage(square, 485.0, 190.0, Color.new(128, 128, 128, 60))
   end
 
   if Pads.check(pad, PAD_CIRCLE) then
-    local pressure = (Pads.getPressure(PAD_CIRCLE) + 1) / 2
+    pressure = Pads.getPressure(PAD_CIRCLE)
     Graphics.drawImage(circle, 555.0, 190.0, Color.new(128, 128, 128,  pressure))
   else
     Graphics.drawImage(circle, 555.0, 190.0, Color.new(128, 128, 128, 60))
   end
 
   if Pads.check(pad, PAD_L1) then
-    local pressure = (Pads.getPressure(PAD_L1) + 1) / 2
+    pressure = Pads.getPressure(PAD_L1)
     Graphics.drawImage(l1, 102.0, 100.0, Color.new(128, 128, 128, pressure))
   else
     Graphics.drawImage(l1, 102.0, 100.0, Color.new(128, 128, 128, 60))
   end
 
   if Pads.check(pad, PAD_L2) then
-    local pressure = (Pads.getPressure(PAD_L2) + 1) / 2
+    pressure = Pads.getPressure(PAD_L2)
     Graphics.drawImage(l2, 137.0, 100.0, Color.new(128, 128, 128, pressure))
   else
     Graphics.drawImage(l2, 137.0, 100.0, Color.new(128, 128, 128, 60))
   end
 
   if Pads.check(pad, PAD_R1) then
-    local pressure = (Pads.getPressure(PAD_R1) + 1) / 2
+    pressure = Pads.getPressure(PAD_R1)
     Graphics.drawImage(r1, 502.0, 100.0, Color.new(128, 128, 128, pressure))
   else
     Graphics.drawImage(r1, 502.0, 100.0, Color.new(128, 128, 128, 60))
   end
 
   if Pads.check(pad, PAD_R2) then
-    local pressure = (Pads.getPressure(PAD_R2) + 1) / 2
+    pressure = Pads.getPressure(PAD_R2)
     Graphics.drawImage(r2, 537.0, 100.0, Color.new(128, 128, 128, pressure))
   else
     Graphics.drawImage(r2, 537.0, 100.0, Color.new(128, 128, 128, 60))

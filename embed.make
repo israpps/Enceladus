@@ -30,15 +30,17 @@ $(EE_ASM_DIR)mcman.s: $(PS2SDK)/iop/irx/mcman.irx | $(EE_ASM_DIR)
 $(EE_ASM_DIR)mcserv.s: $(PS2SDK)/iop/irx/mcserv.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ mcserv_irx
 	
-$(EE_ASM_DIR)sio2man.s: $(PS2SDK)/iop/irx/freesio2.irx | $(EE_ASM_DIR)
+$(EE_ASM_DIR)sio2man.s: $(PS2SDK)/iop/irx/sio2man.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ sio2man_irx
 
 modules-iop/secrman/irx/secrman.irx:
+	@echo "\033[1m-- SECRMAN\033[0m"
 	make -C modules-iop/secrman
 $(EE_ASM_DIR)secrman.s: modules-iop/secrman/irx/secrman.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ secrman_irx
 
 modules-iop/secrsif/irx/secrsif.irx:
+	@echo "\033[1m-- SECRSIF\033[0m"
 	make -C modules-iop/secrsif
 $(EE_ASM_DIR)secrsif.s: modules-iop/secrsif/irx/secrsif.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ secrsif_irx
