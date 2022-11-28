@@ -38,6 +38,7 @@ extern void luaSystem_init(lua_State *L);
 extern void luaSound_init(lua_State *L);
 extern void luaRender_init(lua_State *L);
 extern void stackDump (lua_State *L);
+extern void luaSecrMan_init(lua_State *L);
 
 #endif
 

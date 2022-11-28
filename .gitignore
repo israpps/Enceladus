@@ -33,6 +33,6 @@ bin/test.pdf
 bin/System/noindex.lua
 *.a
 *.irx
-
 obj/
 asm/
+!iop/*.irx

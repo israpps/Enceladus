@@ -11,14 +11,14 @@ static lua_State *L;
 
 const char * runScript(const char* script, bool isStringBuffer )
 {	
-    printf("Creating luaVM... \n");
+    printf("\n\n\nCreating luaVM...\n\n\n");
 
   	L = luaL_newstate();
 	
 	  // Init Standard libraries
 	  luaL_openlibs(L);
 
-    printf("Loading libs... ");
+    printf("\n\n\nLoading libs...\n\n\n");
 
 	  // init graphics
     luaGraphics_init(L);
@@ -28,8 +28,9 @@ const char * runScript(const char* script, bool isStringBuffer )
     luaSystem_init(L);
     luaSound_init(L);
     luaRender_init(L);
+    luaSecrMan_init(L);
     	
-    printf("done !\n");
+    printf("\n\n\ndone !\n\n\n");
      
 	if(!isStringBuffer){
         printf("Loading script : `%s'\n", script);

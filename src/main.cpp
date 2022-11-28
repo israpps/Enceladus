@@ -8,6 +8,7 @@
 #include <libcdvd.h>
 #include <iopheap.h>
 #include <iopcontrol.h>
+#include <iopcontrol_special.h>
 #include <smod.h>
 #include <audsrv.h>
 #include <sys/stat.h>
@@ -26,6 +27,10 @@
 #include <fileXio_rpc.h>
 #include <fileio.h>
 
+#define IMPORT_BIN2C(_n) \
+extern unsigned char _n[]; \
+extern unsigned int size_##_n
+
 extern "C"{
 #include <libds34bt.h>
 #include <libds34usb.h>
@@ -34,50 +39,23 @@ extern "C"{
 extern char bootString[];
 extern unsigned int size_bootString;
 
-extern unsigned char iomanX_irx[];
-extern unsigned int size_iomanX_irx;
-
-extern unsigned char fileXio_irx[];
-extern unsigned int size_fileXio_irx;
-
-extern unsigned char sio2man_irx;
-extern unsigned int size_sio2man_irx;
-
-extern unsigned char mcman_irx;
-extern unsigned int size_mcman_irx;
-
-extern unsigned char mcserv_irx;
-extern unsigned int size_mcserv_irx;
-
-extern unsigned char padman_irx;
-extern unsigned int size_padman_irx;
-
-extern unsigned char libsd_irx;
-extern unsigned int size_libsd_irx;
-
-extern unsigned char cdfs_irx;
-extern unsigned int size_cdfs_irx;
-
-extern unsigned char usbd_irx;
-extern unsigned int size_usbd_irx;
-
-extern unsigned char bdm_irx;
-extern unsigned int size_bdm_irx;
-
-extern unsigned char bdmfs_vfat_irx;
-extern unsigned int size_bdmfs_vfat_irx;
-
-extern unsigned char usbmass_bd_irx;
-extern unsigned int size_usbmass_bd_irx;
-
-extern unsigned char audsrv_irx;
-extern unsigned int size_audsrv_irx;
-
-extern unsigned char ds34usb_irx;
-extern unsigned int size_ds34usb_irx;
-
-extern unsigned char ds34bt_irx;
-extern unsigned int size_ds34bt_irx;
+IMPORT_BIN2C(iomanX_irx);
+IMPORT_BIN2C(fileXio_irx);
+IMPORT_BIN2C(sio2man_irx);
+IMPORT_BIN2C(mcman_irx);
+IMPORT_BIN2C(mcserv_irx);
+IMPORT_BIN2C(padman_irx);
+IMPORT_BIN2C(libsd_irx);
+IMPORT_BIN2C(cdfs_irx);
+IMPORT_BIN2C(usbd_irx);
+IMPORT_BIN2C(bdm_irx);
+IMPORT_BIN2C(bdmfs_vfat_irx);
+IMPORT_BIN2C(usbmass_bd_irx);
+IMPORT_BIN2C(audsrv_irx);
+IMPORT_BIN2C(ds34usb_irx);
+IMPORT_BIN2C(ds34bt_irx);
+IMPORT_BIN2C(secrsif_irx);
+IMPORT_BIN2C(IOPRP_img);
 
 char boot_path[255];
 
@@ -145,7 +123,11 @@ int main(int argc, char * argv[])
 
     #ifdef RESET_IOP  
     SifInitRpc(0);
+#ifdef RESET_IOP_COMMON
     while (!SifIopReset("", 0)){};
+#else
+    SifIopRebootBuffer(IOPRP_img, size_IOPRP_img); // use IOPRP image with SECRMAN_special inside
+#endif
     while (!SifIopSync()){};
     SifInitRpc(0);
     #endif
@@ -158,6 +140,7 @@ int main(int argc, char * argv[])
 
 	DIR *directorytoverify;
 	directorytoverify = opendir("host:.");
+    SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, NULL);
 	if(directorytoverify==NULL){
 		SifExecModuleBuffer(&iomanX_irx, size_iomanX_irx, 0, NULL, NULL);
 		SifExecModuleBuffer(&fileXio_irx, size_fileXio_irx, 0, NULL, NULL);

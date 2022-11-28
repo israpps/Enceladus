@@ -1,14 +1,15 @@
+--Secrman.init()
+Screen.clear(Color.new(255,255,255))
 
-if System.doesFileExist("System/index.lua") then
-	dofile("System/index.lua");
-  elseif System.doesFileExist("System/script.lua") then
-	dofile("System/script.lua");
-  elseif System.doesFileExist("System/system.lua") then
+while true do
+end
+Font.fmLoad() 
+Font.fmPrint(150, 25, 0.6, "Hello motherfucker\n")
+
+if System.doesFileExist("System/system.lua") then
 	dofile("System/system.lua");
-  elseif System.doesFileExist("index.lua") then
-	dofile("index.lua");
-  elseif System.doesFileExist("script.lua") then
-	dofile("script.lua");
-  elseif System.doesFileExist("system.lua") then
-	dofile("system.lua");
+end
+
+Screen.clear(Color.new(255,0,0))
+while true do
 end
