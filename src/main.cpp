@@ -8,6 +8,7 @@
 #include <libcdvd.h>
 #include <iopheap.h>
 #include <iopcontrol.h>
+#include <iopcontrol_special.h>
 #include <smod.h>
 #include <audsrv.h>
 #include <sys/stat.h>
@@ -31,53 +32,32 @@ extern "C"{
 #include <libds34usb.h>
 }
 
+#define IMPORT_BIN2C(_n) \
+extern unsigned char _n[]; \
+extern unsigned int size_##_n
+
+
 extern char bootString[];
 extern unsigned int size_bootString;
 
-extern unsigned char iomanX_irx[];
-extern unsigned int size_iomanX_irx;
-
-extern unsigned char fileXio_irx[];
-extern unsigned int size_fileXio_irx;
-
-extern unsigned char sio2man_irx;
-extern unsigned int size_sio2man_irx;
-
-extern unsigned char mcman_irx;
-extern unsigned int size_mcman_irx;
-
-extern unsigned char mcserv_irx;
-extern unsigned int size_mcserv_irx;
-
-extern unsigned char padman_irx;
-extern unsigned int size_padman_irx;
-
-extern unsigned char libsd_irx;
-extern unsigned int size_libsd_irx;
-
-extern unsigned char cdfs_irx;
-extern unsigned int size_cdfs_irx;
-
-extern unsigned char usbd_irx;
-extern unsigned int size_usbd_irx;
-
-extern unsigned char bdm_irx;
-extern unsigned int size_bdm_irx;
-
-extern unsigned char bdmfs_vfat_irx;
-extern unsigned int size_bdmfs_vfat_irx;
-
-extern unsigned char usbmass_bd_irx;
-extern unsigned int size_usbmass_bd_irx;
-
-extern unsigned char audsrv_irx;
-extern unsigned int size_audsrv_irx;
-
-extern unsigned char ds34usb_irx;
-extern unsigned int size_ds34usb_irx;
-
-extern unsigned char ds34bt_irx;
-extern unsigned int size_ds34bt_irx;
+IMPORT_BIN2C(iomanX_irx);
+IMPORT_BIN2C(fileXio_irx);
+IMPORT_BIN2C(sio2man_irx);
+IMPORT_BIN2C(mcman_irx);
+IMPORT_BIN2C(mcserv_irx);
+IMPORT_BIN2C(padman_irx);
+IMPORT_BIN2C(libsd_irx);
+IMPORT_BIN2C(cdfs_irx);
+IMPORT_BIN2C(usbd_irx);
+IMPORT_BIN2C(bdm_irx);
+IMPORT_BIN2C(bdmfs_vfat_irx);
+IMPORT_BIN2C(usbmass_bd_irx);
+IMPORT_BIN2C(audsrv_irx);
+IMPORT_BIN2C(ds34usb_irx);
+IMPORT_BIN2C(ds34bt_irx);
+IMPORT_BIN2C(secrsif_irx);
+IMPORT_BIN2C(secrman_irx);
+IMPORT_BIN2C(IOPRP);
 
 char boot_path[255];
 
@@ -145,7 +125,10 @@ int main(int argc, char * argv[])
 
     #ifdef RESET_IOP  
     SifInitRpc(0);
-    while (!SifIopReset("", 0)){};
+    // ONLY ONE OF THE LINES BETWEEN THESE TWO COMMENTS CAN BE ENABLED AT THE SAME TIME
+    //while (!SifIopReset("", 0)){};
+    SifIopRebootBuffer(IOPRP, size_IOPRP); // use IOPRP image with SECRMAN_special inside
+    // ONLY ONE OF THE LINES BETWEEN THESE TWO COMMENTS CAN BE ENABLED AT THE SAME TIME
     while (!SifIopSync()){};
     SifInitRpc(0);
     #endif
@@ -196,6 +179,7 @@ int main(int argc, char * argv[])
     SifExecModuleBuffer(&cdfs_irx, size_cdfs_irx, 0, NULL, NULL);
 
     SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, NULL);
+    SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, NULL);
 
     //waitUntilDeviceIsReady by fjtrujy
 

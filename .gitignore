@@ -32,7 +32,9 @@ bin/audio/test/convert.bat
 bin/test.pdf
 bin/System/noindex.lua
 *.a
+
 *.irx
+!iop/*.irx
 
 obj/
 asm/
