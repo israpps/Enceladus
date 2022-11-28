@@ -75,7 +75,7 @@ IOP_MODULES = iomanx.o filexio.o \
 			  sio2man.o mcman.o mcserv.o padman.o libsd.o \
 			  usbd.o audsrv.o bdm.o bdmfs_vfat.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o \
-			  IOPRP.o secrsif.o
+			  IOPRP.o secrsif.o secrman.o
 
 EMBEDDED_RSC = boot.o 
 
@@ -155,6 +155,9 @@ $(EE_ASM_DIR)secrsif.s: iop/secrsif.irx | $(EE_ASM_DIR)
 
 $(EE_ASM_DIR)IOPRP.s: iop/IOPRP.img | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ IOPRP_img
+
+$(EE_ASM_DIR)secrman.s: iop/secrman.irx | $(EE_ASM_DIR)
+	$(BIN2S) $< $@ secrman_irx
 
 modules/ds34bt/ee/libds34bt.a: modules/ds34bt/ee
 	$(MAKE) -C $<

@@ -55,6 +55,7 @@ IMPORT_BIN2C(audsrv_irx);
 IMPORT_BIN2C(ds34usb_irx);
 IMPORT_BIN2C(ds34bt_irx);
 IMPORT_BIN2C(secrsif_irx);
+IMPORT_BIN2C(secrman_irx);
 IMPORT_BIN2C(IOPRP_img);
 
 char boot_path[255];
@@ -123,11 +124,8 @@ int main(int argc, char * argv[])
 
     #ifdef RESET_IOP  
     SifInitRpc(0);
-#ifdef RESET_IOP_COMMON
     while (!SifIopReset("", 0)){};
-#else
-    SifIopRebootBuffer(IOPRP_img, size_IOPRP_img); // use IOPRP image with SECRMAN_special inside
-#endif
+    //SifIopRebootBuffer(IOPRP_img, size_IOPRP_img); // use IOPRP image with SECRMAN_special inside
     while (!SifIopSync()){};
     SifInitRpc(0);
     #endif
@@ -140,7 +138,6 @@ int main(int argc, char * argv[])
 
 	DIR *directorytoverify;
 	directorytoverify = opendir("host:.");
-    SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, NULL);
 	if(directorytoverify==NULL){
 		SifExecModuleBuffer(&iomanX_irx, size_iomanX_irx, 0, NULL, NULL);
 		SifExecModuleBuffer(&fileXio_irx, size_fileXio_irx, 0, NULL, NULL);
@@ -179,6 +176,9 @@ int main(int argc, char * argv[])
     SifExecModuleBuffer(&cdfs_irx, size_cdfs_irx, 0, NULL, NULL);
 
     SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, NULL);
+    
+    SifExecModuleBuffer(&secrman_irx, size_secrman_irx, 0, NULL, NULL);
+    SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, NULL);
 
     //waitUntilDeviceIsReady by fjtrujy
 
