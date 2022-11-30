@@ -19,7 +19,7 @@ static int lua_initsecrman(lua_State *L)
     int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
     if (argc != 0)
-        return luaL_error(L, "wrong number of arguments");
+        return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__);
 #endif
     int result = SecrInit();
     lua_pushinteger(L, result);
@@ -32,15 +32,14 @@ static int lua_deinitsecrman(lua_State *L)
     int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
     if (argc != 0)
-        return luaL_error(L, "wrong number of arguments");
+        return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__);
 #endif
 
     SecrDeinit();
     return 0;
 }
 
-static int SignKELF(void *buffer, int size, unsigned char port,
-                    unsigned char slot)
+static int SignKELF(void *buffer, int size, unsigned char port, unsigned char slot)
 {
     int result, InitSemaID, mcInitRes;
 
@@ -64,6 +63,48 @@ static int SignKELF(void *buffer, int size, unsigned char port,
     }
 
     return result;
+}
+
+int installKELF(const char* filepath, const char* installpath)
+{
+    int fd, result;
+    ssize_t READED;
+    unsigned char* PTR;
+    fd = open(filepath, O_RDONLY);
+    if (fd < 0)
+        return -EIO;
+	lseek(fd, 0, SEEK_CUR); // make sure we seek from start
+	uint32_t size = lseek(fd, 0, SEEK_END);
+	lseek(fd, 0, SEEK_CUR); // go back to start so read() gets the job done
+
+    PTR = (unsigned char *)malloc(size);
+    if (PTR != NULL)
+    {
+        READED = read(fd, PTR, size);
+        if (READED != size)
+        {
+            result = -EIO;
+            printf("%s: ERROR reading KELF, expected to read %d bytes, but %d bytes were readed", __func__, size, READED);
+        } else
+        {
+            result = SignKELF(PTR, size, installpath[2] - '0', 0);
+        }
+    } else {
+        result = -2;
+    }
+    close(fd);
+    return result;
+}
+
+static int lua_installKELF(lua_State *L)
+{
+    int argc = lua_gettop(L);
+#ifndef SKIP_ERROR_HANDLING
+    if (argc != 2)
+        return luaL_error(L, "wrong number of arguments");
+#endif
+
+return 0;
 }
 
 static void GetKbitAndKc(void *buffer, u8 *Kbit, u8 *Kc)
@@ -116,6 +157,7 @@ static int lua_signKELFfile(lua_State *L)
 static const luaL_Reg Secrman_functions[] = {
     {"init", lua_initsecrman},
     {"deinit", lua_deinitsecrman},
+    {"installKELF", lua_installKELF},
     //{"signKELFfile", lua_signKELFfile},
     {0, 0}};
 
@@ -126,3 +168,4 @@ void luaSecrMan_init(lua_State *L)
     luaL_setfuncs(L, Secrman_functions, 0);
     lua_setglobal(L, "Secrman");
 }
+

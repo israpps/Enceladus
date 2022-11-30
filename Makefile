@@ -71,7 +71,7 @@ APP_CORE = main.o system.o pad.o graphics.o render.o \
 
 LUA_LIBS =	luaplayer.o luasound.o luacontrols.o \
 			luatimer.o luaScreen.o luagraphics.o \
-			luasystem.o luaRender.o luasecrman.o
+			luasystem.o luaRender.o luasecrman.o luaKELFBinder.o
 
 IOP_MODULES = iomanx.o filexio.o \
 			  sio2man.o mcman.o mcserv.o padman.o libsd.o \

@@ -42,17 +42,17 @@ static int imgThread(void* data)
 
 
 static int lua_fontload(lua_State *L){
-	if (lua_gettop(L) != 1) return luaL_error(L, "wrong number of arguments"); 
+	if (lua_gettop(L) != 1) return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__); 
 	const char* path = luaL_checkstring(L, 1);
 	GSFONT* font = loadFont(path);
-	if (font == NULL) return luaL_error(L, "Error loading font (invalid magic).");
+	if (font == NULL) return luaL_error(L, "Error loading font (invalid magic).(%s:%d)", __FILE__, __LINE__);
 	lua_pushinteger(L, (uint32_t)(font));
 	return 1;
 }
 
 static int lua_print(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 5 && argc != 6) return luaL_error(L, "wrong number of arguments");
+	if (argc != 5 && argc != 6) return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__);
 	GSFONT* font = (GSFONT*)luaL_checkinteger(L, 1);
     float x = luaL_checknumber(L, 2);
 	float y = luaL_checknumber(L, 3);
@@ -66,20 +66,20 @@ static int lua_print(lua_State *L) {
 
 static int lua_fontunload(lua_State *L){
 	int argc = lua_gettop(L); 
-	if (argc != 1) return luaL_error(L, "wrong number of arguments"); 
+	if (argc != 1) return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__); 
 	GSFONT* font = (GSFONT*)luaL_checkinteger(L, 1);
 	unloadFont(font);
 	return 0;
 }
 
 static int lua_ftinit(lua_State *L){
-	if (lua_gettop(L) != 0) return luaL_error(L, "wrong number of arguments"); 
+	if (lua_gettop(L) != 0) return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__); 
 	fntInit();
 	return 0;
 }
 
 static int lua_ftload(lua_State *L){
-	if (lua_gettop(L) != 1) return luaL_error(L, "wrong number of arguments"); 
+	if (lua_gettop(L) != 1) return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__); 
 	const char* fontpath = luaL_checkstring(L, 1);
 	int fntHandle = fntLoadFile(fontpath);
     lua_pushinteger(L, fntHandle);
@@ -87,7 +87,7 @@ static int lua_ftload(lua_State *L){
 }
 
 static int lua_ftSetPixelSize(lua_State *L) {
-	if (lua_gettop(L) != 3) return luaL_error(L, "wrong number of arguments"); 
+	if (lua_gettop(L) != 3) return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__); 
 	int fontid = luaL_checkinteger(L, 1);
 	int width = luaL_checknumber(L, 2); 
 	int height = luaL_checknumber(L, 3); 
@@ -97,7 +97,7 @@ static int lua_ftSetPixelSize(lua_State *L) {
 
 
 static int lua_ftSetCharSize(lua_State *L) {
-	if (lua_gettop(L) != 3) return luaL_error(L, "wrong number of arguments"); 
+	if (lua_gettop(L) != 3) return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__); 
 	int fontid = luaL_checkinteger(L, 1);
 	int width = luaL_checkinteger(L, 2); 
 	int height = luaL_checkinteger(L, 3); 
@@ -107,7 +107,7 @@ static int lua_ftSetCharSize(lua_State *L) {
 
 static int lua_ftprint(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 7 && argc != 8) return luaL_error(L, "wrong number of arguments");
+	if (argc != 7 && argc != 8) return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__);
 	int fontid = luaL_checkinteger(L, 1);
     int x = luaL_checkinteger(L, 2);
 	int y = luaL_checkinteger(L, 3);
@@ -123,7 +123,7 @@ static int lua_ftprint(lua_State *L) {
 
 static int lua_ftunload(lua_State *L){
 	int argc = lua_gettop(L); 
-	if (argc != 1) return luaL_error(L, "wrong number of arguments"); 
+	if (argc != 1) return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__); 
 	int fontid = luaL_checkinteger(L, 1);
 	fntRelease(fontid);
 	return 0;
@@ -132,14 +132,14 @@ static int lua_ftunload(lua_State *L){
 
 static int lua_ftend(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 0) return luaL_error(L, "wrong number of arguments");
+	if (argc != 0) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 	fntEnd();
 	return 0;
 }
 
 static int lua_fmload(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 0) return luaL_error(L, "wrong number of arguments");
+	if (argc != 0) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 	loadFontM();
 	return 0;
 }
@@ -159,7 +159,7 @@ static int lua_fmprint(lua_State *L) {
 
 static int lua_fmunload(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 0) return luaL_error(L, "wrong number of arguments");
+	if (argc != 0) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 	unloadFontM();
 	return 0;
 }
@@ -188,7 +188,7 @@ static const luaL_Reg Font_functions[] = {
 
 static int lua_loadimgasync(lua_State *L){
 	int argc = lua_gettop(L);
-	if (argc != 1) return luaL_error(L, "wrong number of arguments");
+	if (argc != 1) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 	char* text = (char*)(luaL_checkstring(L, 1));
 	if (argc == 2) asyncDelayed = lua_toboolean(L, 2);
 	
@@ -214,7 +214,7 @@ static int lua_loadimgasync(lua_State *L){
 
 static int lua_loadimg(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 1 && argc != 2) return luaL_error(L, "wrong number of arguments");
+	if (argc != 1 && argc != 2) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 	const char* text = luaL_checkstring(L, 1);
 	bool delayed = true;
 	if (argc == 2) delayed = lua_toboolean(L, 2);
@@ -226,7 +226,7 @@ static int lua_loadimg(lua_State *L) {
 
 static int lua_drawimg(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 3 && argc != 4) return luaL_error(L, "wrong number of arguments");
+	if (argc != 3 && argc != 4) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
     GSTEXTURE* source = (GSTEXTURE*)(luaL_checkinteger(L, 1));
 	float x = luaL_checknumber(L, 2);
 	float y = luaL_checknumber(L, 3);
@@ -246,7 +246,7 @@ static int lua_drawimg(lua_State *L) {
 
 static int lua_drawimg_rotate(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 4 && argc != 5) return luaL_error(L, "wrong number of arguments");
+	if (argc != 4 && argc != 5) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
     GSTEXTURE* source = (GSTEXTURE*)(luaL_checkinteger(L, 1));
 	float x = luaL_checknumber(L, 2);
 	float y = luaL_checknumber(L, 3);
@@ -267,7 +267,7 @@ static int lua_drawimg_rotate(lua_State *L) {
 
 static int lua_drawimg_scale(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 5 && argc != 6) return luaL_error(L, "wrong number of arguments");
+	if (argc != 5 && argc != 6) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
     GSTEXTURE* source = (GSTEXTURE*)(luaL_checkinteger(L, 1));
 	float x = luaL_checknumber(L, 2);
 	float y = luaL_checknumber(L, 3);
@@ -288,7 +288,7 @@ static int lua_drawimg_scale(lua_State *L) {
 
 static int lua_drawimg_part(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 7 && argc != 8) return luaL_error(L, "wrong number of arguments");
+	if (argc != 7 && argc != 8) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
     GSTEXTURE* source = (GSTEXTURE*)(luaL_checkinteger(L, 1));
 	float x = luaL_checknumber(L, 2);
 	float y = luaL_checknumber(L, 3);
@@ -308,7 +308,7 @@ static int lua_drawimg_part(lua_State *L) {
 
 static int lua_drawimg_full(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 10 && argc != 11) return luaL_error(L, "wrong number of arguments");
+	if (argc != 10 && argc != 11) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
     GSTEXTURE* source = (GSTEXTURE*)(luaL_checkinteger(L, 1));
 	float x = luaL_checknumber(L, 2);
 	float y = luaL_checknumber(L, 3);
@@ -329,7 +329,7 @@ static int lua_drawimg_full(lua_State *L) {
 
 static int lua_width(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 1) return luaL_error(L, "wrong number of arguments");
+	if (argc != 1) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
     GSTEXTURE* source = (GSTEXTURE*)(luaL_checkinteger(L, 1));
 	lua_pushinteger(L, (uint32_t)(source->Width));
 	return 1;
@@ -338,7 +338,7 @@ static int lua_width(lua_State *L) {
 
 static int lua_height(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 1) return luaL_error(L, "wrong number of arguments");
+	if (argc != 1) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
     GSTEXTURE* source = (GSTEXTURE*)(luaL_checkinteger(L, 1));
 	lua_pushinteger(L, (uint32_t)(source->Height));
 	return 1;
@@ -346,7 +346,7 @@ static int lua_height(lua_State *L) {
 
 static int lua_filters(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 2) return luaL_error(L, "wrong number of arguments");
+	if (argc != 2) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
     GSTEXTURE* source = (GSTEXTURE*)(luaL_checkinteger(L, 1));
 	source->Filter = luaL_checknumber(L, 2);
 	return 0;
@@ -355,7 +355,7 @@ static int lua_filters(lua_State *L) {
 
 static int lua_rect(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 5) return luaL_error(L, "wrong number of arguments");
+	if (argc != 5) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 	float x = luaL_checknumber(L, 1);
 	float y = luaL_checknumber(L, 2);
     float width = luaL_checknumber(L, 3);
@@ -370,7 +370,7 @@ static int lua_rect(lua_State *L) {
 
 static int lua_line(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 5) return luaL_error(L, "wrong number of arguments");
+	if (argc != 5) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 	float x = luaL_checknumber(L, 1);
 	float y = luaL_checknumber(L, 2);
     float x2 = luaL_checknumber(L, 3);
@@ -384,7 +384,7 @@ static int lua_line(lua_State *L) {
 
 static int lua_pixel(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 3) return luaL_error(L, "wrong number of arguments");
+	if (argc != 3) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 	float x = luaL_checknumber(L, 1);
 	float y = luaL_checknumber(L, 2);
     Color color =  luaL_checkinteger(L, 3);
@@ -396,7 +396,7 @@ static int lua_pixel(lua_State *L) {
 static int lua_triangle(lua_State *L) {
 	int argc = lua_gettop(L);
 
-	if (argc != 7 && argc != 9) return luaL_error(L, "wrong number of arguments");
+	if (argc != 7 && argc != 9) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 
 	float x = luaL_checknumber(L, 1);
 	float y = luaL_checknumber(L, 2);
@@ -419,7 +419,7 @@ static int lua_triangle(lua_State *L) {
 static int lua_quad(lua_State *L) {
 	int argc = lua_gettop(L);
 
-	if (argc != 9 && argc != 12) return luaL_error(L, "wrong number of arguments");
+	if (argc != 9 && argc != 12) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 
 	float x = luaL_checknumber(L, 1);
 	float y = luaL_checknumber(L, 2);
@@ -445,7 +445,7 @@ static int lua_quad(lua_State *L) {
 static int lua_circle(lua_State *L) {
 	int argc = lua_gettop(L);
 
-	if (argc != 4 && argc != 5) return luaL_error(L, "wrong number of arguments");
+	if (argc != 4 && argc != 5) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 
 	float x = luaL_checknumber(L, 1);
 	float y = luaL_checknumber(L, 2);
@@ -464,7 +464,7 @@ static int lua_circle(lua_State *L) {
 static int lua_free(lua_State *L) {
 	int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-	if (argc != 1) return luaL_error(L, "wrong number of arguments");
+	if (argc != 1) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 #endif
 	
 	GSTEXTURE* source = (GSTEXTURE*)(luaL_checkinteger(L, 1));
@@ -492,7 +492,7 @@ static int lua_free(lua_State *L) {
 static int lua_getloadstate(lua_State *L){
 	int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-	if(argc != 0) return luaL_error(L, "wrong number of arguments.");
+	if(argc != 0) return luaL_error(L, "wrong number of arguments. (%s:%d)", __FILE__, __LINE__);
 #endif
 	lua_pushinteger(L, imgThreadResult);
 	return 1;
@@ -501,7 +501,7 @@ static int lua_getloadstate(lua_State *L){
 static int lua_getloaddata(lua_State *L){
 	int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-	if(argc != 0) return luaL_error(L, "wrong number of arguments.");
+	if(argc != 0) return luaL_error(L, "wrong number of arguments. (%s:%d)", __FILE__, __LINE__);
 #endif
 	if (imgThreadData != NULL){
 		lua_pushlstring(L,(const char*)imgThreadData,imgThreadSize);

@@ -236,16 +236,17 @@ int main(int argc, char * argv[])
             errMsg = runScript(argv[1], false);
         }   
 
-        init_scr();
 
         if (errMsg != NULL)
         {
-        	while (!isButtonPressed(PAD_START)) {
+            printf("\n\nerrMsg is not null and it's contents are:\n%s\n\n", errMsg);
+            init_scr();
 				scr_clear();
 				scr_setXY(5, 2);
 				scr_printf("Enceladus ERROR!\n");
 				scr_printf(errMsg);
 				scr_printf("\nPress [start] to restart\n");
+        	while (!isButtonPressed(PAD_START)) {
 			}
         }
 

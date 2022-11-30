@@ -1,5 +1,5 @@
 Font.fmLoad()
-
+--KELFBinder.init()
 local circle = Graphics.loadImage("pads/circle.png")
 local cross = Graphics.loadImage("pads/cross.png")
 local square = Graphics.loadImage("pads/square.png")
@@ -28,11 +28,17 @@ local ry = nil
 local lx = nil
 local ly = nil
 local pressure = nil
-
+--local SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
+--local REGION = KELFBinder.getsystemregion()
+--local REGIONSTR = KELFBinder.getsystemregionString()
+--local ROMVER = KELFBinder.getROMversion()
 while true do
   Screen.clear()
 
   Font.fmPrint(150, 25, 0.6, "\nEnceladus project: Controls demo\n")
+  --Font.fmPrint(150, 50, 0.6, string.format("your console looks for updates on this path \n %s\n", SYSUPDATEPATH))
+  --Font.fmPrint(150, 100, 0.6, string.format("Console region %d (%s)\n", REGION, REGIONSTR))
+  --Font.fmPrint(150, 150, 0.6, string.format("system ROM version is %lu\n", ROMVER))
   Font.fmPrint(100, 370, 0.4, "\nTips:\n")
   Font.fmPrint(100, 390, 0.4, "\nPress R2+L2 to start rumble and R3+L3 to stop it.\n")
   Font.fmPrint(100, 405, 0.4, "\nButtons transparency varies with the pressure applied to them\n")

@@ -6,13 +6,15 @@ extern "C"{
 #include <libds34usb.h>
 }
 
+// luaL_error(L,"ERROR IN File %s\nline %d", __FILE__,__LINE);
+
 static int lua_gettype(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 0 && argc != 1) return luaL_error(L, "wrong number of arguments");
+	if (argc != 0 && argc != 1) return luaL_error(L, "wrong number of arguments (%s:%d)", __FILE__, __LINE__);
 	int port = 0;
 	if (argc == 1){
 		port = luaL_checkinteger(L, 1);
-		if (port > 1) return luaL_error(L, "wrong port number.");
+		if (port > 1) return luaL_error(L, "wrong port number.(%s:%d)", __FILE__, __LINE__);
 	}
 	int mode = padInfoMode(port, 0, PAD_MODETABLE, 0);
 	lua_pushinteger(L, mode);
@@ -21,11 +23,11 @@ static int lua_gettype(lua_State *L) {
 
 static int lua_getpad(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 0 && argc != 1) return luaL_error(L, "wrong number of arguments");
+	if (argc != 0 && argc != 1) return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__);
 	int port = 0;
 	if (argc == 1){
 		port = luaL_checkinteger(L, 1);
-		if (port > 1) return luaL_error(L, "wrong port number.");
+		if (port > 1) return luaL_error(L, "wrong port number.(%s:%d)", __FILE__, __LINE__);
 	}
 
 	padButtonStatus buttons;
@@ -62,11 +64,11 @@ static int lua_getpad(lua_State *L) {
 
 static int lua_getleft(lua_State *L){
 	int argc = lua_gettop(L);
-	if (argc != 0 && argc != 1) return luaL_error(L, "wrong number of arguments.");
+	if (argc != 0 && argc != 1) return luaL_error(L, "wrong number of arguments.(%s:%d)", __FILE__, __LINE__);
 	int port = 0;
 	if (argc == 1){
 		port = luaL_checkinteger(L, 1);
-		if (port > 1) return luaL_error(L, "wrong port number.");
+		if (port > 1) return luaL_error(L, "wrong port number.(%s:%d)", __FILE__, __LINE__);
 	}
 
 	padButtonStatus buttons;
@@ -84,11 +86,11 @@ static int lua_getleft(lua_State *L){
 
 static int lua_getright(lua_State *L){
 	int argc = lua_gettop(L);
-	if (argc != 0 && argc != 1) return luaL_error(L, "wrong number of arguments.");
+	if (argc != 0 && argc != 1) return luaL_error(L, "wrong number of arguments.(%s:%d)", __FILE__, __LINE__);
 	int port = 0;
 	if (argc == 1){
 		port = luaL_checkinteger(L, 1);
-		if (port > 1) return luaL_error(L, "wrong port number.");
+		if (port > 1) return luaL_error(L, "wrong port number.(%s:%d)", __FILE__, __LINE__);
 	}
 
 	padButtonStatus buttons;
@@ -106,7 +108,7 @@ static int lua_getright(lua_State *L){
 
 static int lua_getpressure(lua_State *L){
 	int argc = lua_gettop(L);
-	if (argc != 1 && argc != 2) return luaL_error(L, "wrong number of arguments.");
+	if (argc != 1 && argc != 2) return luaL_error(L, "wrong number of arguments.(%s:%d)", __FILE__, __LINE__);
 	int port = 0;
 	int button;
 	if (argc == 2) {
@@ -174,7 +176,7 @@ static int lua_getpressure(lua_State *L){
 
 static int lua_rumble(lua_State *L){
 	int argc = lua_gettop(L);
-	if (argc != 2 && argc != 3) return luaL_error(L, "wrong number of arguments.");
+	if (argc != 2 && argc != 3) return luaL_error(L, "wrong number of arguments.(%s:%d)", __FILE__, __LINE__);
 	static char actAlign[6];
 	int port = 0;
 	if (argc == 3){
@@ -196,7 +198,7 @@ static int lua_rumble(lua_State *L){
 
 static int lua_check(lua_State *L){
 	int argc = lua_gettop(L);
-	if (argc != 2) return luaL_error(L, "wrong number of arguments.");
+	if (argc != 2) return luaL_error(L, "wrong number of arguments.(%s:%d)", __FILE__, __LINE__);
 	int pad = luaL_checkinteger(L, 1);
 	int button = luaL_checkinteger(L, 2);
 	lua_pushboolean(L, (pad & button));
@@ -206,7 +208,7 @@ static int lua_check(lua_State *L){
 
 static int lua_set_led(lua_State *L){
 	int argc = lua_gettop(L);
-	if (argc != 3 && argc != 4) return luaL_error(L, "wrong number of arguments.");
+	if (argc != 3 && argc != 4) return luaL_error(L, "wrong number of arguments.(%s:%d)", __FILE__, __LINE__);
 	u8 led[4];
 	int port = 0;
 	if (argc == 4){

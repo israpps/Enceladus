@@ -29,6 +29,7 @@ const char * runScript(const char* script, bool isStringBuffer )
     luaSound_init(L);
     luaRender_init(L);
     luaSecrMan_init(L);
+	luaKELFBinder_init(L);
     	
     printf("done !\n");
      
