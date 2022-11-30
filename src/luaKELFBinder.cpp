@@ -2,8 +2,11 @@
 #include "include/baexec-system_paths.h"
 #include "include/luaKELFBinder.h"
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <osd_config.h>
+#include "include/dbgprintf.h"
 
 static int KELFBinderHelperFunctionsInited = false;
 static unsigned long int ROMVERSION;
@@ -30,32 +33,19 @@ static char ROMREGION;
 static int lua_KELFBinderInit(lua_State *L)
 {
     int argc = lua_gettop(L);
-    char ROMVER[ROMVER_LEN];
 #ifndef SKIP_ERROR_HANDLING
-    if (argc != 0)
+    if (argc != 1)
         return luaL_error(L, "wrong number of arguments");
 #endif
-
-    int fd, retcode = 1;
-    fd = open("rom0:ROMVER", O_RDONLY);
-    if (fd < 0) {
-        ssize_t READED = read(fd, ROMVER, ROMVER_LEN);
-        if (READED != ROMVER_LEN) {
-            retcode = -1;
-            close(fd);
-            return luaL_error(L, "could not read 16 bytes from rom0:ROMVER !!!");
-        } else {
-            ROMREGION = GET_CONSOLE_REGION(ROMVER[4]);
-            MACHINETYPE = GET_MACHINE_TYPE(ROMVER[5]);
-            ROMVER[4] = '\0';                       // null terminate here so strtoul only reads the rom version, not any extra data.
-            ROMVERSION = strtoul(ROMVER, NULL, 16); // convert ROM version to unsigned long int for further use on automatic Install, use hex numbers to compare!! (eg: to check for rom 1.20 do ROMVERSION == 0x120)
-            KELFBinderHelperFunctionsInited = true;
-        }
-    } else {
-        return luaL_error(L, "could not access rom0:ROMVER !!!");
-    }
-    close(fd);
-    return retcode;
+    const char *ROMVER = luaL_checkstring(L, 1);
+    char ROMVNUM[4 + 1];
+    ROMREGION = GET_CONSOLE_REGION(ROMVER[4]);
+    MACHINETYPE = GET_MACHINE_TYPE(ROMVER[5]);
+    strncpy(ROMVNUM, ROMVER, 4);
+    ROMVNUM[4] = '\0';
+    ROMVERSION = strtoul(ROMVNUM, NULL, 10); // convert ROM version to unsigned long int for further use on automatic Install, use hex numbers to compare!! (eg: to check for rom 1.20 do ROMVERSION == 0x120)
+    KELFBinderHelperFunctionsInited = true;
+    return 1;
 }
 
 static int lua_KELFBinderDeInit(lua_State *L)
@@ -70,6 +60,7 @@ static int lua_KELFBinderDeInit(lua_State *L)
 
 static int lua_calcsysupdatepath(lua_State *L)
 {
+    DPRINTF(__func__);
     int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
     if (argc != 0)
@@ -81,13 +72,13 @@ static int lua_calcsysupdatepath(lua_State *L)
 
     if (ROMREGION == CONSOLE_REGIONS::JAPAN) {
         switch (ROMVERSION) {
-            case 0x100:
+            case 100:
                 lua_pushstring(L, sysupdate_paths[SYSUPDATE_COUNT::JAP_ROM_100]);
                 break;
-            case 0x101:
+            case 101:
                 lua_pushstring(L, sysupdate_paths[SYSUPDATE_COUNT::JAP_ROM_101]);
                 break;
-            case 0x120:
+            case 120:
                 lua_pushstring(L, sysupdate_paths[SYSUPDATE_COUNT::JAP_ROM_120]);
                 break;
             default:
@@ -97,7 +88,7 @@ static int lua_calcsysupdatepath(lua_State *L)
 
     } else if (ROMREGION == CONSOLE_REGIONS::EUROPE) {
         switch (ROMVERSION) {
-            case 0x120:
+            case 120:
                 lua_pushstring(L, sysupdate_paths[SYSUPDATE_COUNT::EUR_ROM_120]);
                 break;
 
@@ -105,15 +96,17 @@ static int lua_calcsysupdatepath(lua_State *L)
                 lua_pushstring(L, sysupdate_paths[SYSUPDATE_COUNT::EUR_STANDARD]);
                 break;
         }
+
     } else if (ROMREGION == CONSOLE_REGIONS::CHINA) {
         lua_pushstring(L, sysupdate_paths[SYSUPDATE_COUNT::CHN_STANDARD]);
+
     } else if ((ROMREGION == CONSOLE_REGIONS::USA) || (ROMREGION == CONSOLE_REGIONS::ASIA)) {
         switch (ROMVERSION) {
-            case 0x110:
+            case 110:
                 lua_pushstring(L, sysupdate_paths[SYSUPDATE_COUNT::USA_ROM_110]);
                 break;
 
-            case 0x120:
+            case 120:
                 lua_pushstring(L, sysupdate_paths[SYSUPDATE_COUNT::USA_ROM_120]);
                 break;
 
@@ -129,31 +122,33 @@ static int lua_calcsysupdatepath(lua_State *L)
 
 static int lua_getsystemregion(lua_State *L)
 {
+    DPRINTF(__func__);
     lua_pushinteger(L, ROMREGION);
     return 1;
 }
 
 static int lua_getsystemregionString(lua_State *L)
 {
+    DPRINTF(__func__);
     switch (ROMREGION) {
 
-            case CONSOLE_REGIONS::JAPAN:
+        case CONSOLE_REGIONS::JAPAN:
             lua_pushstring(L, "Japan");
             break;
 
-            case CONSOLE_REGIONS::USA:
+        case CONSOLE_REGIONS::USA:
             lua_pushstring(L, "USA");
             break;
 
-            case CONSOLE_REGIONS::ASIA:
+        case CONSOLE_REGIONS::ASIA:
             lua_pushstring(L, "Asia");
             break;
 
-            case CONSOLE_REGIONS::CHINA:
+        case CONSOLE_REGIONS::CHINA:
             lua_pushstring(L, "China");
             break;
 
-            default:
+        default:
             lua_pushstring(L, "UNKNOWN!");
             break;
     }
@@ -162,7 +157,15 @@ static int lua_getsystemregionString(lua_State *L)
 
 static int lua_getromversion(lua_State *L)
 {
+    DPRINTF(__func__);
     lua_pushinteger(L, ROMVERSION);
+    return 1;
+}
+
+static int lua_getosdconfigLNG(lua_State *L)
+{
+    DPRINTF(__func__);
+    lua_pushinteger(L, configGetLanguage());
     return 1;
 }
 
@@ -171,9 +174,10 @@ static const luaL_Reg KELFBinder_functions[] = {
     {"init", lua_KELFBinderInit},
     {"deinit", lua_KELFBinderDeInit},
     {"calculateSysUpdatePath", lua_calcsysupdatepath},
-    //{"getsystemregion", lua_getsystemregion},
-    //{"getsystemregionString", lua_getsystemregionString},
-    //{"getROMversion", lua_getromversion},
+    {"getsystemregion", lua_getsystemregion},
+    {"getsystemregionString", lua_getsystemregionString},
+    {"getROMversion", lua_getromversion},
+    {"getsystemLanguage", lua_getosdconfigLNG},
     {0, 0}};
 
 void luaKELFBinder_init(lua_State *L)

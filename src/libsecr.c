@@ -5,6 +5,7 @@
 
 #include "include/libsecr.h"
 #include "include/secrsif.h"
+#include "include/dbgprintf.h"
 
 static SifRpcClientData_t SifRpcClient01;
 static SifRpcClientData_t SifRpcClient02;
@@ -20,42 +21,42 @@ static unsigned char RpcBuffer[0x1000] ALIGNED(64);
 
 int SecrInit(void)
 {
-	printf("STARTING SECRMAN RPC BINDING\n");
+	DPRINTF("STARTING SECRMAN RPC BINDING\n");
 	SifInitRpc(0);
 
 	nopdelay();
 	while(SifBindRpc(&SifRpcClient01, 0x80000A01, 0)<0 || SifRpcClient01.server==NULL){
-		printf("libsecr: SifRpcClient01 bind failed\n");
+		DPRINTF("libsecr: SifRpcClient01 bind failed\n");
 	}
 
 	nopdelay();
 	while(SifBindRpc(&SifRpcClient02, 0x80000A02, 0)<0 || SifRpcClient02.server==NULL){
-		printf("libsecr: SifRpcClient02 bind failed\n");
+		DPRINTF("libsecr: SifRpcClient02 bind failed\n");
 	}
 
 	nopdelay();
 	while(SifBindRpc(&SifRpcClient03, 0x80000A03, 0)<0 || SifRpcClient03.server==NULL){
-		printf("libsecr: SifRpcClient03 bind failed\n");
+		DPRINTF("libsecr: SifRpcClient03 bind failed\n");
 	}
 
 	nopdelay();
 	while(SifBindRpc(&SifRpcClient04, 0x80000A04, 0)<0 || SifRpcClient04.server==NULL){
-		printf("libsecr: SifRpcClient04 bind failed\n");
+		DPRINTF("libsecr: SifRpcClient04 bind failed\n");
 	}
 
 	nopdelay();
 	while(SifBindRpc(&SifRpcClient05, 0x80000A05, 0)<0 || SifRpcClient05.server==NULL){
-		printf("libsecr: SifRpcClient05 bind failed\n");
+		DPRINTF("libsecr: SifRpcClient05 bind failed\n");
 	}
 
 	nopdelay();
 	while(SifBindRpc(&SifRpcClient06, 0x80000A06, 0)<0 || SifRpcClient06.server==NULL){
-		printf("libsecr: SifRpcClient06 bind failed\n");
+		DPRINTF("libsecr: SifRpcClient06 bind failed\n");
 	}
 
 	nopdelay();
 	while(SifBindRpc(&SifRpcClient07, 0x80000A07, 0)<0 || SifRpcClient07.server==NULL){
-		printf("libsecr: SifRpcClient07 bind failed\n");
+		DPRINTF("libsecr: SifRpcClient07 bind failed\n");
 	}
 
 	return 1;

@@ -1,6 +1,6 @@
+Screen.clear(Color.new(255, 0, 0))
 Secrman.init()
 --[[while true do
-	Screen.clear(Color.new(255, 0, 0))
 	Screen.flip()
 end ]]
 

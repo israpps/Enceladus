@@ -42,5 +42,21 @@ enum SYSUPDATE_COUNT
 
 };
 
+// the following bit shifted macros are intended to be used for special installations, where used picked specific updates
+#define BS(x) (1 << X)
+
+#define JAP_100 BS(1)
+#define JAP_101 BS(2)
+#define JAP_120 BS(3)
+#define JAP_STD BS(4)
+
+#define USA_110 BS(5)
+#define USA_120 BS(6)
+#define USA_STD BS(7)
+
+#define EUR_120 BS(8)
+#define EUR_STD BS(9)
+
+#define CHN_STD BS(10)
 
 #endif

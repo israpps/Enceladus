@@ -8,6 +8,7 @@
 #include <sys/fcntl.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include "include/dbgprintf.h"
 
 extern "C" {
 #include "include/libsecr.h"
@@ -15,7 +16,7 @@ extern "C" {
 
 static int lua_initsecrman(lua_State *L)
 {
-	printf("INITIALIZING SECRMAN\n");
+	DPRINTF("INITIALIZING SECRMAN\n");
     int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
     if (argc != 0)
@@ -28,7 +29,7 @@ static int lua_initsecrman(lua_State *L)
 
 static int lua_deinitsecrman(lua_State *L)
 {
-	printf("DEINITIALIZING SECRMAN\n");
+	DPRINTF("DEINITIALIZING SECRMAN\n");
     int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
     if (argc != 0)
@@ -84,7 +85,7 @@ int installKELF(const char* filepath, const char* installpath)
         if (READED != size)
         {
             result = -EIO;
-            printf("%s: ERROR reading KELF, expected to read %d bytes, but %d bytes were readed", __func__, size, READED);
+            DPRINTF("%s: ERROR reading KELF, expected to read %d bytes, but %d bytes were readed", __func__, size, READED);
         } else
         {
             result = SignKELF(PTR, size, installpath[2] - '0', 0);

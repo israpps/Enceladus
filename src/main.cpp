@@ -27,14 +27,16 @@
 #include <fileXio_rpc.h>
 #include <fileio.h>
 
-extern "C"{
+extern "C" {
 #include <libds34bt.h>
 #include <libds34usb.h>
 }
 
-#define IMPORT_BIN2C(_n) \
-extern unsigned char _n[]; \
-extern unsigned int size_##_n
+#include "include/dbgprintf.h"
+
+#define IMPORT_BIN2C(_n)       \
+    extern unsigned char _n[]; \
+    extern unsigned int size_##_n
 
 
 extern char bootString[];
@@ -61,197 +63,216 @@ IMPORT_BIN2C(IOPRP);
 
 char boot_path[255];
 
-void setLuaBootPath(int argc, char ** argv, int idx)
+void setLuaBootPath(int argc, char **argv, int idx)
 {
-    if (argc>=(idx+1))
-    {
+    if (argc >= (idx + 1)) {
 
-	char *p;
-	if ((p = strrchr(argv[idx], '/'))!=NULL) {
-	    snprintf(boot_path, sizeof(boot_path), "%s", argv[idx]);
-	    p = strrchr(boot_path, '/');
-	if (p!=NULL)
-	    p[1]='\0';
-	} else if ((p = strrchr(argv[idx], '\\'))!=NULL) {
-	   snprintf(boot_path, sizeof(boot_path), "%s", argv[idx]);
-	   p = strrchr(boot_path, '\\');
-	   if (p!=NULL)
-	     p[1]='\0';
-	} else if ((p = strchr(argv[idx], ':'))!=NULL) {
-	   snprintf(boot_path, sizeof(boot_path), "%s", argv[idx]);
-	   p = strchr(boot_path, ':');
-	   if (p!=NULL)
-	   p[1]='\0';
-	}
-
+        char *p;
+        if ((p = strrchr(argv[idx], '/')) != NULL) {
+            snprintf(boot_path, sizeof(boot_path), "%s", argv[idx]);
+            p = strrchr(boot_path, '/');
+            if (p != NULL)
+                p[1] = '\0';
+        } else if ((p = strrchr(argv[idx], '\\')) != NULL) {
+            snprintf(boot_path, sizeof(boot_path), "%s", argv[idx]);
+            p = strrchr(boot_path, '\\');
+            if (p != NULL)
+                p[1] = '\0';
+        } else if ((p = strchr(argv[idx], ':')) != NULL) {
+            snprintf(boot_path, sizeof(boot_path), "%s", argv[idx]);
+            p = strchr(boot_path, ':');
+            if (p != NULL)
+                p[1] = '\0';
+        }
     }
-    
+
     // check if path needs patching
-    if( !strncmp( boot_path, "mass:/", 6) && (strlen (boot_path)>6))
-    {
-        strcpy((char *)&boot_path[5],(const char *)&boot_path[6]);
+    if (!strncmp(boot_path, "mass:/", 6) && (strlen(boot_path) > 6)) {
+        strcpy((char *)&boot_path[5], (const char *)&boot_path[6]);
     }
-      
-    
+
+    DPRINTF("%s: boot_path=%s\n", __func__, boot_path);
 }
 
 
 void initMC(void)
 {
-   int ret;
-   // mc variables
-   int mc_Type, mc_Free, mc_Format;
+    int ret;
+    // mc variables
+    int mc_Type, mc_Free, mc_Format;
 
-   
-   printf("initMC: Initializing Memory Card\n");
 
-   ret = mcInit(MC_TYPE_XMC);
-   
-   if( ret < 0 ) {
-	printf("initMC: failed to initialize memcard server.\n");
-   } else {
-       printf("initMC: memcard server started successfully.\n");
-   }
-   
-   // Since this is the first call, -1 should be returned.
-   // makes me sure that next ones will work !
-   mcGetInfo(0, 0, &mc_Type, &mc_Free, &mc_Format); 
-   mcSync(MC_WAIT, NULL, &ret);
+    DPRINTF("initMC: Initializing Memory Card\n");
+
+    ret = mcInit(MC_TYPE_XMC);
+
+    if (ret < 0) {
+        DPRINTF("initMC: failed to initialize memcard server.\n");
+    } else {
+        DPRINTF("initMC: memcard server started successfully.\n");
+    }
+
+    // Since this is the first call, -1 should be returned.
+    // makes me sure that next ones will work !
+    mcGetInfo(0, 0, &mc_Type, &mc_Free, &mc_Format);
+    mcSync(MC_WAIT, NULL, &ret);
 }
 
-int main(int argc, char * argv[])
+int main(int argc, char *argv[])
 {
-    const char * errMsg;
-
-    #ifdef RESET_IOP  
+//#ifdef SCR_PRINTF
+    init_scr();
+//#endif
+    const char *errMsg;
+    int ret = -1, STAT;
+#ifdef RESET_IOP
     SifInitRpc(0);
     // ONLY ONE OF THE LINES BETWEEN THESE TWO COMMENTS CAN BE ENABLED AT THE SAME TIME
-    //while (!SifIopReset("", 0)){};
+    // while (!SifIopReset("", 0)){};
     SifIopRebootBuffer(IOPRP, size_IOPRP); // use IOPRP image with SECRMAN_special inside
     // ONLY ONE OF THE LINES BETWEEN THESE TWO COMMENTS CAN BE ENABLED AT THE SAME TIME
-    while (!SifIopSync()){};
+    while (!SifIopSync()) {};
     SifInitRpc(0);
-    #endif
-    
-    // install sbv patch fix
-    printf("Installing SBV Patches...\n");
-    sbv_patch_enable_lmb();
-    sbv_patch_disable_prefix_check(); 
-    sbv_patch_fileio(); 
+#endif
 
-	DIR *directorytoverify;
-	directorytoverify = opendir("host:.");
-	if(directorytoverify==NULL){
-		SifExecModuleBuffer(&iomanX_irx, size_iomanX_irx, 0, NULL, NULL);
-		SifExecModuleBuffer(&fileXio_irx, size_fileXio_irx, 0, NULL, NULL);
-	}
-	SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, NULL, NULL);
-	if(directorytoverify==NULL){
-		fileXioInit();
-	}
-	if(directorytoverify!=NULL){
-		closedir(directorytoverify);
-	}
-    SifExecModuleBuffer(&mcman_irx, size_mcman_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&mcserv_irx, size_mcserv_irx, 0, NULL, NULL);
+    // install sbv patch fix
+    DPRINTF("Installing SBV Patches...\n");
+    sbv_patch_enable_lmb();
+    sbv_patch_disable_prefix_check();
+    sbv_patch_fileio();
+
+    DIR *directorytoverify;
+    directorytoverify = opendir("host:.");
+    if (directorytoverify == NULL) {
+        ret = SifExecModuleBuffer(&iomanX_irx, size_iomanX_irx, 0, NULL, &STAT);
+        DPRINTF("[IOMANX.IRX]: ret=%d, stat=%d\n", ret, STAT);
+        ret = SifExecModuleBuffer(&fileXio_irx, size_fileXio_irx, 0, NULL, &STAT);
+        DPRINTF("[FILEXIO.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    }
+    ret = SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, NULL, &STAT);
+    DPRINTF("[SIO2MAN.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    if (directorytoverify == NULL) {
+        fileXioInit();
+    }
+    if (directorytoverify != NULL) {
+        closedir(directorytoverify);
+    }
+    ret = SifExecModuleBuffer(&mcman_irx, size_mcman_irx, 0, NULL, &STAT);
+    DPRINTF("[MCMAN.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    ret = SifExecModuleBuffer(&mcserv_irx, size_mcserv_irx, 0, NULL, &STAT);
+    DPRINTF("[MCSERV.IRX]: ret=%d, stat=%d\n", ret, STAT);
     initMC();
 
-    SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&libsd_irx, size_libsd_irx, 0, NULL, NULL);
+    ret = SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, NULL, &STAT);
+    DPRINTF("[PADMAN.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    ret = SifExecModuleBuffer(&libsd_irx, size_libsd_irx, 0, NULL, &STAT);
+    DPRINTF("[LIBSD.IRX]: ret=%d, stat=%d\n", ret, STAT);
 
-    // load pad & mc modules 
-    printf("Installing Pad & MC modules...\n");
+    // load USB modules
+    ret = SifExecModuleBuffer(&usbd_irx, size_usbd_irx, 0, NULL, &STAT);
+    DPRINTF("[USBD.IRX]: ret=%d, stat=%d\n", ret, STAT);
 
-    // load USB modules    
-    SifExecModuleBuffer(&usbd_irx, size_usbd_irx, 0, NULL, NULL);
 
-    
     int ds3pads = 1;
-    SifExecModuleBuffer(&ds34usb_irx, size_ds34usb_irx, 4, (char *)&ds3pads, NULL);
-    SifExecModuleBuffer(&ds34bt_irx, size_ds34bt_irx, 4, (char *)&ds3pads, NULL);
+    ret = SifExecModuleBuffer(&ds34usb_irx, size_ds34usb_irx, 4, (char *)&ds3pads, &STAT);
+    DPRINTF("[DS34USB.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    ret = SifExecModuleBuffer(&ds34bt_irx, size_ds34bt_irx, 4, (char *)&ds3pads, &STAT);
+    DPRINTF("[DS34BT.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ds34usb_init();
     ds34bt_init();
 
-    SifExecModuleBuffer(&bdm_irx, size_bdm_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&bdmfs_vfat_irx, size_bdmfs_vfat_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&usbmass_bd_irx, size_usbmass_bd_irx, 0, NULL, NULL);
+    ret = SifExecModuleBuffer(&bdm_irx, size_bdm_irx, 0, NULL, &STAT);
+    DPRINTF("[BDM.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    ret = SifExecModuleBuffer(&bdmfs_vfat_irx, size_bdmfs_vfat_irx, 0, NULL, &STAT);
+    DPRINTF("[BDMFS_VFAT.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    ret = SifExecModuleBuffer(&usbmass_bd_irx, size_usbmass_bd_irx, 0, NULL, &STAT);
+    DPRINTF("[USBMASS_BD.IRX]: ret=%d, stat=%d\n", ret, STAT);
 
-    SifExecModuleBuffer(&cdfs_irx, size_cdfs_irx, 0, NULL, NULL);
+    ret = SifExecModuleBuffer(&cdfs_irx, size_cdfs_irx, 0, NULL, &STAT);
+    DPRINTF("[CDFS.IRX]: ret=%d, stat=%d\n", ret, STAT);
 
-    SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, NULL);
-
-    //waitUntilDeviceIsReady by fjtrujy
+    ret = SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, &STAT);
+    DPRINTF("[AUDSRV.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    ret = SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, &STAT);
+    DPRINTF("[SECRSIF.IRX]: ret=%d, stat=%d\n", ret, STAT);
+#ifndef RESET_IOP
+    ret = SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, &STAT);
+    DPRINTF("[SECRMAN_SPECIAL.IRX]: ret=%d, stat=%d\n", ret, STAT);
+#endif
+    DPRINTF("\n\n\nFINISHED LOADING IRX FILES\n");
+    // waitUntilDeviceIsReady by fjtrujy
 
     struct stat buffer;
-    int ret = -1;
+    ret = -1;
     int retries = 50;
 
-    while(ret != 0 && retries > 0)
-    {
+    while (ret != 0 && retries > 0) {
         ret = stat("mass:/", &buffer);
         /* Wait until the device is ready */
         nopdelay();
 
         retries--;
     }
-	
-        // if no parameters are specified, use the default boot
-	if (argc < 2)
-	{
-	   // set boot path global variable based on the elf path
-	   setLuaBootPath (argc, argv, 0);  
-        }
-        else // set path based on the specified script
-        {
-           if (!strchr(argv[1], ':')) // filename doesn't contain device
-              // set boot path global variable based on the elf path
-	      setLuaBootPath (argc, argv, 0);  
-           else
-              // set path global variable based on the given script path
-	      setLuaBootPath (argc, argv, 1);
-	}
-	
-	// Lua init
-	// init internals library
-    
-    // graphics (gsKit)
-    initGraphics();
+    DPRINTF("FINISHED WAITING FOR USB DEVICE READY\n");
 
-    pad_init();
-
-    // set base path luaplayer
-    chdir(boot_path); 
-
-    printf("boot path : %s\n", boot_path);
-	dbgprintf("boot path : %s\n", boot_path);
-    
-    while (1)
+    // if no parameters are specified, use the default boot
+    if (argc < 2) {
+        // set boot path global variable based on the elf path
+        setLuaBootPath(argc, argv, 0);
+    } else // set path based on the specified script
     {
-    
-        // if no parameters are specified, use the default boot
-        if (argc < 2) {
-            errMsg = runScript(bootString, true); 
-        } else {
-            errMsg = runScript(argv[1], false);
-        }   
-
-
-        if (errMsg != NULL)
-        {
-            printf("\n\nerrMsg is not null and it's contents are:\n%s\n\n", errMsg);
-            init_scr();
-				scr_clear();
-				scr_setXY(5, 2);
-				scr_printf("Enceladus ERROR!\n");
-				scr_printf(errMsg);
-				scr_printf("\nPress [start] to restart\n");
-        	while (!isButtonPressed(PAD_START)) {
-			}
-        }
-
+        if (!strchr(argv[1], ':')) // filename doesn't contain device
+                                   // set boot path global variable based on the elf path
+            setLuaBootPath(argc, argv, 0);
+        else
+            // set path global variable based on the given script path
+            setLuaBootPath(argc, argv, 1);
     }
 
-	return 0;
-}
+    // Lua init
+    // init internals library
 
+    // graphics (gsKit)
+    initGraphics();
+    DPRINTF("initGraphics() Finished\n");
+
+    pad_init();
+    DPRINTF("pad_init() Finished\n");
+
+    // set base path luaplayer
+    chdir(boot_path);
+
+    DPRINTF("boot path : %s\n", boot_path);
+
+    while (1) {
+
+        // if no parameters are specified, use the default boot
+        if (argc < 2) {
+            DPRINTF("running bootstring\n");
+            errMsg = runScript(bootString, true);
+        } else {
+            DPRINTF("running argv[1] =%s\n", argv[1]);
+            errMsg = runScript(argv[1], false);
+        }
+
+
+        if (errMsg != NULL) {
+#ifndef SCR_PRINTF
+            init_scr();
+#endif
+            scr_clear();
+            DPRINTF("\n\nerrMsg is not null and it's contents are:\n%s\n\n", errMsg);
+#ifndef SCR_PRINTF
+            scr_printf("\n\nerrMsg is not null and it's contents are:\n%s\n\n", errMsg);
+#endif
+            scr_setXY(5, 2);
+            scr_printf("Enceladus ERROR!\n");
+            scr_printf(errMsg);
+            scr_printf("\nPress [start] to restart\n");
+            while (!isButtonPressed(PAD_START)) {
+            }
+        }
+    }
+
+    return 0;
+}

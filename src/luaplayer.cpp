@@ -6,35 +6,45 @@
 #include <malloc.h>
 
 #include "include/luaplayer.h"
+#include "include/dbgprintf.h"
 
 static lua_State *L;
 
 const char * runScript(const char* script, bool isStringBuffer )
 {	
-    printf("Creating luaVM... \n");
+    DPRINTF("Creating luaVM... \n");
 
   	L = luaL_newstate();
 	
 	  // Init Standard libraries
 	  luaL_openlibs(L);
 
-    printf("Loading libs... ");
+    DPRINTF("Loading libs... ");
 
 	  // init graphics
     luaGraphics_init(L);
+    DPRINTF("luaGraphics_init done !\n");
     luaControls_init(L);
+    DPRINTF("luaControls_init done !\n");
 	luaScreen_init(L);
+    DPRINTF("luaScreen_init done !\n");
     luaTimer_init(L);
+    DPRINTF("luaTimer_init done !\n");
     luaSystem_init(L);
+    DPRINTF("luaSystem_init done !\n");
     luaSound_init(L);
+    DPRINTF("luaSound_init done !\n");
     luaRender_init(L);
+    DPRINTF("luaRender_init done !\n");
     luaSecrMan_init(L);
+    DPRINTF("luaSecrMan_init done !\n");
 	luaKELFBinder_init(L);
+    DPRINTF("luaKELFBinder_init done !\n");
     	
-    printf("done !\n");
+    DPRINTF("done !\n");
      
 	if(!isStringBuffer){
-        printf("Loading script : `%s'\n", script);
+        DPRINTF("Loading script : `%s'\n", script);
 	}
 
 	int s = 0;
@@ -50,7 +60,7 @@ const char * runScript(const char* script, bool isStringBuffer )
 
 	if (s) {
 		sprintf((char*)errMsg, "%s\n", lua_tostring(L, -1));
-    printf("%s\n", lua_tostring(L, -1));
+    DPRINTF("%s\n", lua_tostring(L, -1));
 		lua_pop(L, 1); // remove error message
 	}
 	lua_close(L);
