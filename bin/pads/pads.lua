@@ -41,6 +41,8 @@ local REGION = KELFBinder.getsystemregion()
 local REGIONSTR = KELFBinder.getsystemregionString()
 local ROMVERN = KELFBinder.getROMversion()
 Language = KELFBinder.getsystemLanguage()
+mcinfo0 = System.getMCInfo(0)
+mcinfo1 = System.getMCInfo(1)
 while true do
   Screen.clear()
 
@@ -50,9 +52,8 @@ while true do
   Font.ftPrint(font, 150, 150, 0, 400, 32, "system ROM version is "..ROMVERN.."\n")
   Font.ftPrint(font, 150, 190, 0, 400, 32, "system Language is "..Language.."\n")
   --Font.fmPrint(100, 370, 0.4, "\nTips:\n")
-  --Font.fmPrint(100, 390, 0.4, "\nPress R2+L2 to start rumble and R3+L3 to stop it.\n")
-  --Font.fmPrint(100, 405, 0.4, "\nButtons transparency varies with the pressure applied to them\n")
-
+  Font.ftPrint(font, 100, 300, 0, 400, 32, string.format("SLOT0  type=%d, freespace=%d, format=%d", mcinfo0.type, mcinfo0.freemem, mcinfo0.format))
+  Font.ftPrint(font, 100, 350, 0, 400, 32, string.format("SLOT1  type=%d, freespace=%d, format=%d", mcinfo1.type, mcinfo1.freemem, mcinfo1.format))
   pad = Pads.get()
   
   Screen.flip()

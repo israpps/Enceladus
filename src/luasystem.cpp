@@ -386,7 +386,7 @@ static int lua_getmcinfo(lua_State *L){
 
 	mcGetInfo(mcslot, 0, &type, &freespace, &format);
 	mcSync(0, NULL, &result);
-
+	DPRINTF("\nSLOT=%d\ttype=%d, freespace=%d, format=%d, mcSync.result=%d\n", mcslot, type, freespace, format, result);
 	lua_newtable(L);
 
 	lua_pushstring(L, "type");
