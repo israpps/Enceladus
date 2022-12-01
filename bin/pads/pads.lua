@@ -1,13 +1,16 @@
+Screen.clear(Color.new(0, 0, 255))
+Screen.flip()
 Font.ftInit()
 font = Font.ftLoad("pads/font.ttf")
---ALIGN_HCENTER = bit.blshift(2, 2)
---ALIGN_VCENTER = bit.blshift(2, 0)
-temporaryVar = System.openFile("rom0:ROMVER", FREAD)
-temporaryVar_size = System.sizeFile(temporaryVar)
+
+local temporaryVar = System.openFile("rom0:ROMVER", FREAD)
+local temporaryVar_size = System.sizeFile(temporaryVar)
 ROMVER = System.readFile(temporaryVar, temporaryVar_size)
 ROMVER = string.sub(ROMVER,0,14)
 System.closeFile(temporaryVar)
+
 KELFBinder.init(ROMVER)
+
 local circle = Graphics.loadImage("pads/circle.png")
 local cross = Graphics.loadImage("pads/cross.png")
 local square = Graphics.loadImage("pads/square.png")
@@ -31,11 +34,6 @@ local l3 = Graphics.loadImage("pads/L3.png")
 local r3 = Graphics.loadImage("pads/R3.png")
 
 local pad = nil
---[[local rx = nil
-local ry = nil
-local lx = nil
-local ly = nil]]
-local pressure = nil
 local SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
 local REGION = KELFBinder.getsystemregion()
 local REGIONSTR = KELFBinder.getsystemregionString()
@@ -43,6 +41,71 @@ local ROMVERN = KELFBinder.getROMversion()
 Language = KELFBinder.getsystemLanguage()
 mcinfo0 = System.getMCInfo(0)
 mcinfo1 = System.getMCInfo(1)
+
+
+function greeting()
+  local CONTINUE = true
+  local Q = 4
+  local W = 1
+    while CONTINUE do
+      Screen.clear()
+      if Q > 250 then W = -1 end
+      if Q > 3 then Q = Q+W else CONTINUE = false end
+      Font.ftPrint(font, 320, 20  , 8, 600, 64, "HELLO MOTHERFUCKER", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 340 , 8, 600, 64, "Coded By El_isra (aka: Matias Israelson)", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 360 , 8, 600, 64, "Based on Enceladus. by Daniel Santos", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 380 , 8, 600, 64, "SECRMAN and SECRSIF taken from FreeMcBoot 1.9 series installer", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 400 , 8, 600, 64, "Thanks to everyone that contributed with ideas!", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 520 , 8, 600, 64, "Get me Free at github.com/israpps/KelfBinder", Color.new(240, 240, 240, Q))
+      Screen.flip()
+    end
+end
+
+-- function memcardPickup() end
+
+function MainMenu()
+  local T = 1
+  local S = 1
+  while true do
+    Screen.clear()
+    pad = Pads.get()
+    if Pads.check(pad, PAD_UP) then
+      if T > 3 then T = 0 else T = T+1
+    elseif Pads.check(pad, PAD_DOWN) then
+      if T < 0 then T = 3 else T = T-1
+    end
+    Font.ftPrint(font, 150, 20,  0, 400, 32, "HELLO MOTHERFUCKER")
+    
+    if T == 1 then
+      Font.ftPrint(font, 100, 150, 0, 400, 16, "Manage System Updates", Color.new(200, 200, 200, 0x80))
+    else
+      Font.ftPrint(font, 100, 150, 0, 400, 16, "Manage System Updates", Color.new(200, 200, 200, 0x50))
+    end
+    if T == 2 then
+      Font.ftPrint(font, 100, 190, 0, 400, 16, "Manage DVDPlayer Updates", Color.new(200, 200, 200, 0x80))
+    else
+      Font.ftPrint(font, 100, 190, 0, 400, 16, "Manage DVDPlayer Updates", Color.new(200, 200, 200, 0x50))
+    end
+    if T == 3 then
+      Font.ftPrint(font, 90 , 390, 0, 400, 16, "Exit program", Color.new(200, 200, 200, 0x80))
+    else
+      Font.ftPrint(font, 90 , 390, 0, 400, 16, "Exit program", Color.new(200, 200, 200, 0x50))
+    end
+    Screen.flip()
+  end
+end
+
+
+
+
+
+
+
+
+
+-- HERE THE SCRIPT BEHAVIOUR SHOULD BEGIN
+greeting()
+MainMenu()
 while true do
   Screen.clear()
 
