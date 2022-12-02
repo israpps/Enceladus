@@ -379,14 +379,25 @@ void recursive_mkdir(char *dir) {
 
 static int lua_getmcinfo(lua_State *L){
 	int argc = lua_gettop(L);
-	int type, freespace, format, result;
+	int type, freespace, format;
+	int result, syncret, inforet;
 
 	int mcslot = 0;
 	if(argc == 1) mcslot = luaL_checkinteger(L, 1);
 
-	mcGetInfo(mcslot, 0, &type, &freespace, &format);
-	mcSync(0, NULL, &result);
-	DPRINTF("\nSLOT=%d\ttype=%d, freespace=%d, format=%d, mcSync.result=%d\n", mcslot, type, freespace, format, result);
+	inforet = mcGetInfo(mcslot, 0, &type, &freespace, &format);
+	syncret = mcSync(0, NULL, &result);
+	DPRINTF("\nSLOT=%d\ttype=%d, freespace=%d, format=%d, inforet=%d\n"
+			"mcSync.result=%d mcSync.syncret=%d\n", 
+			mcslot, type, freespace, format, inforet,
+			result, syncret);
+
+	inforet = mcGetInfo(mcslot, 0, &type, &freespace, &format);
+	syncret = mcSync(0, NULL, &result);
+	DPRINTF("\nSLOT=%d\ttype=%d, freespace=%d, format=%d, inforet=%d\n"
+			"mcSync.result=%d mcSync.syncret=%d\n", 
+			mcslot, type, freespace, format, inforet,
+			result, syncret);
 	lua_newtable(L);
 
 	lua_pushstring(L, "type");

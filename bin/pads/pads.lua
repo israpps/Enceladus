@@ -1,8 +1,10 @@
-Screen.clear(Color.new(0, 0, 255))
+
+
+
+
 Screen.flip()
 Font.ftInit()
-font = Font.ftLoad("pads/font.ttf")
-
+font = Font.ftLoad("pads/font2.ttf")
 local temporaryVar = System.openFile("rom0:ROMVER", FREAD)
 local temporaryVar_size = System.sizeFile(temporaryVar)
 ROMVER = System.readFile(temporaryVar, temporaryVar_size)
@@ -33,7 +35,7 @@ local l2 = Graphics.loadImage("pads/L2.png")
 local l3 = Graphics.loadImage("pads/L3.png")
 local r3 = Graphics.loadImage("pads/R3.png")
 
-local pad = nil
+pad = nil
 local SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
 local REGION = KELFBinder.getsystemregion()
 local REGIONSTR = KELFBinder.getsystemregionString()
@@ -41,6 +43,7 @@ local ROMVERN = KELFBinder.getROMversion()
 Language = KELFBinder.getsystemLanguage()
 mcinfo0 = System.getMCInfo(0)
 mcinfo1 = System.getMCInfo(1)
+
 
 
 function greeting()
@@ -61,22 +64,20 @@ function greeting()
     end
 end
 
+
 -- function memcardPickup() end
 
 function MainMenu()
-  local T = 1
-  local S = 1
+  local T = 3
+  local D = 0
   while true do
     Screen.clear()
-    pad = Pads.get()
-    if Pads.check(pad, PAD_UP) then
-      if T > 3 then T = 0 else T = T+1
-    elseif Pads.check(pad, PAD_DOWN) then
-      if T < 0 then T = 3 else T = T-1
-    end
-    Font.ftPrint(font, 150, 20,  0, 400, 32, "HELLO MOTHERFUCKER")
+
     
-    if T == 1 then
+
+    Font.ftPrint(font, 150, 20,  0, 400, 32, "HELLO MOTHERFUCKER")
+
+    if T == 3 then
       Font.ftPrint(font, 100, 150, 0, 400, 16, "Manage System Updates", Color.new(200, 200, 200, 0x80))
     else
       Font.ftPrint(font, 100, 150, 0, 400, 16, "Manage System Updates", Color.new(200, 200, 200, 0x50))
@@ -86,26 +87,96 @@ function MainMenu()
     else
       Font.ftPrint(font, 100, 190, 0, 400, 16, "Manage DVDPlayer Updates", Color.new(200, 200, 200, 0x50))
     end
-    if T == 3 then
-      Font.ftPrint(font, 90 , 390, 0, 400, 16, "Exit program", Color.new(200, 200, 200, 0x80))
+    if T == 1 then
+      Font.ftPrint(font, 100, 300, 0, 400, 16, "Exit program", Color.new(200, 200, 200, 0x80))
     else
-      Font.ftPrint(font, 90 , 390, 0, 400, 16, "Exit program", Color.new(200, 200, 200, 0x50))
+      Font.ftPrint(font, 100, 300, 0, 400, 16, "Exit program", Color.new(200, 200, 200, 0x50))
     end
+
+    Graphics.drawImage(cross, 80.0, 400.0)
+    Font.ftPrint(font, 110 , 407, 0, 400, 16, "Select")
+
     Screen.flip()
+    pad = Pads.get()
+
+    if Pads.check(pad, PAD_CROSS) and D == 0 then
+      Screen.clear()
+      break
+    end
+
+    if Pads.check(pad, PAD_UP) and D == 0 then 
+      T = T+1
+      D = 1
+    elseif Pads.check(pad, PAD_DOWN) and D == 0 then 
+      T = T-1
+      D = 1
+    end
+    if D > 0 then D = D+1 end
+    if D > 10 then D = 0 end
+    if T < 1 then T = 3 end
+    if T > 3 then T = 1 end 
+
   end
+  return T
 end
 
+function SystemUpdatePicker()
+  local T = 3
+  local D = 0
+  while true do
+    Screen.clear()
+    Font.ftPrint(font, 150, 20,  0, 400, 32, "HELLO MOTHERFUCKER")
 
+    if T == 3 then
+      Font.ftPrint(font, 100, 150, 0, 400, 16, "Normal Install", Color.new(200, 200, 200, 0x80))
+    else
+      Font.ftPrint(font, 100, 150, 0, 400, 16, "Normal Install", Color.new(200, 200, 200, 0x50))
+    end
+    if T == 2 then
+      Font.ftPrint(font, 100, 190, 0, 400, 16, "Advanced Install", Color.new(200, 200, 200, 0x80))
+    else
+      Font.ftPrint(font, 100, 190, 0, 400, 16, "Advanced Install", Color.new(200, 200, 200, 0x50))
+    end
+    if T == 1 then
+      Font.ftPrint(font, 100 , 230, 0, 400, 16, "Expert Install", Color.new(200, 200, 200, 0x80))
+    else
+      Font.ftPrint(font, 100 , 230, 0, 400, 16, "Expert Install", Color.new(200, 200, 200, 0x50))
+    end
 
+    Graphics.drawImage(cross, 80.0, 400.0)
+    Font.ftPrint(font, 110 , 407, 0, 400, 16, "Select")
+    Graphics.drawImage(circle, 160.0, 400.0)
+    Font.ftPrint(font, 190 , 407, 0, 400, 16, "Quit")
 
+    Screen.flip()
+    pad = Pads.get()
 
+    if Pads.check(pad, PAD_CROSS) and D == 0 then
+      Screen.clear()
+      break
+    end
 
+    if Pads.check(pad, PAD_UP) and D == 0 then 
+      T = T+1
+      D = 1
+    elseif Pads.check(pad, PAD_DOWN) and D == 0 then 
+      T = T-1
+      D = 1
+    end
+    if D > 0 then D = D+1 end
+    if D > 10 then D = 0 end
+    if T < 1 then T = 3 end
+    if T > 3 then T = 1 end 
 
-
+  end
+  return T
+end
 
 -- HERE THE SCRIPT BEHAVIOUR SHOULD BEGIN
-greeting()
+--greeting()
 MainMenu()
+System.sleep(1)
+SystemUpdatePicker()
 while true do
   Screen.clear()
 
@@ -122,3 +193,8 @@ while true do
   Screen.flip()
   --Screen.waitVblankStart()
 end
+
+
+--]]
+
+while true do end

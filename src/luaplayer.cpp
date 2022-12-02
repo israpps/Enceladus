@@ -26,7 +26,7 @@ const char * runScript(const char* script, bool isStringBuffer )
     DPRINTF("luaGraphics_init done !\n");
     luaControls_init(L);
     DPRINTF("luaControls_init done !\n");
-	luaScreen_init(L);
+	  luaScreen_init(L);
     DPRINTF("luaScreen_init done !\n");
     luaTimer_init(L);
     DPRINTF("luaTimer_init done !\n");

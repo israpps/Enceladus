@@ -1,6 +1,5 @@
 Screen.clear(Color.new(255, 0, 0))
 Screen.flip()
-
 --Secrman.init()
 if System.doesFileExist("System/index.lua") then
 	dofile("System/index.lua");
