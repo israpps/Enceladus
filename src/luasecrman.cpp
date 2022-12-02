@@ -101,10 +101,17 @@ static int lua_installKELF(lua_State *L)
 {
     int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-    if (argc != 2)
+    if (argc != 3)
         return luaL_error(L, "wrong number of arguments");
 #endif
+    char* PTR;
+    ssize_t size;
+    const char* install_path;
+    PTR = luaL_checkstring(L, 1);
+    size = luaL_checkinteger(L, 2);
+    install_path = luaL_checkstring(L, 3);
 
+    
 return 0;
 }
 

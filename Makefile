@@ -126,7 +126,7 @@ $(EE_ASM_DIR)sio2man.s: $(PS2SDK)/iop/irx/sio2man.irx | $(EE_ASM_DIR)
 $(EE_ASM_DIR)mcman.s: $(PS2SDK)/iop/irx/mcman.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ mcman_irx
 
-$(EE_ASM_DIR)mcserv.s: iop/debug/mcserv.irx | $(EE_ASM_DIR)
+$(EE_ASM_DIR)mcserv.s: $(PS2SDK)/iop/irx/mcserv.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ mcserv_irx
 
 $(EE_ASM_DIR)padman.s: $(PS2SDK)/iop/irx/padman.irx | $(EE_ASM_DIR)
