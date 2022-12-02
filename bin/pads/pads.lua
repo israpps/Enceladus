@@ -23,17 +23,18 @@ local down = Graphics.loadImage("pads/down.png")
 local left = Graphics.loadImage("pads/left.png")
 local right = Graphics.loadImage("pads/right.png")
 
-local start = Graphics.loadImage("pads/start.png")
-local pad_select = Graphics.loadImage("pads/select.png")
+--local start = Graphics.loadImage("pads/start.png")
+--local pad_select = Graphics.loadImage("pads/select.png")
 
-local r1 = Graphics.loadImage("pads/R1.png")
-local r2 = Graphics.loadImage("pads/R2.png")
+--local r1 = Graphics.loadImage("pads/R1.png")
+--local r2 = Graphics.loadImage("pads/R2.png")
 
-local l1 = Graphics.loadImage("pads/L1.png")
-local l2 = Graphics.loadImage("pads/L2.png")
+--local l1 = Graphics.loadImage("pads/L1.png")
+--local l2 = Graphics.loadImage("pads/L2.png")
 
-local l3 = Graphics.loadImage("pads/L3.png")
-local r3 = Graphics.loadImage("pads/R3.png")
+--local l3 = Graphics.loadImage("pads/L3.png")
+--local r3 = Graphics.loadImage("pads/R3.png")
+local MC = Graphics.loadImage("pads/MC.png")
 
 pad = nil
 local SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
@@ -41,10 +42,19 @@ local REGION = KELFBinder.getsystemregion()
 local REGIONSTR = KELFBinder.getsystemregionString()
 local ROMVERN = KELFBinder.getROMversion()
 Language = KELFBinder.getsystemLanguage()
-mcinfo0 = System.getMCInfo(0)
-mcinfo1 = System.getMCInfo(1)
 
+function promptkeys(SELECT, CANCEL)
 
+  if SELECT == 1 then
+    Graphics.drawImage(cross, 80.0, 400.0)
+    Font.ftPrint(font, 110 , 407, 0, 400, 16, "Select")
+  end
+  if CANCEL == 1 then
+    Graphics.drawImage(circle, 160.0, 400.0)
+    Font.ftPrint(font, 190 , 407, 0, 400, 16, "Quit")
+  end
+
+end
 
 function greeting()
   local CONTINUE = true
@@ -64,19 +74,12 @@ function greeting()
     end
 end
 
-
--- function memcardPickup() end
-
 function MainMenu()
   local T = 3
   local D = 0
   while true do
     Screen.clear()
-
-    
-
     Font.ftPrint(font, 150, 20,  0, 400, 32, "HELLO MOTHERFUCKER")
-
     if T == 3 then
       Font.ftPrint(font, 100, 150, 0, 400, 16, "Manage System Updates", Color.new(200, 200, 200, 0x80))
     else
@@ -93,9 +96,7 @@ function MainMenu()
       Font.ftPrint(font, 100, 300, 0, 400, 16, "Exit program", Color.new(200, 200, 200, 0x50))
     end
 
-    Graphics.drawImage(cross, 80.0, 400.0)
-    Font.ftPrint(font, 110 , 407, 0, 400, 16, "Select")
-
+    promptkeys(1,0)
     Screen.flip()
     pad = Pads.get()
 
@@ -143,13 +144,10 @@ function SystemUpdatePicker()
       Font.ftPrint(font, 100 , 230, 0, 400, 16, "Expert Install", Color.new(200, 200, 200, 0x50))
     end
 
-    Graphics.drawImage(cross, 80.0, 400.0)
-    Font.ftPrint(font, 110 , 407, 0, 400, 16, "Select")
-    Graphics.drawImage(circle, 160.0, 400.0)
-    Font.ftPrint(font, 190 , 407, 0, 400, 16, "Quit")
+    promptkeys(1,1)
 
     Screen.flip()
-    pad = Pads.get()
+    local pad = Pads.get()
 
     if Pads.check(pad, PAD_CROSS) and D == 0 then
       Screen.clear()
@@ -172,11 +170,66 @@ function SystemUpdatePicker()
   return T
 end
 
+
+function MemcardPickup()
+  local T = 1
+  local D = 0
+  local Q = 128
+  local QP = -3
+  local mcinfo0 = System.getMCInfo(0)
+  local mcinfo1 = System.getMCInfo(1)
+  while true do
+    Screen.clear()
+    Font.ftPrint(font, 150, 20,  0, 400, 32, "HELLO MOTHERFUCKER")
+    if (T == 1) and (mcinfo0.type == 2) then
+      Graphics.drawImage(MC, 80.0, 150.0, Color.new(0x80, 0x80, 0x80, Q))
+    else
+      Graphics.drawImage(MC, 80.0, 150.0)
+    end
+    if (T == 2) and (mcinfo1.type == 2) then
+      Graphics.drawImage(MC, 360.0, 150.0, Color.new(0x80, 0x80, 0x80, Q))
+    else
+      Graphics.drawImage(MC, 360.0, 150.0)
+    end
+
+    promptkeys(1,1)
+    Screen.flip()
+    pad = Pads.get()
+
+    if Pads.check(pad, PAD_CROSS) and D == 0 then
+      Screen.clear()
+      break
+    end
+
+    if Pads.check(pad, PAD_LEFT) and D == 0 then 
+      T = 1
+      D = 1
+    elseif Pads.check(pad, PAD_RIGHT) and D == 0 then 
+      T = 2
+      D = 1
+    end
+    Q = Q+QP
+    if Q < 5 then QP = 3 end
+    if Q > 200 then QP = -3 end
+    if D > 0 then D = D+1 end
+    if D > 10 then D = 0 end
+    if Pads.check(pad, PAD_TRIANGLE)  then
+      mcinfo0 = System.getMCInfo(0)
+      mcinfo1 = System.getMCInfo(1)
+    end
+
+  end
+  return T
+end
+
 -- HERE THE SCRIPT BEHAVIOUR SHOULD BEGIN
 --greeting()
 MainMenu()
 System.sleep(1)
 SystemUpdatePicker()
+System.sleep(1)
+MemcardPickup()
+System.sleep(1)
 while true do
   Screen.clear()
 
@@ -186,8 +239,8 @@ while true do
   Font.ftPrint(font, 150, 150, 0, 400, 32, "system ROM version is "..ROMVERN.."\n")
   Font.ftPrint(font, 150, 190, 0, 400, 32, "system Language is "..Language.."\n")
   --Font.fmPrint(100, 370, 0.4, "\nTips:\n")
-  Font.ftPrint(font, 100, 300, 0, 400, 32, string.format("SLOT0  type=%d, freespace=%d, format=%d", mcinfo0.type, mcinfo0.freemem, mcinfo0.format))
-  Font.ftPrint(font, 100, 350, 0, 400, 32, string.format("SLOT1  type=%d, freespace=%d, format=%d", mcinfo1.type, mcinfo1.freemem, mcinfo1.format))
+  --Font.ftPrint(font, 100, 300, 0, 400, 32, string.format("SLOT0  type=%d, freespace=%d, format=%d", mcinfo0.type, mcinfo0.freemem, mcinfo0.format))
+  --Font.ftPrint(font, 100, 350, 0, 400, 32, string.format("SLOT1  type=%d, freespace=%d, format=%d", mcinfo1.type, mcinfo1.freemem, mcinfo1.format))
   pad = Pads.get()
   
   Screen.flip()
