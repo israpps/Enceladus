@@ -76,6 +76,21 @@ static int lua_curdir(lua_State *L) {
 	return luaL_error(L, "Argument error: System.currentDirectory([file]) takes zero or one argument.");
 }
 
+static int lua_direxists(lua_State *L)
+{
+	int argc = lua_gettop(L);
+	if (argc != 1) return luaL_error(L, "Argument error: lua_direxists takes one argument.");
+	const char* path = luaL_checkstring(L, 1);
+    struct stat info;
+
+    if(stat( path, &info ) != 0)
+        lua_pushboolean(L, false);
+    else if(info.st_mode & S_IFDIR)
+        lua_pushboolean(L, true);
+    else
+        lua_pushboolean(L, false);
+    return 1;
+}
 
 static int lua_dir(lua_State *L)
 {
@@ -673,6 +688,7 @@ static const luaL_Reg System_functions[] = {
 	{"seekFile",                   lua_seekfile},  
 	{"sizeFile",                   lua_sizefile},
 	{"doesFileExist",            lua_checkexist},
+	{"doesDirExist",			  lua_direxists},
 	{"currentDirectory",             lua_curdir},
 	{"listDirectory",           	    lua_dir},
 	{"createDirectory",           lua_createDir},

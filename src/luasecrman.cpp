@@ -99,8 +99,8 @@ static int SignKELF(void *buffer, int size, unsigned char port, unsigned char sl
 } */
 
 static int lua_secrdownloadfile(lua_State *L) {
-    printf("\n\n\n\n\n\n\nluasecrdownloadfile: Starts\n");
 	int argc = lua_gettop(L);
+    printf("\n\n\n\n\n\n\nluasecrdownloadfile: Startint with %d argumments\n", argc);
 #ifndef SKIP_ERROR_HANDLING
 	if ((argc != 4) && (argc != 5)) return luaL_error(L, "wrong number of arguments");
 #endif
@@ -110,9 +110,11 @@ static int lua_secrdownloadfile(lua_State *L) {
     const char* dest = luaL_checkstring(L, 4);
     int flags = 0;
 
-    if (argc != 5)
+    if (argc == 5)
     {
+        printf("5 argumments, trying to load flags...");
         flags = luaL_checkinteger(L, 5);
+        printf("\nFlags are %%d=%d or %%x=%x\n", flags, flags);
     }
 
 	void* buf;
@@ -131,8 +133,8 @@ static int lua_secrdownloadfile(lua_State *L) {
 	lseek(fd, 0, SEEK_SET);
 	if((buf = memalign(64, size))!=NULL){
 		if ((read(fd, buf, size)) != size) {
-			luaL_error(L, "Error reading file %s.\n", file_tbo);
 			close(fd);
+            result = -EIO;
     	} else {
 			close(fd);
 			if((result=SignKELF(buf, size, port, slot))<0){
@@ -142,25 +144,42 @@ static int lua_secrdownloadfile(lua_State *L) {
             printf("luasecrdownloadfile: SignKELF returns %d\n", result);
             if (flags == 0)
             {
-			int McFileFD = open(dest, O_WRONLY|O_CREAT|O_TRUNC);
-            printf("luasecrdownloadfile: %s fd is (%d)\n",dest, McFileFD);
-			int written = write(McFileFD, buf, size);
-            printf("luasecrdownloadfile: written %d\n", written);
-			close(McFileFD);
-            } else
-            {
-                int x = 0, TF = 0;
-                for (x=0; x<SYSTEM_UPDATE_COUNT; x++)
+                printf("flags was empty, performing normal install!\n");
+			    int McFileFD = open(dest, O_WRONLY|O_CREAT|O_TRUNC);
+                printf("luasecrdownloadfile: %s fd is (%d)\n",dest, McFileFD);
+			    int written = write(McFileFD, buf, size);
+                if (written != size)
                 {
-                    TF = (1 << x);
+                    result = -EIO;
+                }
+                printf("luasecrdownloadfile: written %d\n", written);
+			    close(McFileFD);
+            }
+            else
+            {
+                printf("flags was not empty, performing multiple installation\n");
+                int x = 0, TF = 0;
+                char output[64];
+                for (x=2; x<SYSTEM_UPDATE_COUNT; x++) // start from index 2, since 0 and 1 are kernel patches, wich require different value for file_tbo
+                {
+                    TF = (1 << (x+1));
+                    printf("trying with %s ", sysupdate_paths[BSM2AI(TF)]);
                     if (flags & TF)
                     {
-                        int McFileFD = open(sysupdate_paths[BSM2AI(TF)], O_WRONLY|O_CREAT|O_TRUNC);
+                        sprintf(output, "mc%d:/%s", port, sysupdate_paths[BSM2AI(TF)]);
+                        printf("IT IS FLAGGED\n");
+                        int McFileFD = open(output, O_WRONLY|O_CREAT|O_TRUNC);
                         printf("luasecrdownloadfile: %s fd is (%d)\n",sysupdate_paths[BSM2AI(TF)], McFileFD);
                         int written = write(McFileFD, buf, size);
+                        if (written != size)
+                        {
+                            result = -EIO;
+                            break;
+                        }
                         printf("luasecrdownloadfile: written %d\n", written);
                         close(McFileFD);
-                    }
+                    } else
+                        printf("NOT FLAGGED\n");
                 }
             }
 		}
@@ -169,7 +188,7 @@ static int lua_secrdownloadfile(lua_State *L) {
 	}
     if (buf != NULL)
 	    free(buf);
-    lua_pushinteger(L, (uint32_t)result);
+    lua_pushinteger(L, result);
 	return 1;
 }
 
