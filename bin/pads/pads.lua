@@ -38,8 +38,8 @@ function promptkeys(SELECT, ST, CANCEL, CT, REFRESH, RT)
     Font.ftPrint(font, 200 , 407, 0, 400, 16, CT)
   end
   if REFRESH == 1 then
-    Graphics.drawImage(triangle, 240.0, 400.0)
-    Font.ftPrint(font, 270 , 407, 0, 400, 16, RT)
+    Graphics.drawImage(triangle, 260.0, 400.0)
+    Font.ftPrint(font, 290 , 407, 0, 400, 16, RT)
   end
 
 end
@@ -74,7 +74,7 @@ function MainMenu()
       Font.ftPrint(font, 100, 150, 0, 400, 16, "Manage System Updates", Color.new(200, 200, 200, 0x50))
     end
     if T == 2 then
-      Font.ftPrint(font, 100, 190, 0, 400, 16, "Manage DVDPlayer Updates", Color.new(200, 200, 200, 0x80))
+      Font.ftPrint(font, 100, 190, 0, 400, 16, "Manage DVDPlayer Updates (Comming soon)", Color.new(200, 200, 200, 0x80))
     else
       Font.ftPrint(font, 100, 190, 0, 400, 16, "Manage DVDPlayer Updates", Color.new(200, 200, 200, 0x50))
     end
@@ -109,7 +109,7 @@ function MainMenu()
   return T
 end
 
-function SystemUpdatePicker()
+function Installmodepicker()
   local T = 3
   local D = 0
   while true do
@@ -122,9 +122,8 @@ function SystemUpdatePicker()
       Font.ftPrint(font, 100, 150, 0, 400, 16, "Normal Install", Color.new(200, 200, 200, 0x50))
     end
     if T == 2 then
-      Font.ftPrint(font, 100, 190, 0, 400, 16, "Advanced Install", Color.new(200, 200, 200, 0x80))
-    else
-      Font.ftPrint(font, 100, 190, 0, 400, 16, "Advanced Install", Color.new(200, 200, 200, 0x50))
+      Font.ftPrint(font, 100, 190, 0, 400, 16, "Advanced Install (Comming soon!)", Color.new(200, 200, 200, 0x80)) else
+      Font.ftPrint(font, 100, 190, 0, 400, 16, "Advanced Install (Comming soon!)", Color.new(200, 200, 200, 0x50))
     end
     if T == 1 then
       Font.ftPrint(font, 100 , 230, 0, 400, 16, "Expert Install", Color.new(200, 200, 200, 0x80))
@@ -349,7 +348,7 @@ function expertINSTprompt()
   return UPDT
 end
 
-function prompt(port, slot, UPDT)
+function performExpertINST(port, slot, UPDT)
   Screen.clear()
   local FLAGS = 0
   for i=0,9 do
@@ -357,20 +356,6 @@ function prompt(port, slot, UPDT)
       FLAGS = FLAGS | (1 << (i+1))
     end
   end
-
-  --[[Font.ftPrint(font, 150, 20,  0, 400, 64, string.format("%d %d %d %d\n%d %d %d\n%d %d\n%d -> %x",
-    UPDT[0],
-    UPDT[1],
-    UPDT[2],
-    UPDT[3],
-    UPDT[4],
-    UPDT[5],
-    UPDT[6],
-    UPDT[7],
-    UPDT[8],
-    UPDT[9],
-    FLAGS
-  ))]]
   Font.ftPrint(font, 150, 100,  0, 400, 64, "Installing System Updates...") 
   Screen.flip()
   if UPDT[0] or UPDT[1] or UPDT[2] or UPDT[3] then
@@ -415,10 +400,19 @@ function prompt(port, slot, UPDT)
   Screen.flip()
 end
 
-
-local port = MemcardPickup()
-local UPDT = expertINSTprompt()
-prompt(port,0,UPDT)
+-- SCRIPT BEHAVIOUR BEGINS --
+local TT = MainMenu()
+if (TT == 1) then
+  local TTT = Installmodepicker()
+  if TTT == 3 
+  then 
+    NormalInstall(MemcardPickup(),0)
+  elseif TTT == 1 then
+    local port = MemcardPickup()
+    local UPDT = expertINSTprompt()
+    performExpertINST(port,0,UPDT)
+  end
+end
 while true do end
 NormalInstall(MemcardPickup(),0)
  --]]
