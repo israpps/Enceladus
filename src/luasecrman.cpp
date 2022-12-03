@@ -9,6 +9,7 @@
 #include <sys/stat.h>
 #include <unistd.h>
 #include "include/dbgprintf.h"
+#include "baexec-system_paths.h"
 
 extern "C" {
 #include "include/libsecr.h"
@@ -66,7 +67,7 @@ static int SignKELF(void *buffer, int size, unsigned char port, unsigned char sl
     return result;
 }
 
-int installKELF(const char* filepath, const char* installpath)
+/* int installKELF(const char* filepath, const char* installpath)
 {
     int fd, result;
     ssize_t READED;
@@ -95,77 +96,87 @@ int installKELF(const char* filepath, const char* installpath)
     }
     close(fd);
     return result;
-}
+} */
 
-static int lua_installKELF(lua_State *L)
-{
-    int argc = lua_gettop(L);
+static int lua_secrdownloadfile(lua_State *L) {
+    printf("\n\n\n\n\n\n\nluasecrdownloadfile: Starts\n");
+	int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-    if (argc != 3)
-        return luaL_error(L, "wrong number of arguments");
+	if ((argc != 4) && (argc != 5)) return luaL_error(L, "wrong number of arguments");
 #endif
-    char* PTR;
-    ssize_t size;
-    const char* install_path;
-    PTR = luaL_checkstring(L, 1);
-    size = luaL_checkinteger(L, 2);
-    install_path = luaL_checkstring(L, 3);
+    int port = luaL_checkinteger(L, 1);
+    int slot = luaL_checkinteger(L, 2);
+    const char* file_tbo = luaL_checkstring(L, 3);
+    const char* dest = luaL_checkstring(L, 4);
+    int flags = 0;
 
-    
-return 0;
-}
-
-static void GetKbitAndKc(void *buffer, u8 *Kbit, u8 *Kc)
-{
-    int offset;
-    unsigned char OffsetByte;
-    SecrKELFHeader_t *header;
-
-    header = (SecrKELFHeader_t *)buffer;
-    offset = 0x20;
-    if (header->BIT_count > 0)
-        offset += header->BIT_count * 0x10;
-    if ((*(unsigned int *)&header->flags) & 1) {
-        OffsetByte = ((u8 *)buffer)[offset];
-        offset += OffsetByte + 1;
+    if (argc != 5)
+    {
+        flags = luaL_checkinteger(L, 5);
     }
-    if (((*(unsigned int *)&header->flags) & 0xF000) == 0)
-        offset += 8;
 
-    memcpy(Kbit, &((u8 *)buffer)[offset], 16);
-    memcpy(Kc, &((u8 *)buffer)[offset + 16], 16);
-}
+	void* buf;
+	int result = 0;
 
-static int SetKbitAndKc(void *buffer, u8 *Kbit, u8 *Kc)
-{
-    int offset;
-    unsigned char OffsetByte;
-    SecrKELFHeader_t *header;
-
-    header = (SecrKELFHeader_t *)buffer;
-    offset = 0x20;
-    if (header->BIT_count > 0)
-        offset += header->BIT_count * 0x10;
-    if ((*(unsigned int *)&header->flags) & 1) {
-        OffsetByte = ((u8 *)buffer)[offset];
-        offset += OffsetByte + 1;
+	int fd = open(file_tbo, O_RDONLY, 0777);
+    printf("luasecrdownloadfile: input fd is %d\n", fd);
+	if(fd<0){
+        luaL_error(L, "CANT OPEN KELF");
+	}
+	int size=lseek(fd, 0, SEEK_END);
+    printf("luasecrdownloadfile: KELF size is %d\n", size);
+	if(size<0){
+        luaL_error(L, "CANT SEEK KELF SIZE");
     }
-    if (((*(unsigned int *)&header->flags) & 0xF000) == 0)
-        offset += 8;
-
-    memcpy(&((u8 *)buffer)[offset], Kbit, 16);
-    memcpy(&((u8 *)buffer)[offset + 16], Kc, 16);
-}
-
-static int lua_signKELFfile(lua_State *L)
-{
-
+	lseek(fd, 0, SEEK_SET);
+	if((buf = memalign(64, size))!=NULL){
+		if ((read(fd, buf, size)) != size) {
+			luaL_error(L, "Error reading file %s.\n", file_tbo);
+			close(fd);
+    	} else {
+			close(fd);
+			if((result=SignKELF(buf, size, port, slot))<0){
+				luaL_error(L, "Error signing file %s. Code: %d.\n", file_tbo, result);
+				free(buf);
+			}
+            printf("luasecrdownloadfile: SignKELF returns %d\n", result);
+            if (flags == 0)
+            {
+			int McFileFD = open(dest, O_WRONLY|O_CREAT|O_TRUNC);
+            printf("luasecrdownloadfile: %s fd is (%d)\n",dest, McFileFD);
+			int written = write(McFileFD, buf, size);
+            printf("luasecrdownloadfile: written %d\n", written);
+			close(McFileFD);
+            } else
+            {
+                int x = 0, TF = 0;
+                for (x=0; x<SYSTEM_UPDATE_COUNT; x++)
+                {
+                    TF = (1 << x);
+                    if (flags & TF)
+                    {
+                        int McFileFD = open(sysupdate_paths[BSM2AI(TF)], O_WRONLY|O_CREAT|O_TRUNC);
+                        printf("luasecrdownloadfile: %s fd is (%d)\n",sysupdate_paths[BSM2AI(TF)], McFileFD);
+                        int written = write(McFileFD, buf, size);
+                        printf("luasecrdownloadfile: written %d\n", written);
+                        close(McFileFD);
+                    }
+                }
+            }
+		}
+	} else {
+		luaL_error(L, "Error allocating %u bytes of memory for file %s.\n", size, file_tbo);
+	}
+    if (buf != NULL)
+	    free(buf);
+    lua_pushinteger(L, (uint32_t)result);
+	return 1;
 }
 
 static const luaL_Reg Secrman_functions[] = {
     {"init", lua_initsecrman},
     {"deinit", lua_deinitsecrman},
-    {"installKELF", lua_installKELF},
+    {"downloadfile", lua_secrdownloadfile},
     //{"signKELFfile", lua_signKELFfile},
     {0, 0}};
 
@@ -175,5 +186,39 @@ void luaSecrMan_init(lua_State *L)
     lua_newtable(L);
     luaL_setfuncs(L, Secrman_functions, 0);
     lua_setglobal(L, "Secrman");
+
+	lua_pushinteger(L, JAP_ROM_100);
+	lua_setglobal (L, "JAP_ROM_100");
+
+	lua_pushinteger(L, JAP_ROM_101);
+	lua_setglobal (L, "JAP_ROM_101");
+
+	lua_pushinteger(L, JAP_ROM_120);
+	lua_setglobal (L, "JAP_ROM_120");
+
+	lua_pushinteger(L, JAP_STANDARD);
+	lua_setglobal (L, "JAP_STANDARD");
+
+	lua_pushinteger(L, USA_ROM_110);
+	lua_setglobal (L, "USA_ROM_110");
+
+	lua_pushinteger(L, USA_ROM_120);
+	lua_setglobal (L, "USA_ROM_120");
+
+	lua_pushinteger(L, USA_STANDARD);
+	lua_setglobal (L, "USA_STANDARD");
+
+	lua_pushinteger(L, EUR_ROM_120);
+	lua_setglobal (L, "EUR_ROM_120");
+    
+	lua_pushinteger(L, EUR_STANDARD);
+	lua_setglobal (L, "EUR_STANDARD");
+
+	lua_pushinteger(L, CHN_STANDARD);
+	lua_setglobal (L, "CHN_STANDARD");
+
+	lua_pushinteger(L, SYSTEM_UPDATE_COUNT);
+	lua_setglobal (L, "SYSTEM_UPDATE_COUNT");
+
 }
 

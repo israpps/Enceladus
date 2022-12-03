@@ -5,6 +5,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <libmc.h>
 #include <osd_config.h>
 #include "include/dbgprintf.h"
 
@@ -61,17 +62,12 @@ static int lua_KELFBinderDeInit(lua_State *L)
 static int lua_calcsysupdatepath(lua_State *L)
 {
     DPRINTF(__func__);
-    int argc = lua_gettop(L);
-#ifndef SKIP_ERROR_HANDLING
-    if (argc != 0)
-        return luaL_error(L, "wrong number of arguments");
-#endif
-
+    int ver = ROMVERSION, region = ROMREGION;
     if (!KELFBinderHelperFunctionsInited)
         return luaL_error(L, "error initializing kelfbinder helper service!");
 
-    if (ROMREGION == CONSOLE_REGIONS::JAPAN) {
-        switch (ROMVERSION) {
+    if (region == CONSOLE_REGIONS::JAPAN) {
+        switch (ver) {
             case 100:
                 lua_pushstring(L, sysupdate_paths[SYSUPDATE_COUNT::JAP_ROM_100]);
                 break;
@@ -86,8 +82,8 @@ static int lua_calcsysupdatepath(lua_State *L)
                 break;
         }
 
-    } else if (ROMREGION == CONSOLE_REGIONS::EUROPE) {
-        switch (ROMVERSION) {
+    } else if (region == CONSOLE_REGIONS::EUROPE) {
+        switch (ver) {
             case 120:
                 lua_pushstring(L, sysupdate_paths[SYSUPDATE_COUNT::EUR_ROM_120]);
                 break;
@@ -97,11 +93,11 @@ static int lua_calcsysupdatepath(lua_State *L)
                 break;
         }
 
-    } else if (ROMREGION == CONSOLE_REGIONS::CHINA) {
+    } else if (region == CONSOLE_REGIONS::CHINA) {
         lua_pushstring(L, sysupdate_paths[SYSUPDATE_COUNT::CHN_STANDARD]);
 
-    } else if ((ROMREGION == CONSOLE_REGIONS::USA) || (ROMREGION == CONSOLE_REGIONS::ASIA)) {
-        switch (ROMVERSION) {
+    } else if ((region == CONSOLE_REGIONS::USA) || (region == CONSOLE_REGIONS::ASIA)) {
+        switch (ver) {
             case 110:
                 lua_pushstring(L, sysupdate_paths[SYSUPDATE_COUNT::USA_ROM_110]);
                 break;
@@ -118,7 +114,6 @@ static int lua_calcsysupdatepath(lua_State *L)
     }
     return 1;
 }
-
 
 static int lua_getsystemregion(lua_State *L)
 {
@@ -155,6 +150,33 @@ static int lua_getsystemregionString(lua_State *L)
     return 1;
 }
 
+static int lua_getsystemupdatefolder(lua_State *L)
+{
+    DPRINTF(__func__);
+    switch (ROMREGION) {
+        case CONSOLE_REGIONS::JAPAN:
+            lua_pushstring(L, "BIEXEC-SYSTEM");
+            break;
+
+        case CONSOLE_REGIONS::USA:
+            lua_pushstring(L, "BAEXEC-SYSTEM");
+            break;
+
+        case CONSOLE_REGIONS::ASIA:
+            lua_pushstring(L, "BAEXEC-SYSTEM");
+            break;
+
+        case CONSOLE_REGIONS::CHINA:
+            lua_pushstring(L, "BCEXEC-SYSTEM");
+            break;
+
+        default:
+            return luaL_error(L, "SYSTEM REGION IS UNKNOWN\nCONTACT THE DEVELOPER!");
+            break;
+    }
+    return 1;
+}
+
 static int lua_getromversion(lua_State *L)
 {
     DPRINTF(__func__);
@@ -169,11 +191,33 @@ static int lua_getosdconfigLNG(lua_State *L)
     return 1;
 }
 
+static int lua_setsysupdatefoldprops(lua_State *L)
+{	
+    int argc = lua_gettop(L);
+	if (argc != 3) 
+        return luaL_error(L, "lua_createsysupdatefolder takes 3 argumments\n");
+    int result;
+    int port = luaL_checkinteger(L, 1);
+    int slot = luaL_checkinteger(L, 2);
+    const char* path = luaL_checkstring(L, 3);
+    sceMcTblGetDir table;
+    // Set desired file attributes.
+    table.AttrFile = sceMcFileAttrReadable | sceMcFileAttrWriteable | sceMcFileAttrExecutable | sceMcFileAttrDupProhibit | sceMcFileAttrSubdir | sceMcFile0400;
+    if ((result = mcSetFileInfo(port, slot, path, &table, sceMcFileInfoAttr)) == 0) {
+        DPRINTF("mcSetFileInfo: result was %d\n", result);
+        mcSync(0, NULL, &result);
+    }
+
+    return result;
+}
+
 static const luaL_Reg KELFBinder_functions[] = {
 
     {"init", lua_KELFBinderInit},
     {"deinit", lua_KELFBinderDeInit},
     {"calculateSysUpdatePath", lua_calcsysupdatepath},
+    {"setSysUpdateFoldProps", lua_setsysupdatefoldprops},
+    {"getsysupdatefolder", lua_getsystemupdatefolder},
     {"getsystemregion", lua_getsystemregion},
     {"getsystemregionString", lua_getsystemregionString},
     {"getROMversion", lua_getromversion},

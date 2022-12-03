@@ -6,45 +6,27 @@ local temporaryVar_size = System.sizeFile(temporaryVar)
 ROMVER = System.readFile(temporaryVar, temporaryVar_size)
 ROMVER = string.sub(ROMVER,0,14)
 System.closeFile(temporaryVar)
-
 KELFBinder.init(ROMVER)
 Secrman.init()
-
 SYSUPDATE_MAIN = "INSTALL/KELF/SYSTEM.XLF"
--- SYSUPDATE_DESR = "INSTALL/KELF/XSYSTEM.XLF"
 KERNEL_PATCH_100 = "INSTALL/KELF/OSDSYS.KERNEL"
 KERNEL_PATCH_101 = "INSTALL/KELF/OSD110.KERNEL"
 
 local circle = Graphics.loadImage("pads/circle.png")
 local cross = Graphics.loadImage("pads/cross.png")
-local square = Graphics.loadImage("pads/square.png")
+--local square = Graphics.loadImage("pads/square.png")
 local triangle = Graphics.loadImage("pads/triangle.png")
 
-local up = Graphics.loadImage("pads/up.png")
+--[[local up = Graphics.loadImage("pads/up.png")
 local down = Graphics.loadImage("pads/down.png")
 local left = Graphics.loadImage("pads/left.png")
-local right = Graphics.loadImage("pads/right.png")
-
---local start = Graphics.loadImage("pads/start.png")
---local pad_select = Graphics.loadImage("pads/select.png")
-
---local r1 = Graphics.loadImage("pads/R1.png")
---local r2 = Graphics.loadImage("pads/R2.png")
-
---local l1 = Graphics.loadImage("pads/L1.png")
---local l2 = Graphics.loadImage("pads/L2.png")
-
---local l3 = Graphics.loadImage("pads/L3.png")
---local r3 = Graphics.loadImage("pads/R3.png")
+local right = Graphics.loadImage("pads/right.png")]]
 local MC = Graphics.loadImage("pads/MC.png")
 
-pad = nil
-local SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
 local REGION = KELFBinder.getsystemregion()
-local REGIONSTR = KELFBinder.getsystemregionString()
-local ROMVERN = KELFBinder.getROMversion()
-Language = KELFBinder.getsystemLanguage()
+local REGIONSTR = KELFBinder.getsystemregionString(REGION)
 
+Language = KELFBinder.getsystemLanguage()
 function promptkeys(SELECT, CANCEL, REFRESH)
 
   if SELECT == 1 then
@@ -104,24 +86,24 @@ function MainMenu()
 
     promptkeys(1,0,0)
     Screen.flip()
-    pad = Pads.get()
+    local pad = Pads.get()
 
     if Pads.check(pad, PAD_CROSS) and D == 0 then
       Screen.clear()
       break
     end
 
-    if Pads.check(pad, PAD_UP) and D == 0 then 
+    if Pads.check(pad, PAD_UP) and D == 0 then
       T = T+1
       D = 1
-    elseif Pads.check(pad, PAD_DOWN) and D == 0 then 
+    elseif Pads.check(pad, PAD_DOWN) and D == 0 then
       T = T-1
       D = 1
     end
     if D > 0 then D = D+1 end
     if D > 10 then D = 0 end
     if T < 1 then T = 3 end
-    if T > 3 then T = 1 end 
+    if T > 3 then T = 1 end
 
   end
   return T
@@ -160,115 +142,189 @@ function SystemUpdatePicker()
       break
     end
 
-    if Pads.check(pad, PAD_UP) and D == 0 then 
+    if Pads.check(pad, PAD_UP) and D == 0 then
       T = T+1
       D = 1
-    elseif Pads.check(pad, PAD_DOWN) and D == 0 then 
+    elseif Pads.check(pad, PAD_DOWN) and D == 0 then
       T = T-1
       D = 1
     end
     if D > 0 then D = D+1 end
     if D > 10 then D = 0 end
     if T < 1 then T = 3 end
-    if T > 3 then T = 1 end 
+    if T > 3 then T = 1 end
 
   end
   return T
 end
 
+function NormalInstall(port, slot)
+  local ROMVERN = KELFBinder.getROMversion()
+  System.createDirectory(string.format("mc%d:/%s", port, KELFBinder.getsysupdatefolder()))
+  KELFBinder.setSysUpdateFoldProps(port, slot, KELFBinder.getsysupdatefolder())
+  SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
+  Screen.clear(Color.new(200, 0, 0))
+  Font.ftPrint(font, 320, 20  , 8, 600, 64, "BINDING KELF\n\n"..SYSUPDATEPATH.."\n")
+  Screen.flip()
+  if (ROMVERN == 100) or (ROMVERN == 101) then -- PROTOKERNEL NEED TWO UPDATES TO FUNCTION
+    Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, "BIEXEC-SYSTEM/osd130.elf")) -- SCPH-18000
+    if (ROMVERN == 100) then
+      Secrman.downloadfile(port, slot, KERNEL_PATCH_100, string.format("mc%d:/%s", port, SYSUPDATEPATH))
+    else
+      Secrman.downloadfile(port, slot, KERNEL_PATCH_101, string.format("mc%d:/%s", port, SYSUPDATEPATH))
+    end
+  else
+    Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH))
+  end
+  Screen.clear()
+  Screen.flip()
+end
+
 function MemcardPickup()
-  local T = 1
+  local T = 0
   local D = 0
   local Q = 0x77
   local QP = -4
   local mcinfo0 = System.getMCInfo(0)
   local mcinfo1 = System.getMCInfo(1)
   while true do
+    local HC = ((mcinfo0.type == 2) or (mcinfo1.type == 2))
     Screen.clear()
     Font.ftPrint(font, 320, 20,  8, 400, 32, "Choose a Memory card")
-    if (T == 1) and (mcinfo0.type == 2) then
-      Graphics.drawImage(MC, 80.0, 150.0, Color.new(0x80, 0x80, 0x80, Q))
-    else
-      Graphics.drawImage(MC, 80.0, 150.0)
-    end
-
-
     if mcinfo0.type == 2 then
-      Font.ftPrint(font, 80, 270,  0, 400, 32, "Memory Card 1\n  Free Space: "..mcinfo0.freemem.." kb")
-      if T == 2 then
-        Graphics.drawImage(MC, 360.0, 150.0, Color.new(0x80, 0x80, 0x80, Q))
+      Font.ftPrint(font, 80, 270,  0, 400, 32, "Memory Card 1\nFree Space: "..mcinfo0.freemem.." kb")
+      if T == 0 then
+        Graphics.drawImage(MC, 80.0, 150.0, Color.new(0x80, 0x80, 0x80, Q))
       else
-        Graphics.drawImage(MC, 360.0, 150.0)
+        Graphics.drawImage(MC, 80.0, 150.0)
       end
     end
     if mcinfo1.type == 2 then
-      Font.ftPrint(font, 360, 270,  0, 400, 32, "Memory Card 2\n  Free Space: "..mcinfo1.freemem.." kb")
-      if T == 2 then
+      Font.ftPrint(font, 360, 270,  0, 400, 32, "Memory Card 2\nFree Space: "..mcinfo1.freemem.." kb")
+      if T == 1 then
         Graphics.drawImage(MC, 360.0, 150.0, Color.new(0x80, 0x80, 0x80, Q))
       else
         Graphics.drawImage(MC, 360.0, 150.0)
       end
     end
-
     promptkeys(1,1,1)
     Screen.flip()
-    pad = Pads.get()
+    local pad = Pads.get()
+    if Pads.check(pad, PAD_CROSS) and (D == 0) and (HC == true) then
+      Screen.clear()
+      break
+    end
+
+    if Pads.check(pad, PAD_LEFT) and D == 0 then
+      T = 0
+      D = 1
+      Q = 0x77
+    elseif Pads.check(pad, PAD_RIGHT) and D == 0 then
+      T = 1
+      D = 1
+      Q = 0x77
+    end
+    if Pads.check(pad, PAD_TRIANGLE) and D == 0 then
+      mcinfo0 = System.getMCInfo(0)
+      mcinfo1 = System.getMCInfo(1)
+    end
+
+    if Q < 4 then QP = 4 end
+    if Q > 0x77 then QP = -4 end
+    Q = Q+QP
+    if D > 0 then D = D+1 end
+    if D > 10 then D = 0 end
+
+
+  end
+  return T
+end
+
+function expertINSTprompt()
+  local T = 0
+  local D = 0
+  local UPDT = {
+    JAP_ROM_100, JAP_ROM_101, JAP_ROM_120, JAP_STANDARD,
+    USA_ROM_110, USA_ROM_120, USA_STANDARD,
+    EUR_ROM_120, EUR_STANDARD,
+    CHN_STANDARD,
+   }
+  while true do
+    Screen.clear()
+    Font.ftPrint(font, 150, 20,  0, 400, 32, "Select system update executables")
+    Font.ftPrint(font, 100, 50, 0, 400, 16, "Japan - SCPH-XXX00", Color.new(250, 250, 250, 0x50))
+    Font.ftPrint(font, 100, 150, 0, 400, 16, "USA and Asia", Color.new(250, 250, 250, 0x50))
+    Font.ftPrint(font, 100, 230, 0, 400, 16, "Europe - SCPH-XXX0[2-4]", Color.new(250, 250, 250, 0x50))
+    Font.ftPrint(font, 100, 290, 0, 400, 16, "China - SCPH-XXX09", Color.new(250, 250, 250, 0x50))
+    if T == JAP_ROM_100 then
+      Font.ftPrint(font, 110, 70, 0, 400, 16, "osdsys.elf", Color.new(200, 200, 200, 0x80)) else
+      Font.ftPrint(font, 110, 70, 0, 400, 16, "osdsys.elf", Color.new(200, 200, 200, 0x50))
+    end
+    if T == JAP_ROM_101 then
+      Font.ftPrint(font, 110, 90, 0, 400, 16, "osd110.elf", Color.new(200, 200, 200, 0x80)) else
+      Font.ftPrint(font, 110, 90, 0, 400, 16, "osd110.elf", Color.new(200, 200, 200, 0x50))
+    end
+    if T == JAP_ROM_120 then
+      Font.ftPrint(font, 110, 110, 0, 400, 16, "osd130.elf", Color.new(200, 200, 200, 0x80)) else
+      Font.ftPrint(font, 110, 110, 0, 400, 16, "osd130.elf", Color.new(200, 200, 200, 0x50))
+    end
+    if T == JAP_STANDARD then
+      Font.ftPrint(font, 110, 130, 0, 400, 16, "osdmain.elf", Color.new(200, 200, 200, 0x80)) else
+      Font.ftPrint(font, 110, 130, 0, 400, 16, "osdmain.elf", Color.new(200, 200, 200, 0x50))
+    end
+    if T == USA_ROM_110 then
+      Font.ftPrint(font, 110, 170, 0, 400, 16, "osd120.elf", Color.new(200, 200, 200, 0x80)) else
+      Font.ftPrint(font, 110, 170, 0, 400, 16, "osd120.elf", Color.new(200, 200, 200, 0x50))
+    end
+    if T == USA_ROM_120 then
+      Font.ftPrint(font, 110, 190, 0, 400, 16, "osd130.elf", Color.new(200, 200, 200, 0x80)) else
+      Font.ftPrint(font, 110, 190, 0, 400, 16, "osd130.elf", Color.new(200, 200, 200, 0x50))
+    end
+    if T == USA_STANDARD then
+      Font.ftPrint(font, 110, 210, 0, 400, 16, "osdmain.elf", Color.new(200, 200, 200, 0x80)) else
+      Font.ftPrint(font, 110, 210, 0, 400, 16, "osdmain.elf", Color.new(200, 200, 200, 0x50))
+    end
+    if T == EUR_ROM_120 then
+      Font.ftPrint(font, 110, 250, 0, 400, 16, "osd130.elf", Color.new(200, 200, 200, 0x80)) else
+      Font.ftPrint(font, 110, 250, 0, 400, 16, "osd130.elf", Color.new(200, 200, 200, 0x50))
+    end
+    if T == EUR_STANDARD then
+      Font.ftPrint(font, 110, 270, 0, 400, 16, "osdmain.elf", Color.new(200, 200, 200, 0x80)) else
+      Font.ftPrint(font, 110, 270, 0, 400, 16, "osdmain.elf", Color.new(200, 200, 200, 0x50))
+    end
+    if T == CHN_STANDARD then
+      Font.ftPrint(font, 110, 310, 0, 400, 16, "osdmain.elf", Color.new(200, 200, 200, 0x80)) else
+      Font.ftPrint(font, 110, 310, 0, 400, 16, "osdmain.elf", Color.new(200, 200, 200, 0x50))
+    end
+
+    promptkeys(1,0,0)
+    Screen.flip()
+    local pad = Pads.get()
 
     if Pads.check(pad, PAD_CROSS) and D == 0 then
       Screen.clear()
       break
     end
 
-    if Pads.check(pad, PAD_LEFT) and D == 0 then 
-      T = 1
+    if Pads.check(pad, PAD_UP) and D == 0 then
+      T = T-1
       D = 1
-      Q = 0x77
-    elseif Pads.check(pad, PAD_RIGHT) and D == 0 then 
-      T = 2
+    elseif Pads.check(pad, PAD_DOWN) and D == 0 then
+      T = T+1
       D = 1
-      Q = 0x77
     end
-    if Q < 4 then QP = 4 end
-    if Q > 0x77 then QP = -4 end
-    Q = Q+QP
     if D > 0 then D = D+1 end
     if D > 10 then D = 0 end
-    
-    if Pads.check(pad, PAD_TRIANGLE)  then
-      mcinfo0 = System.getMCInfo(0)
-      mcinfo1 = System.getMCInfo(1)
-    end
+    if T < JAP_ROM_100 then T = CHN_STANDARD end
+    if T > CHN_STANDARD then T = JAP_ROM_100 end
 
   end
   return T
 end
+expertINSTprompt()
+NormalInstall(MemcardPickup(),0)
+ --]]
 
--- HERE THE SCRIPT BEHAVIOUR SHOULD BEGIN
---greeting()
-MainMenu()
-System.sleep(1)
-SystemUpdatePicker()
-System.sleep(1)
-MemcardPickup()
-System.sleep(1)
-while true do
-  Screen.clear()
-
-  Font.ftPrint(font, 150, 20,  0, 400, 32, ROMVER)
-  Font.ftPrint(font, 150, 50,  0, 400, 32, "your console looks for updates on this path \n "..SYSUPDATEPATH.."\n")
-  Font.ftPrint(font, 150, 100, 0, 400, 32, "Console region "..REGION.." ("..REGIONSTR..")\n")
-  Font.ftPrint(font, 150, 150, 0, 400, 32, "system ROM version is "..ROMVERN.."\n")
-  Font.ftPrint(font, 150, 190, 0, 400, 32, "system Language is "..Language.."\n")
-  --Font.fmPrint(100, 370, 0.4, "\nTips:\n")
-  --Font.ftPrint(font, 100, 300, 0, 400, 32, string.format("SLOT0  type=%d, freespace=%d, format=%d", mcinfo0.type, mcinfo0.freemem, mcinfo0.format))
-  --Font.ftPrint(font, 100, 350, 0, 400, 32, string.format("SLOT1  type=%d, freespace=%d, format=%d", mcinfo1.type, mcinfo1.freemem, mcinfo1.format))
-  pad = Pads.get()
-  
-  Screen.flip()
-  --Screen.waitVblankStart()
-end
-
-
---]]
-
+Screen.clear()
 while true do end
+
