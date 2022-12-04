@@ -38,7 +38,7 @@ enum SYSUPDATE_COUNT
     SYSTEM_UPDATE_COUNT
 
 };
-extern char *sysupdate_paths[SYSTEM_UPDATE_COUNT];
+extern char *sysupdate_paths[];
 
 // BSM2AI == Bit Shifted Macros to Array Index
 #define BSM2AI(X)                   \
