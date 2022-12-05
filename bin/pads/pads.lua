@@ -192,6 +192,7 @@ function NormalInstall(port, slot)
   end
   Screen.clear()
   Font.ftPrint(font, 320, 40,  8, 400, 64, "Installation concluded!")
+  System.sleep(2)
   Screen.flip()
 end
 
@@ -435,6 +436,7 @@ function performExpertINST(port, slot, UPDT)
   if RET < 0 then secrerr(RET) end
   Screen.clear()
   Font.ftPrint(font, 320, 40,  8, 400, 64, "Installation concluded!")
+  System.sleep(2)
   Screen.flip()
 end
 
