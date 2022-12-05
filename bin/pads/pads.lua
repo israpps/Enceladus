@@ -384,6 +384,8 @@ function secrerr(RET)
       Font.ftPrint(font, 320, 60,  8, 400, 64, "I/O ERROR")
     elseif RET == -22 then
       Font.ftPrint(font, 320, 40,  8, 400, 64, "SECRDOWNLOADFILE Failed!\nPossible Magicgate error")
+    elseif RET == -12 then
+      Font.ftPrint(font, 320, 40,  8, 400, 64, "MEMORY ALLOCATION ERROR!")
     else
       Font.ftPrint(font, 320, 40,  8, 400, 64, "Unknown error!")
     end
