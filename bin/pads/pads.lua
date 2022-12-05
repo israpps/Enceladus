@@ -169,23 +169,28 @@ end
 
 function NormalInstall(port, slot)
   local ROMVERN = KELFBinder.getROMversion()
+  local RET
   System.createDirectory(string.format("mc%d:/%s", port, KELFBinder.getsysupdatefolder()))
   KELFBinder.setSysUpdateFoldProps(port, slot, KELFBinder.getsysupdatefolder())
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
-  Screen.clear(Color.new(200, 0, 0))
+  Screen.clear(Color.new(0, 0, 0))
   Font.ftPrint(font, 320, 20  , 8, 600, 64, "BINDING KELF\n\n"..SYSUPDATEPATH.."\n")
   Screen.flip()
   if (ROMVERN == 100) or (ROMVERN == 101) then -- PROTOKERNEL NEED TWO UPDATES TO FUNCTION
     Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, "BIEXEC-SYSTEM/osd130.elf")) -- SCPH-18000
     if (ROMVERN == 100) then
-      Secrman.downloadfile(port, slot, KERNEL_PATCH_100, string.format("mc%d:/%s", port, SYSUPDATEPATH))
+      RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_100, string.format("mc%d:/%s", port, SYSUPDATEPATH))
+      if RET < 0 then secrerr(RET) end
     else
-      Secrman.downloadfile(port, slot, KERNEL_PATCH_101, string.format("mc%d:/%s", port, SYSUPDATEPATH))
+      RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_101, string.format("mc%d:/%s", port, SYSUPDATEPATH))
+      if RET < 0 then secrerr(RET) end
     end
   else
-    Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH))
+    RET = Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH))
+    if RET < 0 then secrerr(RET) end
   end
   Screen.clear()
+  Font.ftPrint(font, 320, 40,  8, 400, 64, "Installation concluded!")
   Screen.flip()
 end
 
@@ -368,6 +373,21 @@ function expertINSTprompt()
   return UPDT
 end
 
+function secrerr(RET)
+  if RET < 0 then
+    Screen.clear(Color.new(0xff, 00, 00))
+    Font.ftPrint(font, 320, 40,  8, 400, 64, string.format("Installation Failed! (%d)", RET))
+    if RET == -5 then
+      Font.ftPrint(font, 320, 60,  8, 400, 64, "I/O ERROR")
+    elseif RET == -22 then
+      Font.ftPrint(font, 320, 40,  8, 400, 64, "SECRDOWNLOADFILE Failed!\nPossible Magicgate error")
+    else
+      Font.ftPrint(font, 320, 40,  8, 400, 64, "Unknown error!")
+    end
+    while true do end
+  end
+end
+
 function performExpertINST(port, slot, UPDT)
   Screen.clear()
   local FLAGS = 0
@@ -396,25 +416,18 @@ function performExpertINST(port, slot, UPDT)
   end
 
   if UPDT[0] == 1 then
-    Secrman.downloadfile(port, slot, KERNEL_PATCH_100, string.format("mc%d:/BIEXEC-SYSTEM/osdsys.elf", port), 0) 
+    RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_100, string.format("mc%d:/BIEXEC-SYSTEM/osdsys.elf", port), 0) 
+    if RET < 0 then secrerr(RET) end
   end
   if UPDT[1] == 1 then
-    Secrman.downloadfile(port, slot, KERNEL_PATCH_101, string.format("mc%d:/BIEXEC-SYSTEM/osd110.elf", port), 0) 
+    RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_101, string.format("mc%d:/BIEXEC-SYSTEM/osd110.elf", port), 0) 
+    if RET < 0 then secrerr(RET) end
   end
 
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
   local RET = Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH), FLAGS)
   System.sleep(2)
-  if RET < 0 then
-    Screen.clear(Color.new(0xff, 00, 00))
-    Font.ftPrint(font, 320, 40,  8, 400, 64, "Installation Failed!")
-    if RET == -5 then
-      Font.ftPrint(font, 320, 60,  8, 400, 64, "I/O ERROR")
-    elseif RET == -22 then
-      Font.ftPrint(font, 320, 40,  8, 400, 64, "SECRDOWNLOADFILE Failed!\nPossible Magicgate error")
-    end
-    while true do end
-  end
+  if RET < 0 then secrerr(RET) end
   Screen.clear()
   Font.ftPrint(font, 320, 40,  8, 400, 64, "Installation concluded!")
   Screen.flip()

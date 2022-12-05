@@ -131,60 +131,67 @@ static int lua_secrdownloadfile(lua_State *L) {
         luaL_error(L, "CANT SEEK KELF SIZE");
     }
 	lseek(fd, 0, SEEK_SET);
-	if((buf = memalign(64, size))!=NULL){
-		if ((read(fd, buf, size)) != size) {
+	if((buf = memalign(64, size))!=NULL) 
+    {
+		if ((read(fd, buf, size)) != size) 
+        {
 			close(fd);
             result = -EIO;
-    	} else {
+    	} 
+        else
+        {
 			close(fd);
 			if((result=SignKELF(buf, size, port, slot))<0){
-				luaL_error(L, "Error signing file %s. Code: %d.\n", file_tbo, result);
 				free(buf);
-			}
-            printf("luasecrdownloadfile: SignKELF returns %d\n", result);
-            if (flags == 0)
+			} 
+            else 
             {
-                printf("flags was empty, performing normal install!\n");
-			    int McFileFD = open(dest, O_WRONLY|O_CREAT|O_TRUNC);
-                printf("luasecrdownloadfile: %s fd is (%d)\n",dest, McFileFD);
-			    int written = write(McFileFD, buf, size);
-                if (written != size)
+                printf("luasecrdownloadfile: SignKELF returns %d\n", result);
+                if (flags == 0)
                 {
-                    result = -EIO;
-                }
-                printf("luasecrdownloadfile: written %d\n", written);
-			    close(McFileFD);
-            }
-            else
-            {
-                printf("flags was not empty, performing multiple installation\n");
-                int x = 0, TF = 0;
-                char output[64];
-                for (x=2; x<SYSTEM_UPDATE_COUNT; x++) // start from index 2, since 0 and 1 are kernel patches, wich require different value for file_tbo
-                {
-                    TF = (1 << (x+1));
-                    printf("trying with %s ", sysupdate_paths[BSM2AI(TF)]);
-                    if (flags & TF)
+                    printf("flags was empty, performing normal install!\n");
+			        int McFileFD = open(dest, O_WRONLY|O_CREAT|O_TRUNC);
+                    printf("luasecrdownloadfile: %s fd is (%d)\n",dest, McFileFD);
+			        int written = write(McFileFD, buf, size);
+                    if (written != size)
                     {
-                        sprintf(output, "mc%d:/%s", port, sysupdate_paths[BSM2AI(TF)]);
-                        printf("IT IS FLAGGED\n");
-                        int McFileFD = open(output, O_WRONLY|O_CREAT|O_TRUNC);
-                        printf("luasecrdownloadfile: %s fd is (%d)\n",sysupdate_paths[BSM2AI(TF)], McFileFD);
-                        int written = write(McFileFD, buf, size);
-                        if (written != size)
+                        result = -EIO;
+                    }
+                    printf("luasecrdownloadfile: written %d\n", written);
+			        close(McFileFD);
+                }
+                else
+                {
+                    printf("flags was not empty, performing multiple installation\n");
+                    int x = 0, TF = 0;
+                    char output[64];
+                    for (x=2; x<SYSTEM_UPDATE_COUNT; x++) // start from index 2, since 0 and 1 are kernel patches, wich require different value for file_tbo
+                    {
+                        TF = (1 << (x+1));
+                        printf("trying with %s ", sysupdate_paths[BSM2AI(TF)]);
+                        if (flags & TF)
                         {
-                            result = -EIO;
-                            break;
-                        }
-                        printf("luasecrdownloadfile: written %d\n", written);
-                        close(McFileFD);
-                    } else
-                        printf("NOT FLAGGED\n");
+                            sprintf(output, "mc%d:/%s", port, sysupdate_paths[BSM2AI(TF)]);
+                            printf("IT IS FLAGGED\n");
+                            int McFileFD = open(output, O_WRONLY|O_CREAT|O_TRUNC);
+                            printf("luasecrdownloadfile: %s fd is (%d)\n",sysupdate_paths[BSM2AI(TF)], McFileFD);
+                            int written = write(McFileFD, buf, size);
+                            printf("luasecrdownloadfile: written %d\n", written);
+                            close(McFileFD);
+                            if (written != size)
+                            {
+                                result = -EIO;
+                                break;
+                            }
+                        } else
+                            printf("NOT FLAGGED\n");
+                    }
                 }
             }
 		}
 	} else {
-		luaL_error(L, "Error allocating %u bytes of memory for file %s.\n", size, file_tbo);
+		result = -ENOMEM;
+        close(fd);
 	}
     if (buf != NULL)
 	    free(buf);
