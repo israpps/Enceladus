@@ -33,6 +33,7 @@ static char ROMREGION;
 
 static int lua_KELFBinderInit(lua_State *L)
 {
+    DPRINTF("%s: start\n", __func__);
     int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
     if (argc != 1)
@@ -51,6 +52,7 @@ static int lua_KELFBinderInit(lua_State *L)
 
 static int lua_KELFBinderDeInit(lua_State *L)
 {
+    DPRINTF("%s: start\n", __func__);
     int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
     if (argc != 0)
@@ -61,7 +63,7 @@ static int lua_KELFBinderDeInit(lua_State *L)
 
 static int lua_calcsysupdatepath(lua_State *L)
 {
-    DPRINTF(__func__);
+    DPRINTF("%s: start\n", __func__);
     int ver = ROMVERSION, region = ROMREGION;
     if (!KELFBinderHelperFunctionsInited)
         return luaL_error(L, "error initializing kelfbinder helper service!");
@@ -117,14 +119,14 @@ static int lua_calcsysupdatepath(lua_State *L)
 
 static int lua_getsystemregion(lua_State *L)
 {
-    DPRINTF(__func__);
+    DPRINTF("%s: start\n", __func__);
     lua_pushinteger(L, ROMREGION);
     return 1;
 }
 
 static int lua_getsystemregionString(lua_State *L)
 {
-    DPRINTF(__func__);
+    DPRINTF("%s: start\n", __func__);
     switch (ROMREGION) {
 
         case CONSOLE_REGIONS::JAPAN:
@@ -152,7 +154,7 @@ static int lua_getsystemregionString(lua_State *L)
 
 static int lua_getsystemupdatefolder(lua_State *L)
 {
-    DPRINTF(__func__);
+    DPRINTF("%s: start\n", __func__);
     switch (ROMREGION) {
         case CONSOLE_REGIONS::JAPAN:
             lua_pushstring(L, "BIEXEC-SYSTEM");
@@ -179,20 +181,21 @@ static int lua_getsystemupdatefolder(lua_State *L)
 
 static int lua_getromversion(lua_State *L)
 {
-    DPRINTF(__func__);
+    DPRINTF("%s: start\n", __func__);
     lua_pushinteger(L, ROMVERSION);
     return 1;
 }
 
 static int lua_getosdconfigLNG(lua_State *L)
 {
-    DPRINTF(__func__);
+    DPRINTF("%s: start\n", __func__);
     lua_pushinteger(L, configGetLanguage());
     return 1;
 }
 
 static int lua_setsysupdatefoldprops(lua_State *L)
 {	
+    DPRINTF("%s: start\n", __func__);
     int argc = lua_gettop(L);
 	if (argc != 3) 
         return luaL_error(L, "lua_createsysupdatefolder takes 3 argumments\n");

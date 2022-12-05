@@ -450,11 +450,12 @@ end
 function SystemInfo()
   local D = 15
   local A = 0x50
+  local UPDTPATH = KELFBinder.calculateSysUpdatePath()
   while true do
     Screen.clear()
     Font.ftPrint(font, 320, 20,  8, 400, 32, "SYSTEM INFORMATION", Color.new(220, 220, 220, 0x80-A))
     Font.ftPrint(font, 50, 60,  0, 400, 32, string.format("ROMVER = [%s]", ROMVER), Color.new(220, 220, 220, 0x80-A))
-    Font.ftPrint(font, 50, 80,  0, 600, 32, string.format("System Update Path = [%s]", KELFBinder.calculateSysUpdatePath()), Color.new(220, 220, 220, 0x80-A))
+    Font.ftPrint(font, 50, 80,  0, 600, 32, string.format("System Update Path = [%s]", UPDTPATH), Color.new(220, 220, 220, 0x80-A))
 
     promptkeys(0,"Select", 1, "Quit",0, 0, A)
     if A > 0 then A=A-1 end
@@ -484,7 +485,7 @@ if (TT == 1) then
     performExpertINST(port,0,UPDT)
     System.sleep(1)
   end
-elseif TT == 2 then
+elseif TT == 2 then -- DVDPLAYER
 
 elseif TT == 3 then
   SystemInfo()
