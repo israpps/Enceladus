@@ -114,7 +114,7 @@ function MainMenu()
 end
 
 function Installmodepicker()
-  local T = 3
+  local T = 1
   local D = 15
   local A = 0x50
   local PROMTPS = {
