@@ -17,7 +17,7 @@ extern "C" {
 
 static int lua_initsecrman(lua_State *L)
 {
-	DPRINTF("INITIALIZING SECRMAN\n");
+    DPRINTF("%s: start\n", __func__);
     int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
     if (argc != 0)
@@ -30,7 +30,7 @@ static int lua_initsecrman(lua_State *L)
 
 static int lua_deinitsecrman(lua_State *L)
 {
-	DPRINTF("DEINITIALIZING SECRMAN\n");
+    DPRINTF("%s: start\n", __func__);
     int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
     if (argc != 0)
@@ -43,6 +43,7 @@ static int lua_deinitsecrman(lua_State *L)
 
 static int SignKELF(void *buffer, int size, unsigned char port, unsigned char slot)
 {
+    DPRINTF("%s: start\n", __func__);
     int result, InitSemaID, mcInitRes;
 
     /*	An IOP reboot would be done by the Utility Disc,
@@ -100,7 +101,7 @@ static int SignKELF(void *buffer, int size, unsigned char port, unsigned char sl
 
 static int lua_secrdownloadfile(lua_State *L) {
 	int argc = lua_gettop(L);
-    printf("\n\n\n\n\n\n\nluasecrdownloadfile: Startint with %d argumments\n", argc);
+    printf("\n\n\n\n\n\n\n%s: Starting with %d argumments\n", __func__, argc);
 #ifndef SKIP_ERROR_HANDLING
 	if ((argc != 4) && (argc != 5)) return luaL_error(L, "wrong number of arguments");
 #endif

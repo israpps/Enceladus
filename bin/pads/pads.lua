@@ -8,6 +8,7 @@ ROMVER = string.sub(ROMVER,0,14)
 System.closeFile(temporaryVar)
 KELFBinder.init(ROMVER)
 Secrman.init()
+-- DVDPLAYERUPDATE = "INSTALL/KELF/DVDPLAYER.XLF"
 SYSUPDATE_MAIN = "INSTALL/KELF/SYSTEM.XLF"
 KERNEL_PATCH_100 = "INSTALL/KELF/OSDSYS.KERNEL"
 KERNEL_PATCH_101 = "INSTALL/KELF/OSD110.KERNEL"
@@ -228,8 +229,10 @@ function MemcardPickup()
     local pad = Pads.get()
     if Pads.check(pad, PAD_CROSS) and (D == 0) and (HC == true) then
       D = 1
-      Screen.clear()
-      break
+      if (mcinfo0.type == 2 and T == 0) or (mcinfo1.type == 2 and T == 1) then
+        Screen.clear()
+        break
+      end
     end
 
     if Pads.check(pad, PAD_CIRCLE) and D == 0 then break end
