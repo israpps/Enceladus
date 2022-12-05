@@ -403,19 +403,19 @@ function performExpertINST(port, slot, UPDT)
   end
   Font.ftPrint(font, 150, 100,  0, 400, 64, "Installing System Updates...") 
   Screen.flip()
-  if UPDT[0] or UPDT[1] or UPDT[2] or UPDT[3] then
+  if UPDT[0] == 1 or UPDT[1] == 1 or UPDT[2] == 1 or UPDT[3] == 1 then
     System.createDirectory(string.format("mc%d:/%s", port, "BIEXEC-SYSTEM"))
     KELFBinder.setSysUpdateFoldProps(port, slot, "BIEXEC-SYSTEM")
   end
-  if UPDT[4] or UPDT[5] or UPDT[6] then
+  if UPDT[4] == 1 or UPDT[5] == 1 or UPDT[6] == 1 then
     System.createDirectory(string.format("mc%d:/%s", port, "BAEXEC-SYSTEM"))
     KELFBinder.setSysUpdateFoldProps(port, slot, "BAEXEC-SYSTEM")
   end
-  if UPDT[7] or UPDT[8] then
+  if UPDT[7] == 1 or UPDT[8] == 1 then
     System.createDirectory(string.format("mc%d:/%s", port, "BEEXEC-SYSTEM"))
     KELFBinder.setSysUpdateFoldProps(port, slot, "BEEXEC-SYSTEM")
   end
-  if UPDT[9] then
+  if UPDT[9] == 1 then
     System.createDirectory(string.format("mc%d:/%s", port, "BCEXEC-SYSTEM"))
     KELFBinder.setSysUpdateFoldProps(port, slot, "BCEXEC-SYSTEM")
   end
@@ -482,12 +482,13 @@ if (TT == 1) then
   local TTT = Installmodepicker()
   System.sleep(1)
   if TTT == 1 then
-    NormalInstall(MemcardPickup(),0)
+    local port = MemcardPickup()
+    NormalInstall(port, 0)
     System.sleep(1)
   elseif TTT == 3 then
     local port = MemcardPickup()
     local UPDT = expertINSTprompt()
-    performExpertINST(port,0,UPDT)
+    performExpertINST(port, 0, UPDT)
     System.sleep(1)
   end
 elseif TT == 2 then -- DVDPLAYER
