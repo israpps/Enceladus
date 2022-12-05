@@ -25,9 +25,10 @@ local right = Graphics.loadImage("pads/right.png")]]
 local MC = Graphics.loadImage("pads/MC.png")
 
 local REGION = KELFBinder.getsystemregion()
-local REGIONSTR = KELFBinder.getsystemregionString(REGION)
+--local REGIONSTR = KELFBinder.getsystemregionString(REGION)
 
 Language = KELFBinder.getsystemLanguage()
+
 function promptkeys(SELECT, ST, CANCEL, CT, REFRESH, RT, ALFA)
 
   if SELECT == 1 then
@@ -54,6 +55,7 @@ function greeting()
       if Q > 250 then W = -2 end
       if Q > 3 then Q = Q+W else CONTINUE = false end
       Font.ftPrint(font, 320, 20  , 8, 600, 16, "HELLO MOTHERFUCKER", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 40  , 8, 600, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 320 , 8, 600, 16, "Coded By El_isra (aka: Matias Israelson)", Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 340 , 8, 600, 16, "Based on Enceladus. by Daniel Santos", Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 360 , 8, 600, 16, "SECRMAN and SECRSIF taken from FreeMcBoot 1.9 series installer", Color.new(128, 128, 128, Q))
