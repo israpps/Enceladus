@@ -189,7 +189,9 @@ static int lua_getromversion(lua_State *L)
 static int lua_getosdconfigLNG(lua_State *L)
 {
     DPRINTF("%s: start\n", __func__);
-    lua_pushinteger(L, configGetLanguage());
+    int lang = configGetLanguage();
+    DPRINTF("%s: Language ID is %d\n", __func__, lang);
+    lua_pushinteger(L, lang);
     return 1;
 }
 
