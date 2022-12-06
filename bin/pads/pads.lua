@@ -25,6 +25,8 @@ local down = Graphics.loadImage("pads/down.png")
 local left = Graphics.loadImage("pads/left.png")
 local right = Graphics.loadImage("pads/right.png")]]
 local MC = Graphics.loadImage("pads/MC.png")
+local LOGO = Graphics.loadImage("pads/logo.png")
+local BG = Graphics.loadImage("pads/background.png")
 
 local REGION = KELFBinder.getsystemregion()
 --local REGIONSTR = KELFBinder.getsystemregionString(REGION)
@@ -59,12 +61,18 @@ end
 
 function greeting()
   local CONTINUE = true
-  local Q = 4
+  local Q = 2
   local W = 1
     while CONTINUE do
       Screen.clear()
-      if Q > 250 then W = -2 end
-      if Q > 3 then Q = Q+W else CONTINUE = false end
+      if Q > 0x80 then W = -1 end
+      if Q > 1 then Q = Q+W else CONTINUE = false end
+      if W > 0 then
+        Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(128, 128, 128, Q))
+      else
+        Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+      end
+      Graphics.drawScaleImage(LOGO, 50.0, 50.0, 256.0, 128.0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 20  , 8, 630, 16, "HELLO MOTHERFUCKER", Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 40  , 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 320 , 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
