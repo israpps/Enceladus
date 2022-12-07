@@ -39,3 +39,4 @@ bin/System/noindex.lua
 obj/
 asm/
 *.7z
+*.log
