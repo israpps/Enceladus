@@ -1,7 +1,7 @@
 Screen.clear()
 Font.ftInit()
 font = Font.ftLoad("pads/font.ttf")
-Font.ftSetCharSize(font, 900, 900)
+Font.ftSetCharSize(font, 940, 940)
 local temporaryVar = System.openFile("rom0:ROMVER", FREAD)
 local temporaryVar_size = System.sizeFile(temporaryVar)
 ROMVER = System.readFile(temporaryVar, temporaryVar_size)
@@ -615,16 +615,21 @@ function performExpertINST(port, slot, UPDT)
 end
 
 function Ask2quit()
-  Font.ftPrint(font, 320, 240  , 8, 630, 16, LNG_WANNAQUIT)
+  Q = 1
+  QQ = 1
   while true do
+    if Q > 100 then QQ = -1 end
+    if Q < 1  then QQ = 1 end
+    Q = Q+QQ
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    Font.ftPrint(font, 320, 40 , 8, 630, 16, LNG_WANNAQUIT)
     promptkeys(1,LNG_YES,1,LNG_NO, 1,LNG_RWLE, 0)
-    ORBMAN(0x80)
+    ORBMAN(0x80-Q)
     local pad = Pads.get()
     if Pads.check(pad, PAD_CROSS) then System.exitToBrowser() end
     if Pads.check(pad, PAD_CIRCLE) then break end
-    if Pads.check(pad, PAD_TRIANGLE) then System.loadELF("INSTALL/CORE/BACKDOOR.ELF") end
+    if Pads.check(pad, PAD_TRIANGLE) then if System.doesFileExist("INSTALL/CORE/BACKDOOR.ELF") then System.loadELF("INSTALL/CORE/BACKDOOR.ELF") end end
     Screen.flip()
   end
 end
@@ -686,7 +691,6 @@ elseif TT == 3 then
   SystemInfo()
 elseif TT == 4 then
   Ask2quit()
-  System.sleep(1)
 end
 -- SYSTEM UPDATE
 end
