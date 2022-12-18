@@ -17,12 +17,12 @@
 	LNG_IMPP0 = "Perform an installation compatible with this console\n and similar units"
 	LNG_IMPP1 = "The clasic installation modes of FreeMcBoot"
 	LNG_IMPP2 = "Choose manually wich updates you will install"
-	LNG_IMPMP0 = "Choose Installation mode"
+	LNG_IMPMP0 = "Choose Installation mode" -- TODO: CHECK IF CAN BE DELETED
 	LNG_IMPMP1 = "Normal Install"
 	LNG_IMPMP2 = "Advanced Install (Comming soon!)"
 	LNG_IMPMP3 = "Expert Install"
 	LNG_INSTPMPT = "BINDING KELF\n\n%s\n"
-	LNG_INSTPMPT1 = "Installation concluded!"
+	LNG_INSTPMPT1 = "Installation Finished!"
 	LNG_MEMCARD0 = "Choose a Memory card"
 	LNG_MEMCARD1 = "Memory card %d\nFree Space %d kb"
 	LNG_SUC0 = "Kernel Patch for early SCPH-10000\n needs SCPH-18000 update to function"
@@ -53,7 +53,9 @@
 	LNG_RWLE = "Run wLaunchELF"
 	LNG_SYSTEMINFO = "SYSTEM INFORMATION"
 	LNG_SUPATH = "System Update Path = [%s]"
-
+	LNG_CONTINUE = "Continue"
+	LNG_COMPAT0 = "This console model does not support system updates"
+	LNG_COMPAT1 = "However, you can still use it to install updates"
 
 if System.doesFileExist("System/index.lua") then
 	dofile("System/index.lua");

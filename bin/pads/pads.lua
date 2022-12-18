@@ -9,8 +9,12 @@ ROMVER = string.sub(ROMVER,0,14)
 System.closeFile(temporaryVar)
 KELFBinder.init(ROMVER)
 Secrman.init()
+ROMVERN = KELFBinder.getROMversion()
 -- DVDPLAYERUPDATE = "INSTALL/KELF/DVDPLAYER.XLF"
 SYSUPDATE_MAIN = "INSTALL/KELF/SYSTEM.XLF"
+temporaryVar = System.openFile(SYSUPDATE_MAIN, FREAD)
+SYSUPDATE_SIZE = System.sizeFile(temporaryVar)
+System.closeFile(temporaryVar)
 KERNEL_PATCH_100 = "INSTALL/KELF/OSDSYS.KERNEL"
 KERNEL_PATCH_101 = "INSTALL/KELF/OSD110.KERNEL"
 
@@ -27,8 +31,10 @@ local MC = Graphics.loadImage("pads/MC.png")
 local LOGO = Graphics.loadImage("pads/logo.png")
 local BG = Graphics.loadImage("pads/background.png")
 local BGERR = Graphics.loadImage("pads/background_error.png")
+local BGSCS = Graphics.loadImage("pads/background_success.png")
 local CURSOR = Graphics.loadImage("pads/firefly.png")
 local REDCURSOR = Graphics.loadImage("pads/firefly_error.png")
+local GREENCURSOR = Graphics.loadImage("pads/firefly_success.png")
 
 local REGION = KELFBinder.getsystemregion()
 --local REGIONSTR = KELFBinder.getsystemregionString(REGION)
@@ -50,14 +56,13 @@ function ORBMAN(Q)
   R = R+RINCREMENT
   if R > 200 and RINCREMENT > 0 then RINCREMENT = -0.0002 end
   if R < 0   and RINCREMENT < 0 then RINCREMENT = -0.0002 end
-  Graphics.drawImage(CURSOR, 120+(90*math.cos(math.deg(R*2.1+1.1))), 120+(90*math.sin(math.deg(R*2.1+1.1))), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 120+(90*math.cos(math.deg(R*2.1+1.2))), 120+(90*math.sin(math.deg(R*2.1+1.2))), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 120+(90*math.cos(math.deg(R*2.1+1.3))), 120+(90*math.sin(math.deg(R*2.1+1.3))), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 120+(90*math.cos(math.deg(R*2.1+1.4))), 120+(90*math.sin(math.deg(R*2.1+1.4))), Color.new(128, 128, 128, Q))
-
-  Graphics.drawImage(CURSOR, 120+(90*math.cos(math.deg(R*2.1+1.7))), 120+(90*math.sin(math.deg(R*2.1+1.7))),  Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 120+(90*math.cos(math.deg(R*2.1+1.8))), 120+(90*math.sin(math.deg(R*2.1+1.8))),  Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 120+(90*math.cos(math.deg(R*2.1+1.9))), 120+(90*math.sin(math.deg(R*2.1+1.9))),  Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.1))), 180+(90*math.sin(math.deg(R*2.1+1.1))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.2))), 180+(90*math.sin(math.deg(R*2.1+1.2))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.3))), 180+(90*math.sin(math.deg(R*2.1+1.3))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.4))), 180+(90*math.sin(math.deg(R*2.1+1.4))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.7))), 180+(90*math.sin(math.deg(R*2.1+1.7))),  Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.8))), 180+(90*math.sin(math.deg(R*2.1+1.8))),  Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.9))), 180+(90*math.sin(math.deg(R*2.1+1.9))),  Color.new(128, 128, 128, Q))
 end
 
 function ORBMANex(IMG, Q, X, Z, POW)
@@ -127,7 +132,7 @@ function greeting()
       end
       Graphics.drawImage(LOGO, 64.0, 50.0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 20  , 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
-      Font.ftPrint(font, 320, 40  , 8, 630, 16, "Closed BETA - 003", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 40  , 8, 630, 16, " Closed BETA - 003 "..(SYSUPDATE_SIZE/1024), Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 320 , 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 340 , 8, 630, 16, LNG_CRDTS1, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 360 , 8, 630, 16, LNG_CRDTS2, Color.new(128, 128, 128, Q))
@@ -143,13 +148,13 @@ function OrbIntro(BGQ)
   local Q = 0x80
   while X > 0 do
     Screen.clear()
-    if BGQ == 0x80 then
+    if BGQ == 0 then
       Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
     else
       Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
       if Q > 0 then Q=Q-1 end
     end
-    ORBMANex(CURSOR, 0x70-A, 120, 120, 90+X)
+    ORBMANex(CURSOR, 0x70-A, 180, 180, 90+X)
     if A > 0 then A=A-1 end
     if X > 0 then X=X-1 end
     Screen.flip()
@@ -166,20 +171,20 @@ function MainMenu()
     ORBMAN(0x80)
     Font.ftPrint(font, 320, 20,  8, 630, 32, LNG_MM1, Color.new(220, 220, 220, 0x90-A))
     if T == 1 then
-      Font.ftPrint(font, 101, 150, 0, 630, 16, LNG_MM2, Color.new(0, 0xde, 0xff, 0x90-A)) else
-      Font.ftPrint(font, 100, 150, 0, 630, 16, LNG_MM2, Color.new(200, 200, 200, 0x80-A))
+      Font.ftPrint(font, 321, 150, 0, 630, 16, LNG_MM2, Color.new(0, 0xde, 0xff, 0x90-A)) else
+      Font.ftPrint(font, 320, 150, 0, 630, 16, LNG_MM2, Color.new(200, 200, 200, 0x80-A))
     end
     if T == 2 then
-      Font.ftPrint(font, 101, 190, 0, 630, 16, LNG_MM3, Color.new(0, 0xde, 0xff, 0x90-A)) else
-      Font.ftPrint(font, 100, 190, 0, 630, 16, LNG_MM3, Color.new(200, 200, 200, 0x80-A))
+      Font.ftPrint(font, 321, 190, 0, 630, 16, LNG_MM3, Color.new(0, 0xde, 0xff, 0x90-A)) else
+      Font.ftPrint(font, 320, 190, 0, 630, 16, LNG_MM3, Color.new(200, 200, 200, 0x80-A))
     end
     if T == 3 then
-      Font.ftPrint(font, 101, 230, 0, 630, 16, LNG_MM4, Color.new(0, 0xde, 0xff, 0x90-A)) else
-      Font.ftPrint(font, 100, 230, 0, 630, 16, LNG_MM4, Color.new(200, 200, 200, 0x80-A))
+      Font.ftPrint(font, 321, 230, 0, 630, 16, LNG_MM4, Color.new(0, 0xde, 0xff, 0x90-A)) else
+      Font.ftPrint(font, 320, 230, 0, 630, 16, LNG_MM4, Color.new(200, 200, 200, 0x80-A))
     end
     if T == 4 then
-      Font.ftPrint(font, 101, 300, 0, 630, 16, LNG_MM5, Color.new(0, 0xde, 0xff, 0x90-A)) else
-      Font.ftPrint(font, 100, 300, 0, 630, 16, LNG_MM5, Color.new(200, 200, 200, 0x80-A))
+      Font.ftPrint(font, 321, 300, 0, 630, 16, LNG_MM5, Color.new(0, 0xde, 0xff, 0x90-A)) else
+      Font.ftPrint(font, 320, 300, 0, 630, 16, LNG_MM5, Color.new(200, 200, 200, 0x80-A))
     end
     if A > 0 then A=A-1 end
     promptkeys(1, LNG_CT0,0,0,0,0,A)
@@ -221,19 +226,19 @@ function Installmodepicker()
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
     ORBMAN(0x80)
-    Font.ftPrint(font, 150, 20,  0, 630, 32, LNG_IMPMP0, Color.new(220, 220, 220, 0x80-A))
+    --Font.ftPrint(font, 150, 20,  0, 630, 32, LNG_IMPMP0, Color.new(220, 220, 220, 0x80-A))
 
     if T == 1 then
-      Font.ftPrint(font, 101, 150, 0, 630, 16, LNG_IMPMP1, Color.new(0, 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 100, 150, 0, 630, 16, LNG_IMPMP1, Color.new(200, 200, 200, 0x80-A))
+      Font.ftPrint(font, 321, 150, 0, 630, 16, LNG_IMPMP1, Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 150, 0, 630, 16, LNG_IMPMP1, Color.new(200, 200, 200, 0x80-A))
     end
     if T == 2 then
-      Font.ftPrint(font, 101, 190, 0, 630, 16, LNG_IMPMP2, Color.new(0, 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 100, 190, 0, 630, 16, LNG_IMPMP2, Color.new(200, 200, 200, 0x80-A))
+      Font.ftPrint(font, 321, 190, 0, 630, 16, LNG_IMPMP2, Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 190, 0, 630, 16, LNG_IMPMP2, Color.new(200, 200, 200, 0x80-A))
     end
     if T == 3 then
-      Font.ftPrint(font, 101 , 230, 0, 630, 16, LNG_IMPMP3, Color.new(0, 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 100 , 230, 0, 630, 16, LNG_IMPMP3, Color.new(200, 200, 200, 0x80-A))
+      Font.ftPrint(font, 321 , 230, 0, 630, 16, LNG_IMPMP3, Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320 , 230, 0, 630, 16, LNG_IMPMP3, Color.new(200, 200, 200, 0x80-A))
     end
     
     Font.ftPrint(font, 80 , 350, 0, 600, 32, PROMTPS[T], Color.new(128, 128, 128, 0x80-A))
@@ -265,7 +270,6 @@ function Installmodepicker()
 end
 
 function NormalInstall(port, slot)
-  local ROMVERN = KELFBinder.getROMversion()
   local RET
   System.createDirectory(string.format("mc%d:/%s", port, KELFBinder.getsysupdatefolder()))
   KELFBinder.setSysUpdateFoldProps(port, slot, KELFBinder.getsysupdatefolder())
@@ -278,23 +282,16 @@ function NormalInstall(port, slot)
     Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, "BIEXEC-SYSTEM/osd130.elf")) -- SCPH-18000
     if (ROMVERN == 100) then
       RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_100, string.format("mc%d:/%s", port, SYSUPDATEPATH))
-      if RET < 0 then secrerr(RET) end
+      if RET < 0 then secrerr(RET) return end
     else
       RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_101, string.format("mc%d:/%s", port, SYSUPDATEPATH))
-      if RET < 0 then secrerr(RET) end
+      if RET < 0 then secrerr(RET) return end
     end
   else
     RET = Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH))
-    if RET < 0 then secrerr(RET) end
+    if RET < 0 then secrerr(RET) return end
   end
-  local A = 0x80
-  while A > 0 do
-    Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-A))
-    Font.ftPrint(font, 320, 40,  8, 630, 64, LNG_INSTPMPT1)
-    Screen.flip()
-    A = A-1
-  end
+  secrerr(RET)
 end
 
 function MemcardPickup()
@@ -398,50 +395,50 @@ function expertINSTprompt()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
     ORBMAN(0x80)
     Font.ftPrint(font, 320, 20,  8, 630, 32, LNG_EXPERTINST_PROMPT)
-    Font.ftPrint(font, 100, 50,  0, 630, 16, LNG_REGS0, Color.new(250, 250, 250, 0x80-A))
-    Font.ftPrint(font, 100, 150, 0, 630, 16, LNG_REGS1, Color.new(250, 250, 250, 0x80))
-    Font.ftPrint(font, 100, 230, 0, 630, 16, LNG_REGS2, Color.new(250, 250, 250, 0x80-A))
-    Font.ftPrint(font, 100, 290, 0, 630, 16, LNG_REGS3, Color.new(250, 250, 250, 0x80-A))
+    Font.ftPrint(font, 310, 50,  0, 630, 16, LNG_REGS0, Color.new(250, 250, 250, 0x80-A))
+    Font.ftPrint(font, 310, 150, 0, 630, 16, LNG_REGS1, Color.new(250, 250, 250, 0x80))
+    Font.ftPrint(font, 310, 230, 0, 630, 16, LNG_REGS2, Color.new(250, 250, 250, 0x80-A))
+    Font.ftPrint(font, 310, 290, 0, 630, 16, LNG_REGS3, Color.new(250, 250, 250, 0x80-A))
     Font.ftPrint(font, 20, 340, 0, 600, 32, UPDTT[T], Color.new(250, 250, 250, 0x80-A))
     if T == JAP_ROM_100 then
-      Font.ftPrint(font, 111, 70, 0, 400, 16, "osdsys.elf", Color.new(200^(UPDT[0]+1), 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 110, 70, 0, 400, 16, "osdsys.elf", Color.new(200^(UPDT[0]+1), 0xde, 0xff, 0x50-A))
+      Font.ftPrint(font, 321, 70, 0, 400, 16, "osdsys.elf", Color.new(200^(UPDT[0]+1), 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 70, 0, 400, 16, "osdsys.elf", Color.new(200^(UPDT[0]+1), 0xde, 0xff, 0x50-A))
     end
     if T == JAP_ROM_101 then
-      Font.ftPrint(font, 111, 90, 0, 400, 16, "osd110.elf", Color.new(200^(UPDT[1]+1), 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 110, 90, 0, 400, 16, "osd110.elf", Color.new(200^(UPDT[1]+1), 0xde, 0xff, 0x50-A))
+      Font.ftPrint(font, 321, 90, 0, 400, 16, "osd110.elf", Color.new(200^(UPDT[1]+1), 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 90, 0, 400, 16, "osd110.elf", Color.new(200^(UPDT[1]+1), 0xde, 0xff, 0x50-A))
     end
     if T == JAP_ROM_120 then
-      Font.ftPrint(font, 111, 110, 0, 400, 16, "osd130.elf", Color.new(200^(UPDT[2]+1), 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 110, 110, 0, 400, 16, "osd130.elf", Color.new(200^(UPDT[2]+1), 0xde, 0xff, 0x50-A))
+      Font.ftPrint(font, 321, 110, 0, 400, 16, "osd130.elf", Color.new(200^(UPDT[2]+1), 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 110, 0, 400, 16, "osd130.elf", Color.new(200^(UPDT[2]+1), 0xde, 0xff, 0x50-A))
     end
     if T == JAP_STANDARD then
-      Font.ftPrint(font, 111, 130, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[3]+1), 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 110, 130, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[3]+1), 0xde, 0xff, 0x50-A))
+      Font.ftPrint(font, 321, 130, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[3]+1), 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 130, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[3]+1), 0xde, 0xff, 0x50-A))
     end
     if T == USA_ROM_110 then
-      Font.ftPrint(font, 111, 170, 0, 400, 16, "osd120.elf", Color.new(200^(UPDT[4]+1), 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 110, 170, 0, 400, 16, "osd120.elf", Color.new(200^(UPDT[4]+1), 0xde, 0xff, 0x50-A))
+      Font.ftPrint(font, 321, 170, 0, 400, 16, "osd120.elf", Color.new(200^(UPDT[4]+1), 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 170, 0, 400, 16, "osd120.elf", Color.new(200^(UPDT[4]+1), 0xde, 0xff, 0x50-A))
     end
     if T == USA_ROM_120 then
-      Font.ftPrint(font, 111, 190, 0, 400, 16, "osd130.elf", Color.new(200^(UPDT[5]+1), 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 110, 190, 0, 400, 16, "osd130.elf", Color.new(200^(UPDT[5]+1), 0xde, 0xff, 0x50-A))
+      Font.ftPrint(font, 321, 190, 0, 400, 16, "osd130.elf", Color.new(200^(UPDT[5]+1), 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 190, 0, 400, 16, "osd130.elf", Color.new(200^(UPDT[5]+1), 0xde, 0xff, 0x50-A))
     end
     if T == USA_STANDARD then
-      Font.ftPrint(font, 111, 210, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[6]+1), 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 110, 210, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[6]+1), 0xde, 0xff, 0x50-A))
+      Font.ftPrint(font, 321, 210, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[6]+1), 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 210, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[6]+1), 0xde, 0xff, 0x50-A))
     end
     if T == EUR_ROM_120 then
-      Font.ftPrint(font, 111, 250, 0, 400, 16, "osd130.elf", Color.new(200^(UPDT[7]+1), 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 110, 250, 0, 400, 16, "osd130.elf", Color.new(200^(UPDT[7]+1), 0xde, 0xff, 0x50-A))
+      Font.ftPrint(font, 321, 250, 0, 400, 16, "osd130.elf", Color.new(200^(UPDT[7]+1), 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 250, 0, 400, 16, "osd130.elf", Color.new(200^(UPDT[7]+1), 0xde, 0xff, 0x50-A))
     end
     if T == EUR_STANDARD then
-      Font.ftPrint(font, 111, 270, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[8]+1), 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 110, 270, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[8]+1), 0xde, 0xff, 0x50-A))
+      Font.ftPrint(font, 321, 270, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[8]+1), 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 270, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[8]+1), 0xde, 0xff, 0x50-A))
     end
     if T == CHN_STANDARD then
-      Font.ftPrint(font, 111, 310, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[9]+1), 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 110, 310, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[9]+1), 0xde, 0xff, 0x50-A))
+      Font.ftPrint(font, 321, 310, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[9]+1), 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 310, 0, 400, 16, "osdmain.elf", Color.new(200^(UPDT[9]+1), 0xde, 0xff, 0x50-A))
     end
     if A > 0 then A=A-1 end
     promptkeys(1,LNG_CT0,1,LNG_CT1,1,LNG_CT3, A)
@@ -494,22 +491,39 @@ function secrerr(RET)
   local Q = 0x7f
   local QIN = 1
   local pad = 0
-  if RET == 0 then return end
+  while A > 0 do
+    Screen.clear()
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, A))
+    A = A-1
+    Screen.flip()
+  end
+  A = 0x80
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
-    ORBMANex(REDCURSOR, 0x80-Q, 120, 120, 90)
+    if RET == 1 then
+      Graphics.drawScaleImage(BGSCS, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+      ORBMANex(GREENCURSOR, 0x80-Q-1, 180, 180, 90)
+    else
+      Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+      ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 90)
+    end
     if Q < 0x20 then
       pad = Pads.get()
       if A > 0 then A = A-1 end
-        Font.ftPrint(font, 320, 40,  8, 630, 64, string.format(LNG_INSTERR, RET), Color.new(0x80, 0x80, 0x80, 0x80-A))
+
+      promptkeys(1, LNG_CONTINUE, 0, 0, 0, 0, A)
+      if RET ~= 1 then
+        Font.ftPrint(font, 320, 40,  8, 630, 64, string.format(LNG_INSTERR, RET), Color.new(0x80, 0x80, 0x80, 0x80-A)) 
+      else
+        Font.ftPrint(font, 320, 40,  8, 630, 64, LNG_INSTPMPT1, Color.new(0x80, 0x80, 0x80, 0x80-A))
+      end
       if RET == (-5) then
         Font.ftPrint(font, 320, 60,  8, 630, 64, LNG_EIO, Color.new(0x80, 0x80, 0x80, 0x80-A))
       elseif RET == (-22) then
         Font.ftPrint(font, 320, 60,  8, 630, 64, LNG_SECRMANERR, Color.new(0x80, 0x80, 0x80, 0x80-A))
       elseif RET == (-12) then
         Font.ftPrint(font, 320, 60,  8, 630, 64, LNG_ENOMEM, Color.new(0x80, 0x80, 0x80, 0x80-A))
-      else
+      elseif RET ~= 1 then -- only write unknown error if retcode is not a success
         Font.ftPrint(font, 320, 60,  8, 630, 64, LNG_EUNKNOWN, Color.new(0x80, 0x80, 0x80, 0x80-A))
       end
       
@@ -523,6 +537,38 @@ function secrerr(RET)
     Screen.flip()
   end
   OrbIntro(1)
+end
+
+function WarnIncompatibleMachine()
+  local A = 0x80
+  local Q = 0x7f
+  local QIN = 1
+  local pad = 0
+  while A > 0 do
+    Screen.clear()
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, A))
+    A = A-1
+    Screen.flip()
+  end
+  A = 0x80
+  while true do
+    Screen.clear()
+    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 90)
+
+    pad = Pads.get()
+    if A > 0 then A = A-1 end
+    promptkeys(1, LNG_CONTINUE, 0, 0, 0, 0, Q)
+    Font.ftPrint(font, 320, 40,  8, 630, 64, LNG_COMPAT0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    Font.ftPrint(font, 320, 100,  8, 630, 64, LNG_COMPAT1, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    if Pads.check(pad, PAD_CROSS) then
+      QIN = -1
+      Q = 1
+    end
+    if Q > 0 and Q < 0x80 then Q=Q-QIN end
+    if Q > 0x7f then break end
+    Screen.flip()
+  end
 end
 
 function performExpertINST(port, slot, UPDT)
@@ -565,15 +611,7 @@ function performExpertINST(port, slot, UPDT)
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
   local RET = Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH), FLAGS)
   System.sleep(2)
-  if RET < 0 then secrerr(RET) end
-  local A = 0
-  while A < 0x80 do
-    Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
-    Font.ftPrint(font, 320, 40,  8, 630, 64, LNG_INSTPMPT1, Color.new(128, 128, 128, A))
-    Screen.flip()
-    A = A+1
-  end
+  secrerr(RET)
 end
 
 function Ask2quit()
@@ -602,7 +640,7 @@ function SystemInfo()
     Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_SYSTEMINFO, Color.new(220, 220, 220, 0x80-A))
     Font.ftPrint(font, 50, 60,  0, 630, 32, string.format("ROMVER = [%s]", ROMVER), Color.new(220, 220, 220, 0x80-A))
     Font.ftPrint(font, 50, 80,  0, 630, 32, string.format(LNG_SUPATH, UPDTPATH), Color.new(220, 220, 220, 0x80-A))
-
+    
     promptkeys(0,LNG_CT0, 1, LNG_CT4,0, 0, A)
     if A > 0 then A=A-1 end
     Screen.flip()
@@ -615,6 +653,7 @@ end
 -- SCRIPT BEHAVIOUR BEGINS --
 --SystemInfo()
 greeting()
+if ROMVERN > 220 then WarnIncompatibleMachine() end
 OrbIntro(0)
 while true do
 local TT = MainMenu()
