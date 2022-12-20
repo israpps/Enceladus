@@ -12,10 +12,14 @@ Secrman.init()
 ROMVERN = KELFBinder.getROMversion()
 KELFBinder.InitConsoleModel()
 IS_PSX = 0
-if System.doesFileExist("rom0:PSXVER") then IS_PSX = 1 else IS_PSX = 0 end
--- DVDPLAYERUPDATE = "INSTALL/KELF/DVDPLAYER.XLF"
-SYSUPDATE_MAIN = "INSTALL/KELF/SYSTEM.XLF"
-PSX_SYSUPDATE =  "INSTALL/KELF/XSYSTEM.XLF"
+if System.doesFileExist("rom0:PSXVER") then 
+  IS_PSX = 1
+else
+  IS_PSX = 0
+end
+DVDPLAYERUPDATE = "INSTALL/KELF/DVDPLAYER.XLF"
+SYSUPDATE_MAIN  = "INSTALL/KELF/SYSTEM.XLF"
+PSX_SYSUPDATE   =  "INSTALL/KELF/XSYSTEM.XLF"
 
 temporaryVar = System.openFile(SYSUPDATE_MAIN, FREAD)
 SYSUPDATE_SIZE = System.sizeFile(temporaryVar)
@@ -285,6 +289,88 @@ function Installmodepicker()
 
   end
   return T
+end
+
+function DVDPlayerRegionPicker()
+  local T = 1
+  local D = 1
+  local A = 0x80
+  local PROMTPS = {
+    "SCPH-XXX00",
+    "SCPH-XXX0[1/6/7/8/10/11]",
+    "SCPH-XXX0[2/3/4]",
+    "SCPH-XXX09"
+  }
+  while true do
+    Screen.clear()
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    ORBMAN(0x80)
+    Font.ftPrint(font, 320, 20,  8, 630, 32, LNG_PICK_DVDPLAYER_REG, Color.new(220, 220, 220, 0x80-A))
+
+    if T == 1 then
+      Font.ftPrint(font, 321, 150, 0, 630, 16, LNG_JAP, Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 150, 0, 630, 16, LNG_JAP, Color.new(200, 200, 200, 0x80-A))
+    end
+    if T == 2 then
+      Font.ftPrint(font, 321, 190, 0, 630, 16, LNG_USANASIA, Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 190, 0, 630, 16, LNG_USANASIA, Color.new(200, 200, 200, 0x80-A))
+    end
+    if T == 3 then
+      Font.ftPrint(font, 321 , 230, 0, 630, 16, LNG_EUR, Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320 , 230, 0, 630, 16, LNG_EUR, Color.new(200, 200, 200, 0x80-A))
+    end
+    if T == 4 then
+      Font.ftPrint(font, 321 , 270, 0, 630, 16, LNG_CHN, Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320 , 270, 0, 630, 16, LNG_CHN, Color.new(200, 200, 200, 0x80-A))
+    end
+    
+    Font.ftPrint(font, 320 , 350, 8, 600, 32, PROMTPS[T], Color.new(128, 128, 128, 0x80-A))
+    promptkeys(1,LNG_CT0, 1, LNG_CT1,0, 0, A)
+    if A > 0 then A=A-1 end
+    Screen.flip()
+    local pad = Pads.get()
+
+    if Pads.check(pad, PAD_CROSS) and D == 0 then
+      D = 1
+      Screen.clear()
+      break
+    end
+
+    if Pads.check(pad, PAD_CIRCLE) and D == 0 then
+      T = -1
+      break
+    end
+
+    if Pads.check(pad, PAD_UP) and D == 0 then
+      T = T-1
+      D = 1
+    elseif Pads.check(pad, PAD_DOWN) and D == 0 then
+      T = T+1
+      D = 1
+    end
+    if D > 0 then D = D+1 end
+    if D > 10 then D = 0 end
+    if T < 1 then T = 4 end
+    if T > 4 then T = 1 end
+
+  end
+  return (T-1)
+end
+
+function DVDPlayerINST(port, slot, target_region)
+  local RET
+  local TARGET_FOLD = KELFBinder.getDVDPlayerFolder(target_region)
+  local TARGET_KELF = string.format("mc%d:/%s/dvdplayer.elf", port, TARGET_FOLD)
+  System.createDirectory(string.format("mc%d:/%s", port, TARGET_FOLD))
+  KELFBinder.setSysUpdateFoldProps(port, slot, TARGET_FOLD)
+  Screen.clear()
+  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+  Font.ftPrint(font, 320, 20  , 8, 600, 64, string.format(LNG_INSTPMPT, TARGET_KELF))
+  Screen.flip()
+  
+  RET = Secrman.downloadfile(port, slot, DVDPLAYERUPDATE, TARGET_KELF)
+  if RET < 0 then secrerr(RET) return end
+  secrerr(RET)
 end
 
 function NormalInstall(port, slot)
@@ -676,6 +762,8 @@ function secrerr(RET)
         Font.ftPrint(font, 320, 60,  8, 630, 64, LNG_SECRMANERR, Color.new(0x80, 0x80, 0x80, 0x80-A))
       elseif RET == (-12) then
         Font.ftPrint(font, 320, 60,  8, 630, 64, LNG_ENOMEM, Color.new(0x80, 0x80, 0x80, 0x80-A))
+      elseif RET == (-201) then
+        Font.ftPrint(font, 320, 60,  8, 630, 64, LNG_SOURCE_KELF_GONE, Color.new(0x80, 0x80, 0x80, 0x80-A))
       elseif RET ~= 1 then -- only write unknown error if retcode is not a success
         Font.ftPrint(font, 320, 60,  8, 630, 64, LNG_EUNKNOWN, Color.new(0x80, 0x80, 0x80, 0x80-A))
       end
@@ -820,57 +908,65 @@ end
 -- SCRIPT BEHAVIOUR BEGINS --
 --SystemInfo()
 
-greeting()
-if ROMVERN > 220 then WarnIncompatibleMachine() end
-OrbIntro(0)
+--greeting()
+--if ROMVERN > 220 then WarnIncompatibleMachine() end
+--OrbIntro(0)
 while true do
-local TT = MainMenu()
-WaitWithORBS(50)
--- SYSTEM UPDATE
-if (TT == 1) then
-  local TTT = Installmodepicker()
+  local TT = MainMenu()
   WaitWithORBS(50)
-  if TTT == 1 then
-    local port = MemcardPickup()
-    if port ~= -1 then
-      FadeWIthORBS()
-      NormalInstall(port, 0)
-      WaitWithORBS(50)
-    end
-  elseif TTT == 2 then
-    local memcard = 0
-    local LOL = AdvancedINSTprompt()
-    local UPDT = { }
-    UPDT = PreAdvancedINSTstep(LOL)
-    if UPDT["x"] == true then
-      memcard = MemcardPickup()
-      if UPDT[10] == 1 then -- IF PSX mode was selected
-        IS_PSX = 1 -- simulate runner console is a PSX to reduce code duplication
-        NormalInstall(memcard, 0)
-        IS_PSX = 0
-      else
-        performExpertINST(memcard, 0, UPDT)
-      end
-    end
-  elseif TTT == 3 then
-    local port = MemcardPickup()
-    if port ~= -1 then
-      WaitWithORBS(30)
-      local UPDT = expertINSTprompt()
-      if UPDT["x"] == true then
+  -- SYSTEM UPDATE
+  if (TT == 1) then
+    local TTT = Installmodepicker()
+    WaitWithORBS(50)
+    if TTT == 1 then
+      local port = MemcardPickup()
+      if port ~= -1 then
         FadeWIthORBS()
-        performExpertINST(port, 0, UPDT)
+        NormalInstall(port, 0)
+        WaitWithORBS(50)
+      end
+    elseif TTT == 2 then
+      local memcard = 0
+      local LOL = AdvancedINSTprompt()
+      local UPDT = { }
+      UPDT = PreAdvancedINSTstep(LOL)
+      if UPDT["x"] == true then
+        memcard = MemcardPickup()
+        if UPDT[10] == 1 then -- IF PSX mode was selected
+          IS_PSX = 1 -- simulate runner console is a PSX to reduce code duplication
+          NormalInstall(memcard, 0)
+          IS_PSX = 0
+        else
+          performExpertINST(memcard, 0, UPDT)
+        end
+      end
+    elseif TTT == 3 then
+      local port = MemcardPickup()
+      if port ~= -1 then
+        WaitWithORBS(30)
+        local UPDT = expertINSTprompt()
+        if UPDT["x"] == true then
+          FadeWIthORBS()
+          performExpertINST(port, 0, UPDT)
+        end
       end
     end
+  elseif TT == 2 then -- DVDPLAYER
+    local port = MemcardPickup()
+    WaitWithORBS(20)
+    if (port >= 0) then
+      local target_region = DVDPlayerRegionPicker()
+      if (target_region >= 0 ) then
+        FadeWIthORBS()
+        DVDPlayerINST(port, 0, target_region)
+      end
+    end
+  elseif TT == 3 then
+    SystemInfo()
+  elseif TT == 4 then
+    Ask2quit()
   end
-elseif TT == 2 then -- DVDPLAYER
-
-elseif TT == 3 then
-  SystemInfo()
-elseif TT == 4 then
-  Ask2quit()
-end
--- SYSTEM UPDATE
+  -- SYSTEM UPDATE
 end
 Screen.clear()
 while true do end

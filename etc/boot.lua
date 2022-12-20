@@ -56,6 +56,13 @@
 	LNG_CONTINUE = "Continue"
 	LNG_COMPAT0 = "This console model does not support system updates"
 	LNG_COMPAT1 = "However, you can still use it to install updates"
+	LNG_PICK_DVDPLAYER_REG = "Choose the region for the DVDPlayer update"
+	LNG_JAP = "Japan"
+	LNG_USA = "USA"
+	LNG_USANASIA = "USA & Asia"
+	LNG_EUR = "Europe"
+	LNG_CHN = "China"
+	LNG_SOURCE_KELF_GONE = "input KELF can't be opened"
 
 if System.doesFileExist("System/index.lua") then
 	dofile("System/index.lua");

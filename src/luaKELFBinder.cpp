@@ -163,16 +163,43 @@ static int lua_getsystemupdatefolder(lua_State *L)
             lua_pushstring(L, "BIEXEC-SYSTEM");
             break;
 
+        case CONSOLE_REGIONS::ASIA:
         case CONSOLE_REGIONS::USA:
             lua_pushstring(L, "BAEXEC-SYSTEM");
             break;
-
-        case CONSOLE_REGIONS::ASIA:
-            lua_pushstring(L, "BAEXEC-SYSTEM");
-            break;
-
+            
         case CONSOLE_REGIONS::CHINA:
             lua_pushstring(L, "BCEXEC-SYSTEM");
+            break;
+
+        default:
+            return luaL_error(L, "SYSTEM REGION IS UNKNOWN\nCONTACT THE DEVELOPER!");
+            break;
+    }
+    return 1;
+}
+
+static int lua_getDVDPlayerUpdatefolder(lua_State *L)
+{
+    int region;
+    if (lua_gettop(L) < 1)
+        region = ROMREGION;
+    else
+        region = luaL_checkinteger(L, 1);
+
+    DPRINTF("%s: start\n", __func__);
+    switch (region) {
+        case CONSOLE_REGIONS::JAPAN:
+            lua_pushstring(L, "BIEXEC-DVDPLAYER");
+            break;
+
+        case CONSOLE_REGIONS::ASIA:
+        case CONSOLE_REGIONS::USA:
+            lua_pushstring(L, "BAEXEC-DVDPLAYER");
+            break;
+            
+        case CONSOLE_REGIONS::CHINA:
+            lua_pushstring(L, "BCEXEC-DVDPLAYER");
             break;
 
         default:
@@ -244,6 +271,7 @@ static const luaL_Reg KELFBinder_functions[] = {
     {"getsystemLanguage", lua_getosdconfigLNG},
     {"InitConsoleModel", lua_initConsoleModel},
     {"getConsoleModel", lua_getConsoleModel},
+    {"getDVDPlayerFolder",lua_getDVDPlayerUpdatefolder},
     {0, 0}
 };
 
