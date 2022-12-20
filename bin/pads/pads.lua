@@ -46,7 +46,7 @@ Graphics.setImageFilters(BGSCS      , LINEAR)
 local REGION = KELFBinder.getsystemregion()
 --local REGIONSTR = KELFBinder.getsystemregionString(REGION)
 local R = 0.1
-local RINCREMENT = 0.0002
+local RINCREMENT = 0.00018
 
 Language = KELFBinder.getsystemLanguage() 
 if Language == 0     then if System.doesFileExist("lang/japanese.lua") then dofile("lang/japanese.lua") end
@@ -61,21 +61,21 @@ end
 
 function ORBMAN(Q)
   R = R+RINCREMENT
-  if R > 200 and RINCREMENT > 0 then RINCREMENT = -0.0002 end
-  if R < 0   and RINCREMENT < 0 then RINCREMENT =  0.0002 end
-  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.1))), 180+(90*math.sin(math.deg(R*2.1+1.1))), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.2))), 180+(90*math.sin(math.deg(R*2.1+1.2))), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.3))), 180+(90*math.sin(math.deg(R*2.1+1.3))), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.4))), 180+(90*math.sin(math.deg(R*2.1+1.4))), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.7))), 180+(90*math.sin(math.deg(R*2.1+1.7))),  Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.8))), 180+(90*math.sin(math.deg(R*2.1+1.8))),  Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.9))), 180+(90*math.sin(math.deg(R*2.1+1.9))),  Color.new(128, 128, 128, Q))
+  if R > 200 and RINCREMENT > 0 then RINCREMENT = -0.00018 end
+  if R < 0   and RINCREMENT < 0 then RINCREMENT =  0.00018 end
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.1))), 180+(80*math.sin(math.deg(R*2.1+1.1))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.2))), 180+(80*math.sin(math.deg(R*2.1+1.2))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.3))), 180+(80*math.sin(math.deg(R*2.1+1.3))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.4))), 180+(80*math.sin(math.deg(R*2.1+1.4))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.7))), 180+(80*math.sin(math.deg(R*2.1+1.7))),  Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.8))), 180+(80*math.sin(math.deg(R*2.1+1.8))),  Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.9))), 180+(80*math.sin(math.deg(R*2.1+1.9))),  Color.new(128, 128, 128, Q))
 end
 
 function ORBMANex(IMG, Q, X, Z, POW)
   R = R+RINCREMENT
-  if R > 200 and RINCREMENT > 0 then RINCREMENT = -0.0002 end
-  if R < 0   and RINCREMENT < 0 then RINCREMENT = -0.0002 end
+  if R > 200 and RINCREMENT > 0 then RINCREMENT = -0.00018 end
+  if R < 0   and RINCREMENT < 0 then RINCREMENT =  0.00018 end
   Graphics.drawImage(IMG, X+(POW*math.cos(math.deg(R*2.1+1.1))), Z+(POW*math.sin(math.deg(R*2.1+1.1))), Color.new(128, 128, 128, Q))
   Graphics.drawImage(IMG, X+(POW*math.cos(math.deg(R*2.1+1.2))), Z+(POW*math.sin(math.deg(R*2.1+1.2))), Color.new(128, 128, 128, Q))
   Graphics.drawImage(IMG, X+(POW*math.cos(math.deg(R*2.1+1.3))), Z+(POW*math.sin(math.deg(R*2.1+1.3))), Color.new(128, 128, 128, Q))
@@ -160,7 +160,7 @@ function OrbIntro(BGQ)
       Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
       if Q > 0 then Q=Q-1 end
     end
-    ORBMANex(CURSOR, 0x70-A, 180, 180, 90+X)
+    ORBMANex(CURSOR, 0x70-A, 180, 180, 80+X)
     if A > 0 then A=A-1 end
     if X > 0 then X=X-1 end
     Screen.flip()
@@ -538,10 +538,10 @@ function secrerr(RET)
     Screen.clear()
     if RET == 1 then
       Graphics.drawScaleImage(BGSCS, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
-      ORBMANex(GREENCURSOR, 0x80-Q-1, 180, 180, 90+Q)
+      ORBMANex(GREENCURSOR, 0x80-Q-1, 180, 180, 80+Q)
     else
       Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
-      ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 90+Q)
+      ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 80+Q)
     end
     if Q < 0x20 then
       pad = Pads.get()
@@ -590,7 +590,7 @@ function WarnIncompatibleMachine()
   while true do
     Screen.clear()
     Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
-    ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 90+Q)
+    ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 80+Q)
 
     pad = Pads.get()
     if A > 0 then A = A-1 end
