@@ -62,7 +62,7 @@ end
 function ORBMAN(Q)
   R = R+RINCREMENT
   if R > 200 and RINCREMENT > 0 then RINCREMENT = -0.0002 end
-  if R < 0   and RINCREMENT < 0 then RINCREMENT = -0.0002 end
+  if R < 0   and RINCREMENT < 0 then RINCREMENT =  0.0002 end
   Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.1))), 180+(90*math.sin(math.deg(R*2.1+1.1))), Color.new(128, 128, 128, Q))
   Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.2))), 180+(90*math.sin(math.deg(R*2.1+1.2))), Color.new(128, 128, 128, Q))
   Graphics.drawImage(CURSOR, 180+(90*math.cos(math.deg(R*2.1+1.3))), 180+(90*math.sin(math.deg(R*2.1+1.3))), Color.new(128, 128, 128, Q))
@@ -590,7 +590,7 @@ function WarnIncompatibleMachine()
   while true do
     Screen.clear()
     Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
-    ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 90)
+    ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 90+Q)
 
     pad = Pads.get()
     if A > 0 then A = A-1 end
