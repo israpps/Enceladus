@@ -128,15 +128,18 @@ static int lua_secrdownloadfile(lua_State *L) {
 	void* buf;
 	int result = 0;
 
-	int fd = open(file_tbo, O_RDONLY, 0777);
+	int fd = open(file_tbo, O_RDONLY);
     printf("luasecrdownloadfile: input fd is %d\n", fd);
 	if(fd<0){
-        luaL_error(L, "CANT OPEN KELF");
+        lua_pushinteger(L, -201);
+        return 1;
 	}
 	int size=lseek(fd, 0, SEEK_END);
     printf("luasecrdownloadfile: KELF size is %d\n", size);
 	if(size<0){
-        luaL_error(L, "CANT SEEK KELF SIZE");
+        close(fd);
+        lua_pushinteger(L, -201);
+        return -EIO;
     }
 	lseek(fd, 0, SEEK_SET);
 	if((buf = memalign(64, size))!=NULL) 
