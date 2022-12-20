@@ -101,7 +101,6 @@ static int SignKELF(void *buffer, int size, unsigned char port, unsigned char sl
 
 static int lua_secrdownloadfile(lua_State *L) {
 	int argc = lua_gettop(L);
-    printf("\n\n\n\n\n\n\n%s: Starting with %d argumments\n", __func__, argc);
 #ifndef SKIP_ERROR_HANDLING
 	if ((argc != 4) && (argc != 5)) return luaL_error(L, "wrong number of arguments");
 #endif
@@ -118,6 +117,14 @@ static int lua_secrdownloadfile(lua_State *L) {
         printf("\nFlags are %%d=%d or %%x=%x\n", flags, flags);
     }
 
+    printf("\n\n\n\n\n\n\n%s: Starting with %d argumments:\n"
+           "[Port]: %d\n"
+           "[Slot]: %d\n"
+           "[input KELF]: %s\n"
+           "[output KELF]: %s\n"
+           "[flags]: %x\n"
+           , __func__, argc,
+           port, slot, file_tbo, dest, flags);
 	void* buf;
 	int result = 0;
 

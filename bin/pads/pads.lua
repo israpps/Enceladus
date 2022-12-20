@@ -10,8 +10,12 @@ System.closeFile(temporaryVar)
 KELFBinder.init(ROMVER)
 Secrman.init()
 ROMVERN = KELFBinder.getROMversion()
+IS_PSX = 0
+if System.doesFileExist("rom0:PSXVER") then IS_PSX = 1 else IS_PSX = 0 end
 -- DVDPLAYERUPDATE = "INSTALL/KELF/DVDPLAYER.XLF"
 SYSUPDATE_MAIN = "INSTALL/KELF/SYSTEM.XLF"
+PSX_SYSUPDATE =  "INSTALL/KELF/XSYSTEM.XLF"
+
 temporaryVar = System.openFile(SYSUPDATE_MAIN, FREAD)
 SYSUPDATE_SIZE = System.sizeFile(temporaryVar)
 System.closeFile(temporaryVar)
@@ -49,8 +53,8 @@ local R = 0.1
 local RINCREMENT = 0.00018
 
 Language = KELFBinder.getsystemLanguage() 
-if System.doesFileExist("lang/global.lua") then dofile("lang/global.lua") end
-elseif Language == 0     then if System.doesFileExist("lang/japanese.lua") then dofile("lang/japanese.lua") end
+if System.doesFileExist("lang/global.lua") then dofile("lang/global.lua")
+elseif Language == 0 then if System.doesFileExist("lang/japanese.lua") then dofile("lang/japanese.lua") end
 elseif Language == 2 then if System.doesFileExist("lang/french.lua") then dofile("lang/french.lua") end
 elseif Language == 3 then if System.doesFileExist("lang/spanish.lua") then dofile("lang/spanish.lua") end
 elseif Language == 4 then if System.doesFileExist("lang/german.lua") then dofile("lang/german.lua") end
@@ -295,8 +299,12 @@ function NormalInstall(port, slot)
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
   Screen.clear()
   Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
-  Font.ftPrint(font, 320, 20  , 8, 600, 64, string.format(LNG_INSTPMPT, SYSUPDATEPATH))
-  Screen.flip()
+  if IS_PSX == 1 then
+    Font.ftPrint(font, 320, 20  , 8, 600, 64, string.format(LNG_INSTPMPT, "BIEXEC-SYSTEM/xosdmain.elf"))
+  else
+    Font.ftPrint(font, 320, 20  , 8, 600, 64, string.format(LNG_INSTPMPT, SYSUPDATEPATH))
+  end
+    Screen.flip()
   if (ROMVERN == 100) or (ROMVERN == 101) then -- PROTOKERNEL NEEDS TWO UPDATES TO FUNCTION
     Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, "BIEXEC-SYSTEM/osd130.elf")) -- SCPH-18000
     if (ROMVERN == 100) then
@@ -306,6 +314,9 @@ function NormalInstall(port, slot)
       RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_101, string.format("mc%d:/%s", port, SYSUPDATEPATH))
       if RET < 0 then secrerr(RET) return end
     end
+  elseif IS_PSX == 1 then
+    RET = Secrman.downloadfile(port, slot, PSX_SYSUPDATE, string.format("mc%d:/BIEXEC-SYSTEM/xosdmain.elf", port))
+    if RET < 0 then secrerr(RET) return end
   else
     RET = Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH))
     if RET < 0 then secrerr(RET) return end
