@@ -29,13 +29,8 @@ KERNEL_PATCH_101 = "INSTALL/KELF/OSD110.KERNEL"
 
 local circle = Graphics.loadImage("pads/circle.png")
 local cross = Graphics.loadImage("pads/cross.png")
---local square = Graphics.loadImage("pads/square.png")
 local triangle = Graphics.loadImage("pads/triangle.png")
 
---[[local up = Graphics.loadImage("pads/up.png")
-local down = Graphics.loadImage("pads/down.png")
-local left = Graphics.loadImage("pads/left.png")
-local right = Graphics.loadImage("pads/right.png")]]
 local MC2 = Graphics.loadImage("pads/mc_ps2.png")
 local MC1 = Graphics.loadImage("pads/mc_ps1.png")
 local MCU = Graphics.loadImage("pads/mc_empty.png")
@@ -148,7 +143,7 @@ function greeting()
       end
       Graphics.drawImage(LOGO, 64.0, 50.0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 20  , 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
-      Font.ftPrint(font, 320, 40  , 8, 630, 16, " Closed BETA - 003 ", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 40  , 8, 630, 16, " Closed BETA - 005 ", Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 320 , 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 340 , 8, 630, 16, LNG_CRDTS1, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 360 , 8, 630, 16, LNG_CRDTS2, Color.new(128, 128, 128, Q))
@@ -632,9 +627,9 @@ function AdvancedINSTprompt()
   local D = 15
   local A = 0x80
   local PROMTPS = {
-    "Installs system update for every PS2 of the same region",
-    "Installs system update for every PS2 of every region",
-    "Installs system update for PSX-DESR systems"
+    LNG_DESC_CROSS_MODEL,
+    LNG_DESC_CROSS_REGION,
+    LNG_DESC_PSXDESR
   }
   while true do
     Screen.clear()
@@ -643,12 +638,12 @@ function AdvancedINSTprompt()
     --Font.ftPrint(font, 150, 20,  0, 630, 32, LNG_IMPMP0, Color.new(220, 220, 220, 0x80-A))
 
     if T == 1 then
-      Font.ftPrint(font, 321, 150, 0, 630, 16, "Cross Model", Color.new(0, 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 320, 150, 0, 630, 16, "Cross Model", Color.new(200, 200, 200, 0x80-A))
+      Font.ftPrint(font, 321, 150, 0, 630, 16, LNG_AI_CROSS_MODEL, Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 150, 0, 630, 16, LNG_AI_CROSS_MODEL, Color.new(200, 200, 200, 0x80-A))
     end
     if T == 2 then
-      Font.ftPrint(font, 321, 190, 0, 630, 16, "Cross Region", Color.new(0, 0xde, 0xff, 0x80-A)) else
-      Font.ftPrint(font, 320, 190, 0, 630, 16, "Cross Region", Color.new(200, 200, 200, 0x80-A))
+      Font.ftPrint(font, 321, 190, 0, 630, 16, LNG_AI_CROSS_REGION, Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 190, 0, 630, 16, LNG_AI_CROSS_REGION, Color.new(200, 200, 200, 0x80-A))
     end
     if T == 3 then
       Font.ftPrint(font, 321 , 230, 0, 630, 16, "PSX DESR", Color.new(0, 0xde, 0xff, 0x80-A)) elseif IS_PSX == 1 then
@@ -887,15 +882,18 @@ function SystemInfo()
   local D = 15
   local A = 0x50
   local UPDTPATH = KELFBinder.calculateSysUpdatePath()
+  local COMPATIBLE_WITH_UPDATES = LNG_YES
+  if ROMVERN > 220 then COMPATIBLE_WITH_UPDATES = LNG_NO end
   while true do
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
     ORBMAN(0x80)
     Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_SYSTEMINFO, Color.new(220, 220, 220, 0x80-A))
+
     Font.ftPrint(font, 50, 60,  0, 630, 32, string.format("ROMVER = [%s]", ROMVER), Color.new(220, 220, 220, 0x80-A))
     Font.ftPrint(font, 50, 80,  0, 630, 32, string.format(LNG_SUPATH, UPDTPATH), Color.new(220, 220, 220, 0x80-A))
-    Font.ftPrint(font, 50, 100,  0, 630, 32, string.format("Console model = [%s]", KELFBinder.getConsoleModel()), Color.new(220, 220, 220, 0x80-A))
-    
+    Font.ftPrint(font, 50, 100,  0, 630, 32, string.format(LNG_IS_COMPATIBLE, COMPATIBLE_WITH_UPDATES), Color.new(220, 220, 220, 0x80-A))
+
     promptkeys(0,LNG_CT0, 1, LNG_CT4,0, 0, A)
     if A > 0 then A=A-1 end
     Screen.flip()
@@ -908,9 +906,9 @@ end
 -- SCRIPT BEHAVIOUR BEGINS --
 --SystemInfo()
 
---greeting()
---if ROMVERN > 220 then WarnIncompatibleMachine() end
---OrbIntro(0)
+greeting()
+if ROMVERN > 220 then WarnIncompatibleMachine() end
+OrbIntro(0)
 while true do
   local TT = MainMenu()
   WaitWithORBS(50)
@@ -968,7 +966,7 @@ while true do
   end
   -- SYSTEM UPDATE
 end
-Screen.clear()
+Screen.clear(Color.new(0xff, 0, 0, 0))
 while true do end
 
 
