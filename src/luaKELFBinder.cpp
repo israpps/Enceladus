@@ -8,6 +8,9 @@
 #include <libmc.h>
 #include <osd_config.h>
 #include "include/dbgprintf.h"
+extern "C" {
+#include "modelname.h"
+}
 
 static int KELFBinderHelperFunctionsInited = false;
 static unsigned long int ROMVERSION;
@@ -216,8 +219,20 @@ static int lua_setsysupdatefoldprops(lua_State *L)
     return result;
 }
 
-static const luaL_Reg KELFBinder_functions[] = {
+static int lua_initConsoleModel(lua_State *L)
+{	
+    ModelNameInit();
+    return 1;
+}
 
+static int lua_getConsoleModel(lua_State *L)
+{
+    const char* model = ModelNameGet();
+    lua_pushstring(L, model);
+    return 1;
+}
+
+static const luaL_Reg KELFBinder_functions[] = {
     {"init", lua_KELFBinderInit},
     {"deinit", lua_KELFBinderDeInit},
     {"calculateSysUpdatePath", lua_calcsysupdatepath},
@@ -227,7 +242,10 @@ static const luaL_Reg KELFBinder_functions[] = {
     {"getsystemregionString", lua_getsystemregionString},
     {"getROMversion", lua_getromversion},
     {"getsystemLanguage", lua_getosdconfigLNG},
-    {0, 0}};
+    {"InitConsoleModel", lua_initConsoleModel},
+    {"getConsoleModel", lua_getConsoleModel},
+    {0, 0}
+};
 
 void luaKELFBinder_init(lua_State *L)
 {

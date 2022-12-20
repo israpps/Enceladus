@@ -62,6 +62,7 @@ IMPORT_BIN2C(secrman_irx);
 IMPORT_BIN2C(IOPRP);
 
 char boot_path[255];
+char ConsoleROMVER[17];
 
 void setLuaBootPath(int argc, char **argv, int idx)
 {
@@ -120,6 +121,7 @@ void initMC(void)
 
 int main(int argc, char *argv[])
 {
+    int fd;
 //#ifdef SCR_PRINTF
     init_scr();
 //#endif
@@ -215,6 +217,12 @@ int main(int argc, char *argv[])
     }
     DPRINTF("FINISHED WAITING FOR USB DEVICE READY\n");
 
+	if ((fd = open("rom0:ROMVER", O_RDONLY)) > 0) // Reading ROMVER
+	{
+		read(fd, ConsoleROMVER, 16);
+		ConsoleROMVER[16] = '\0';
+        close(fd);
+	}
     // if no parameters are specified, use the default boot
     if (argc < 2) {
         // set boot path global variable based on the elf path

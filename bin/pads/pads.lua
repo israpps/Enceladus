@@ -10,6 +10,7 @@ System.closeFile(temporaryVar)
 KELFBinder.init(ROMVER)
 Secrman.init()
 ROMVERN = KELFBinder.getROMversion()
+KELFBinder.InitConsoleModel()
 IS_PSX = 0
 if System.doesFileExist("rom0:PSXVER") then IS_PSX = 1 else IS_PSX = 0 end
 -- DVDPLAYERUPDATE = "INSTALL/KELF/DVDPLAYER.XLF"
@@ -564,10 +565,11 @@ function AdvancedINSTprompt()
       Font.ftPrint(font, 320, 190, 0, 630, 16, "Cross Region", Color.new(200, 200, 200, 0x80-A))
     end
     if T == 3 then
-      Font.ftPrint(font, 321 , 230, 0, 630, 16, "PSX DESR", Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 321 , 230, 0, 630, 16, "PSX DESR", Color.new(0, 0xde, 0xff, 0x80-A)) elseif IS_PSX == 1 then
+      Font.ftPrint(font, 320 , 230, 0, 630, 16, "PSX DESR", Color.new(100, 100, 100, 0x80-A)) else -- make the PSX option grey if runner machine is PSX
       Font.ftPrint(font, 320 , 230, 0, 630, 16, "PSX DESR", Color.new(200, 200, 200, 0x80-A))
     end
-    
+
     Font.ftPrint(font, 80 , 350, 0, 600, 32, PROMTPS[T], Color.new(128, 128, 128, 0x80-A))
     promptkeys(1,LNG_CT0, 1, LNG_CT1,0, 0, A)
     if A > 0 then A=A-1 end
@@ -575,9 +577,13 @@ function AdvancedINSTprompt()
     local pad = Pads.get()
 
     if Pads.check(pad, PAD_CROSS) and D == 0 then
-      D = 1
-      Screen.clear()
-      break
+      if T == 3 and IS_PSX == 1 then
+        --user requested a PSX install on a PSX, senseless, normal install will already do the job
+      else
+        D = 1
+        Screen.clear()
+        break
+      end
     end
 
     if Pads.check(pad, PAD_CIRCLE) and D == 0 then
@@ -625,10 +631,14 @@ function PreAdvancedINSTstep(INSTMODE)
     for i=0,10 do
       UPDT[i] = 1
     end
+  elseif INSTMODE == 3 then
+    UPDT[10] = 1
+  else
+    UPDT["x"] = false
   end
+  return UPDT
 end
 
-AdvancedINSTprompt()
 function secrerr(RET)
   local A = 0x80
   local Q = 0x7f
@@ -796,6 +806,7 @@ function SystemInfo()
     Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_SYSTEMINFO, Color.new(220, 220, 220, 0x80-A))
     Font.ftPrint(font, 50, 60,  0, 630, 32, string.format("ROMVER = [%s]", ROMVER), Color.new(220, 220, 220, 0x80-A))
     Font.ftPrint(font, 50, 80,  0, 630, 32, string.format(LNG_SUPATH, UPDTPATH), Color.new(220, 220, 220, 0x80-A))
+    Font.ftPrint(font, 50, 100,  0, 630, 32, string.format("Console model = [%s]", KELFBinder.getConsoleModel()), Color.new(220, 220, 220, 0x80-A))
     
     promptkeys(0,LNG_CT0, 1, LNG_CT4,0, 0, A)
     if A > 0 then A=A-1 end
@@ -825,6 +836,21 @@ if (TT == 1) then
       FadeWIthORBS()
       NormalInstall(port, 0)
       WaitWithORBS(50)
+    end
+  elseif TTT == 2 then
+    local memcard = 0
+    local LOL = AdvancedINSTprompt()
+    local UPDT = { }
+    UPDT = PreAdvancedINSTstep(LOL)
+    if UPDT["x"] == true then
+      memcard = MemcardPickup()
+      if UPDT[10] == 1 then -- IF PSX mode was selected
+        IS_PSX = 1 -- simulate runner console is a PSX to reduce code duplication
+        NormalInstall(memcard, 0)
+        IS_PSX = 0
+      else
+        performExpertINST(memcard, 0, UPDT)
+      end
     end
   elseif TTT == 3 then
     local port = MemcardPickup()
