@@ -49,7 +49,8 @@ local R = 0.1
 local RINCREMENT = 0.00018
 
 Language = KELFBinder.getsystemLanguage() 
-if Language == 0     then if System.doesFileExist("lang/japanese.lua") then dofile("lang/japanese.lua") end
+if System.doesFileExist("lang/global.lua") then dofile("lang/global.lua") end
+elseif Language == 0     then if System.doesFileExist("lang/japanese.lua") then dofile("lang/japanese.lua") end
 elseif Language == 2 then if System.doesFileExist("lang/french.lua") then dofile("lang/french.lua") end
 elseif Language == 3 then if System.doesFileExist("lang/spanish.lua") then dofile("lang/spanish.lua") end
 elseif Language == 4 then if System.doesFileExist("lang/german.lua") then dofile("lang/german.lua") end
