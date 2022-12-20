@@ -27,14 +27,21 @@ local triangle = Graphics.loadImage("pads/triangle.png")
 local down = Graphics.loadImage("pads/down.png")
 local left = Graphics.loadImage("pads/left.png")
 local right = Graphics.loadImage("pads/right.png")]]
-local MC = Graphics.loadImage("pads/MC.png")
-local LOGO = Graphics.loadImage("pads/logo.png")
-local BG = Graphics.loadImage("pads/background.png")
-local BGERR = Graphics.loadImage("pads/background_error.png")
-local BGSCS = Graphics.loadImage("pads/background_success.png")
-local CURSOR = Graphics.loadImage("pads/firefly.png")
-local REDCURSOR = Graphics.loadImage("pads/firefly_error.png")
+local MC2 = Graphics.loadImage("pads/mc_ps2.png")
+local MC1 = Graphics.loadImage("pads/mc_ps1.png")
+local MCU = Graphics.loadImage("pads/mc_empty.png")
+local LOGO        = Graphics.loadImage("pads/logo.png")
+local BG          = Graphics.loadImage("pads/background.png")
+local BGERR       = Graphics.loadImage("pads/background_error.png")
+local BGSCS       = Graphics.loadImage("pads/background_success.png")
+local CURSOR      = Graphics.loadImage("pads/firefly.png")
+local REDCURSOR   = Graphics.loadImage("pads/firefly_error.png")
 local GREENCURSOR = Graphics.loadImage("pads/firefly_success.png")
+
+Graphics.setImageFilters(LOGO       , LINEAR)
+Graphics.setImageFilters(BG         , LINEAR)
+Graphics.setImageFilters(BGERR      , LINEAR)
+Graphics.setImageFilters(BGSCS      , LINEAR)
 
 local REGION = KELFBinder.getsystemregion()
 --local REGIONSTR = KELFBinder.getsystemregionString(REGION)
@@ -132,7 +139,7 @@ function greeting()
       end
       Graphics.drawImage(LOGO, 64.0, 50.0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 20  , 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
-      Font.ftPrint(font, 320, 40  , 8, 630, 16, " Closed BETA - 003 "..(SYSUPDATE_SIZE/1024), Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 40  , 8, 630, 16, " Closed BETA - 003 ", Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 320 , 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 340 , 8, 630, 16, LNG_CRDTS1, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 360 , 8, 630, 16, LNG_CRDTS2, Color.new(128, 128, 128, Q))
@@ -300,30 +307,48 @@ function MemcardPickup()
   local Q = 0x77
   local QP = -4
   local A = 0x50
+  local mi0
+  local mi1
   local mcinfo0 = System.getMCInfo(0)
   local mcinfo1 = System.getMCInfo(1)
   while true do
     local HC = ((mcinfo0.type == 2) or (mcinfo1.type == 2))
+    if mcinfo0.type == 2 then
+      mi0 = MC2
+    elseif mcinfo0.type == 1 then
+      mi0 = MC1
+    else mi0 = MCU
+    end
+
+    if mcinfo1.type == 2 then
+      mi1 = MC2
+    elseif mcinfo1.type == 1 then
+      mi1 = MC1
+    else mi1 = MCU
+    end
+
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
     ORBMAN(0x80)
     Font.ftPrint(font, 320, 20,  8, 630, 32, LNG_MEMCARD0, Color.new(0x80, 0x80, 0x80, 0x80-A))
+
     if mcinfo0.type == 2 then
       Font.ftPrint(font, 80, 270,  0, 630, 32, string.format(LNG_MEMCARD1, 1, mcinfo0.freemem), Color.new(0x80, 0x80, 0x80, 0x80-A))
-      if T == 0 then
-        Graphics.drawImage(MC, 80.0, 150.0, Color.new(0x80, 0x80, 0x80, Q))
-      else
-        Graphics.drawImage(MC, 80.0, 150.0, Color.new(0x80, 0x80, 0x80, 0x80-A))
-      end
+    end
+    if T == 0 then
+      Graphics.drawScaleImage(mi0, 80.0, 150.0, 64, 64, Color.new(0x90, 0x90, 0x90, Q))
+    else
+      Graphics.drawScaleImage(mi0, 80.0, 150.0, 64, 64, Color.new(0x80, 0x80, 0x80, 0x80-A))
     end
     if mcinfo1.type == 2 then
       Font.ftPrint(font, 360, 270,  0, 630, 32, string.format(LNG_MEMCARD1, 2, mcinfo1.freemem), Color.new(0x80, 0x80, 0x80, 0x80-A))
-      if T == 1 then
-        Graphics.drawImage(MC, 360.0, 150.0, Color.new(0x80, 0x80, 0x80, Q))
-      else
-        Graphics.drawImage(MC, 360.0, 150.0, Color.new(0x80, 0x80, 0x80, 0x80-A))
-      end
     end
+    if T == 1 then
+      Graphics.drawScaleImage(mi1, 360.0, 150.0, 64, 64, Color.new(0x90, 0x90, 0x90, Q))
+    else
+      Graphics.drawScaleImage(mi1, 360.0, 150.0, 64, 64, Color.new(0x80, 0x80, 0x80, 0x80-A))
+    end
+
     if A > 0 then A=A-1 end
     promptkeys(1,LNG_CT0,1,LNG_CT1, 1,LNG_CT2, A)
     Screen.flip()
@@ -657,6 +682,7 @@ function SystemInfo()
 end
 -- SCRIPT BEHAVIOUR BEGINS --
 --SystemInfo()
+MemcardPickup()
 greeting()
 if ROMVERN > 220 then WarnIncompatibleMachine() end
 OrbIntro(0)

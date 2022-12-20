@@ -783,7 +783,7 @@ GSTEXTURE* load_image(const char* path, bool delayed){
 	if (magic == 0x4D42) image =      loadbmp(file, delayed);
 	else if (magic == 0xD8FF) image = loadjpeg(file, false, delayed);
 	else if (magic == 0x5089) image = loadpng(file, delayed);
-	if (image == NULL) DPRINTF("Failed to load image %s.", path);
+	if (image == NULL) DPRINTF("Failed to load image %s.\n", path);
 
 	return image;
 }
