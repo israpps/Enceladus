@@ -151,6 +151,7 @@ function greeting()
       Font.ftPrint(font, 320, 400 , 8, 630, 16, LNG_CRDTS4, Color.new(240, 240, 240, Q))
       Screen.flip()
     end
+    Graphics.freeImage(LOGO)
 end
 
 function OrbIntro(BGQ)
@@ -261,6 +262,11 @@ function Installmodepicker()
     if Pads.check(pad, PAD_CROSS) and D == 0 then
       D = 1
       Screen.clear()
+      break
+    end
+
+    if Pads.check(pad, PAD_CIRCLE) and D == 0 then
+      T = 0
       break
     end
 
@@ -534,6 +540,95 @@ function expertINSTprompt()
   return UPDT
 end
 
+function AdvancedINSTprompt()
+  local T = 1
+  local D = 15
+  local A = 0x80
+  local PROMTPS = {
+    "Installs system update for every PS2 of the same region",
+    "Installs system update for every PS2 of every region",
+    "Installs system update for PSX-DESR systems"
+  }
+  while true do
+    Screen.clear()
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
+    ORBMAN(0x80)
+    --Font.ftPrint(font, 150, 20,  0, 630, 32, LNG_IMPMP0, Color.new(220, 220, 220, 0x80-A))
+
+    if T == 1 then
+      Font.ftPrint(font, 321, 150, 0, 630, 16, "Cross Model", Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 150, 0, 630, 16, "Cross Model", Color.new(200, 200, 200, 0x80-A))
+    end
+    if T == 2 then
+      Font.ftPrint(font, 321, 190, 0, 630, 16, "Cross Region", Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320, 190, 0, 630, 16, "Cross Region", Color.new(200, 200, 200, 0x80-A))
+    end
+    if T == 3 then
+      Font.ftPrint(font, 321 , 230, 0, 630, 16, "PSX DESR", Color.new(0, 0xde, 0xff, 0x80-A)) else
+      Font.ftPrint(font, 320 , 230, 0, 630, 16, "PSX DESR", Color.new(200, 200, 200, 0x80-A))
+    end
+    
+    Font.ftPrint(font, 80 , 350, 0, 600, 32, PROMTPS[T], Color.new(128, 128, 128, 0x80-A))
+    promptkeys(1,LNG_CT0, 1, LNG_CT1,0, 0, A)
+    if A > 0 then A=A-1 end
+    Screen.flip()
+    local pad = Pads.get()
+
+    if Pads.check(pad, PAD_CROSS) and D == 0 then
+      D = 1
+      Screen.clear()
+      break
+    end
+
+    if Pads.check(pad, PAD_CIRCLE) and D == 0 then
+      T = 0
+      break
+    end
+
+    if Pads.check(pad, PAD_UP) and D == 0 then
+      T = T-1
+      D = 1
+    elseif Pads.check(pad, PAD_DOWN) and D == 0 then
+      T = T+1
+      D = 1
+    end
+    if D > 0 then D = D+1 end
+    if D > 10 then D = 0 end
+    if T < 1 then T = 3 end
+    if T > 3 then T = 1 end
+  end
+  return T
+end
+
+function PreAdvancedINSTstep(INSTMODE)
+  local UPDT = { }
+  UPDT["x"] = true
+  for i=0,10 do
+    UPDT[i] = 0
+  end
+  if INSTMODE == 1 then
+    if REGION == 0 then
+      for i=0,3 do
+        UPDT[i] = 1
+      end
+    elseif REGION == 1 or REGION == 2 then
+      for i=4,6 do
+        UPDT[i] = 1
+      end
+    elseif REGION == 3 then
+      UPDT[7] = 1
+      UPDT[8] = 1
+    elseif REGION == 4 then
+      UPDT[9] = 1
+    end
+  elseif INSTMODE == 2 then
+    for i=0,10 do
+      UPDT[i] = 1
+    end
+  end
+end
+
+AdvancedINSTprompt()
 function secrerr(RET)
   local A = 0x80
   local Q = 0x7f
