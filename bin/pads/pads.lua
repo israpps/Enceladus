@@ -85,7 +85,6 @@ function ORBMANex(IMG, Q, X, Z, POW)
   Graphics.drawImage(IMG, X+(POW*math.cos(math.deg(R*2.1+1.9))), Z+(POW*math.sin(math.deg(R*2.1+1.9))), Color.new(128, 128, 128, Q))
 end
 
-
 function WaitWithORBS(NN)
   N = NN
   while N > 1 do
@@ -278,7 +277,19 @@ end
 
 function NormalInstall(port, slot)
   local RET
+  local REG = KELFBinder.getsystemregion()
   System.createDirectory(string.format("mc%d:/%s", port, KELFBinder.getsysupdatefolder()))
+  if REG == 0 then -- JAP
+    System.copyFile("INSTALL/ASSETS/JAP.sys", string.format("mc%d:/%s/icon.sys", port, KELFBinder.getsysupdatefolder()))
+  elseif REG == 1 or REG == 2 then --USA or ASIA
+    System.copyFile("INSTALL/ASSETS/USA.sys", string.format("mc%d:/%s/icon.sys", port, KELFBinder.getsysupdatefolder()))
+  elseif REG == 3 then
+    System.copyFile("INSTALL/ASSETS/EUR.sys", string.format("mc%d:/%s/icon.sys", port, KELFBinder.getsysupdatefolder()))
+  elseif REG == 4 then
+    System.copyFile("INSTALL/ASSETS/CHN.sys", string.format("mc%d:/%s/icon.sys", port, KELFBinder.getsysupdatefolder()))
+  end
+  System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, KELFBinder.getsysupdatefolder())) --icon is the same for all
+
   KELFBinder.setSysUpdateFoldProps(port, slot, KELFBinder.getsysupdatefolder())
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
   Screen.clear()
@@ -336,17 +347,17 @@ function MemcardPickup()
       Font.ftPrint(font, 80, 270,  0, 630, 32, string.format(LNG_MEMCARD1, 1, mcinfo0.freemem), Color.new(0x80, 0x80, 0x80, 0x80-A))
     end
     if T == 0 then
-      Graphics.drawScaleImage(mi0, 80.0, 150.0, 64, 64, Color.new(0x90, 0x90, 0x90, Q))
+      Graphics.drawScaleImage(mi0, 80.0+32, 180.0, 64, 64, Color.new(0x90, 0x90, 0x90, Q))
     else
-      Graphics.drawScaleImage(mi0, 80.0, 150.0, 64, 64, Color.new(0x80, 0x80, 0x80, 0x80-A))
+      Graphics.drawScaleImage(mi0, 80.0+32, 180.0, 64, 64, Color.new(0x80, 0x80, 0x80, 0x80-A))
     end
     if mcinfo1.type == 2 then
       Font.ftPrint(font, 360, 270,  0, 630, 32, string.format(LNG_MEMCARD1, 2, mcinfo1.freemem), Color.new(0x80, 0x80, 0x80, 0x80-A))
     end
     if T == 1 then
-      Graphics.drawScaleImage(mi1, 360.0, 150.0, 64, 64, Color.new(0x90, 0x90, 0x90, Q))
+      Graphics.drawScaleImage(mi1, 360.0+32, 180.0, 64, 64, Color.new(0x90, 0x90, 0x90, Q))
     else
-      Graphics.drawScaleImage(mi1, 360.0, 150.0, 64, 64, Color.new(0x80, 0x80, 0x80, 0x80-A))
+      Graphics.drawScaleImage(mi1, 360.0+32, 180.0, 64, 64, Color.new(0x80, 0x80, 0x80, 0x80-A))
     end
 
     if A > 0 then A=A-1 end
@@ -527,10 +538,10 @@ function secrerr(RET)
     Screen.clear()
     if RET == 1 then
       Graphics.drawScaleImage(BGSCS, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
-      ORBMANex(GREENCURSOR, 0x80-Q-1, 180, 180, 90)
+      ORBMANex(GREENCURSOR, 0x80-Q-1, 180, 180, 90+Q)
     else
       Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
-      ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 90)
+      ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 90+Q)
     end
     if Q < 0x20 then
       pad = Pads.get()
@@ -538,7 +549,7 @@ function secrerr(RET)
 
       promptkeys(1, LNG_CONTINUE, 0, 0, 0, 0, A)
       if RET ~= 1 then
-        Font.ftPrint(font, 320, 40,  8, 630, 64, string.format(LNG_INSTERR, RET), Color.new(0x80, 0x80, 0x80, 0x80-A)) 
+        Font.ftPrint(font, 320, 40,  8, 630, 64, string.format(LNG_INSTERR, RET), Color.new(0x80, 0x80, 0x80, 0x80-A))
       else
         Font.ftPrint(font, 320, 40,  8, 630, 64, LNG_INSTPMPT1, Color.new(0x80, 0x80, 0x80, 0x80-A))
       end
@@ -610,18 +621,26 @@ function performExpertINST(port, slot, UPDT)
   if UPDT[0] == 1 or UPDT[1] == 1 or UPDT[2] == 1 or UPDT[3] == 1 then
     System.createDirectory(string.format("mc%d:/%s", port, "BIEXEC-SYSTEM"))
     KELFBinder.setSysUpdateFoldProps(port, slot, "BIEXEC-SYSTEM")
+    System.copyFile("INSTALL/ASSETS/JAP.sys", string.format("mc%d:/%s/icon.sys", port, "BIEXEC-SYSTEM"))
+    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BIEXEC-SYSTEM"))
   end
   if UPDT[4] == 1 or UPDT[5] == 1 or UPDT[6] == 1 then
     System.createDirectory(string.format("mc%d:/%s", port, "BAEXEC-SYSTEM"))
     KELFBinder.setSysUpdateFoldProps(port, slot, "BAEXEC-SYSTEM")
+    System.copyFile("INSTALL/ASSETS/USA.sys", string.format("mc%d:/%s/icon.sys", port, "BAEXEC-SYSTEM"))
+    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BAEXEC-SYSTEM"))
   end
   if UPDT[7] == 1 or UPDT[8] == 1 then
     System.createDirectory(string.format("mc%d:/%s", port, "BEEXEC-SYSTEM"))
     KELFBinder.setSysUpdateFoldProps(port, slot, "BEEXEC-SYSTEM")
+    System.copyFile("INSTALL/ASSETS/EUR.sys", string.format("mc%d:/%s/icon.sys", port, "BEEXEC-SYSTEM"))
+    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BEEXEC-SYSTEM"))
   end
   if UPDT[9] == 1 then
     System.createDirectory(string.format("mc%d:/%s", port, "BCEXEC-SYSTEM"))
     KELFBinder.setSysUpdateFoldProps(port, slot, "BCEXEC-SYSTEM")
+    System.copyFile("INSTALL/ASSETS/CHN.sys", string.format("mc%d:/%s/icon.sys", port, "BCEXEC-SYSTEM"))
+    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BCEXEC-SYSTEM"))
   end
 
   if UPDT[0] == 1 then
@@ -682,7 +701,7 @@ function SystemInfo()
 end
 -- SCRIPT BEHAVIOUR BEGINS --
 --SystemInfo()
-MemcardPickup()
+
 greeting()
 if ROMVERN > 220 then WarnIncompatibleMachine() end
 OrbIntro(0)
