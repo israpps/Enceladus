@@ -1,14 +1,15 @@
-
 	LNG_CRDTS0 = "Coded by El_isra (aka: Matias Israelson)"
 	LNG_CRDTS1 = "Based on Enceladus by Daniel Santos"
 	LNG_CRDTS2 = "SECRMAN and SECRSIF taken from Free McBoot 1.9 series installer"
 	LNG_CRDTS3 = "GFX by Berion"
 	LNG_CRDTS4 = "Get me free at https://www.github.com/israpps/KelfBinder"
+	LNG_CRDTS5 = "Thanks to:"
 	LNG_MM1 = "Welcome to KELFBinder"
 	LNG_MM2 = "Manage System Updates"
 	LNG_MM3 = "Manage DVDPlayer Updates"
 	LNG_MM4 = "System Information"
 	LNG_MM5 = "Exit"
+	LNG_MM6 = "Credits"
 	LNG_CT0 = "Select"
 	LNG_CT1 = "Cancel"
 	LNG_CT2 = "Refresh"
@@ -69,6 +70,10 @@
 	LNG_DESC_CROSS_MODEL  =  "Install system updates for every PS2 of this same region"
 	LNG_DESC_CROSS_REGION =  "Install system updates for every PS2 of every region"
 	LNG_DESC_PSXDESR      =  "Install a system update for PSX-DESR systems"
+	LNG_WARNING = "Warning!"
+	LNG_WARN_CONFLICT0 = "The selected Memory Card seems to have a system update\nalready installed"
+	LNG_WARN_CONFLICT1 = "clean the target folders before proceeding?"
+	LNG_WARN_CONFLICT2 = "Note: If you don't clean the folders, the update will \nbe installed anyways, but on a dirty enviroment"
 
 if System.doesFileExist("System/index.lua") then
 	dofile("System/index.lua");

@@ -52,7 +52,8 @@ local REGION = KELFBinder.getsystemregion()
 local R = 0.1
 local RINCREMENT = 0.00018
 
-Language = KELFBinder.getsystemLanguage() 
+Language = KELFBinder.getsystemLanguage()
+Language = 3
 if System.doesFileExist("lang/global.lua") then dofile("lang/global.lua")
 elseif Language == 0 then if System.doesFileExist("lang/japanese.lua") then dofile("lang/japanese.lua") end
 elseif Language == 2 then if System.doesFileExist("lang/french.lua") then dofile("lang/french.lua") end
@@ -143,7 +144,7 @@ function greeting()
       end
       Graphics.drawImage(LOGO, 64.0, 50.0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 20  , 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
-      Font.ftPrint(font, 320, 40  , 8, 630, 16, " Closed BETA - 005 ", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 40  , 8, 630, 16, " Closed BETA - 006 ", Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 320 , 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 340 , 8, 630, 16, LNG_CRDTS1, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 360 , 8, 630, 16, LNG_CRDTS2, Color.new(128, 128, 128, Q))
@@ -151,7 +152,6 @@ function greeting()
       Font.ftPrint(font, 320, 400 , 8, 630, 16, LNG_CRDTS4, Color.new(240, 240, 240, Q))
       Screen.flip()
     end
-    Graphics.freeImage(LOGO)
 end
 
 function OrbIntro(BGQ)
@@ -195,8 +195,12 @@ function MainMenu()
       Font.ftPrint(font, 320, 230, 0, 630, 16, LNG_MM4, Color.new(200, 200, 200, 0x80-A))
     end
     if T == 4 then
-      Font.ftPrint(font, 321, 300, 0, 630, 16, LNG_MM5, Color.new(0, 0xde, 0xff, 0x90-A)) else
-      Font.ftPrint(font, 320, 300, 0, 630, 16, LNG_MM5, Color.new(200, 200, 200, 0x80-A))
+      Font.ftPrint(font, 321, 270, 0, 630, 16, LNG_MM6, Color.new(0, 0xde, 0xff, 0x90-A)) else
+      Font.ftPrint(font, 320, 270, 0, 630, 16, LNG_MM6, Color.new(200, 200, 200, 0x80-A))
+    end
+    if T == 5 then
+      Font.ftPrint(font, 321, 310, 0, 630, 16, LNG_MM5, Color.new(0, 0xde, 0xff, 0x90-A)) else
+      Font.ftPrint(font, 320, 310, 0, 630, 16, LNG_MM5, Color.new(200, 200, 200, 0x80-A))
     end
     if A > 0 then A=A-1 end
     promptkeys(1, LNG_CT0,0,0,0,0,A)
@@ -218,8 +222,8 @@ function MainMenu()
     end
     if D > 0 then D = D+1 end
     if D > 10 then D = 0 end
-    if T < 1 then T = 4 end
-    if T > 4 then T = 1 end
+    if T < 1 then T = 5 end
+    if T > 5 then T = 1 end
 
   end
   return T
@@ -371,17 +375,21 @@ end
 function NormalInstall(port, slot)
   local RET
   local REG = KELFBinder.getsystemregion()
-  System.createDirectory(string.format("mc%d:/%s", port, KELFBinder.getsysupdatefolder()))
-  if REG == 0 then -- JAP
-    System.copyFile("INSTALL/ASSETS/JAP.sys", string.format("mc%d:/%s/icon.sys", port, KELFBinder.getsysupdatefolder()))
-  elseif REG == 1 or REG == 2 then --USA or ASIA
-    System.copyFile("INSTALL/ASSETS/USA.sys", string.format("mc%d:/%s/icon.sys", port, KELFBinder.getsysupdatefolder()))
-  elseif REG == 3 then
-    System.copyFile("INSTALL/ASSETS/EUR.sys", string.format("mc%d:/%s/icon.sys", port, KELFBinder.getsysupdatefolder()))
-  elseif REG == 4 then
-    System.copyFile("INSTALL/ASSETS/CHN.sys", string.format("mc%d:/%s/icon.sys", port, KELFBinder.getsysupdatefolder()))
+  local TARGET_FOLD = string.format("mc%d:/%s", port, KELFBinder.getsysupdatefolder())
+  if System.doesDirExist(TARGET_FOLD) then
+    Ask2WipeSysUpdateDirs(false, false, false, false, true, port)
   end
-  System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, KELFBinder.getsysupdatefolder())) --icon is the same for all
+  System.createDirectory(TARGET_FOLD)
+  if REG == 0 then -- JAP
+    System.copyFile("INSTALL/ASSETS/JAP.sys", string.format("%s/icon.sys", TARGET_FOLD))
+  elseif REG == 1 or REG == 2 then --USA or ASIA
+    System.copyFile("INSTALL/ASSETS/USA.sys", string.format("%s/icon.sys", TARGET_FOLD))
+  elseif REG == 3 then
+    System.copyFile("INSTALL/ASSETS/EUR.sys", string.format("%s/icon.sys", TARGET_FOLD))
+  elseif REG == 4 then
+    System.copyFile("INSTALL/ASSETS/CHN.sys", string.format("%s/icon.sys", TARGET_FOLD))
+  end
+  System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("%s/icon.sys", TARGET_FOLD)) --icon is the same for all
 
   KELFBinder.setSysUpdateFoldProps(port, slot, KELFBinder.getsysupdatefolder())
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
@@ -402,10 +410,10 @@ function NormalInstall(port, slot)
       RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_101, string.format("mc%d:/%s", port, SYSUPDATEPATH))
       if RET < 0 then secrerr(RET) return end
     end
-  elseif IS_PSX == 1 then
+  elseif IS_PSX == 1 then -- PSX NEEDS SPECIAL PATH
     RET = Secrman.downloadfile(port, slot, PSX_SYSUPDATE, string.format("mc%d:/BIEXEC-SYSTEM/xosdmain.elf", port))
     if RET < 0 then secrerr(RET) return end
-  else
+  else -- ANYTHING ELSE FOLLOWS WHATEVER IS WRITTEN INTO 'SYSUPDATEPATH'
     RET = Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH))
     if RET < 0 then secrerr(RET) return end
   end
@@ -709,7 +717,7 @@ function PreAdvancedINSTstep(INSTMODE)
       UPDT[9] = 1
     end
   elseif INSTMODE == 2 then
-    for i=0,10 do
+    for i=0,9 do
       UPDT[i] = 1
     end
   elseif INSTMODE == 3 then
@@ -763,7 +771,7 @@ function secrerr(RET)
         Font.ftPrint(font, 320, 60,  8, 630, 64, LNG_EUNKNOWN, Color.new(0x80, 0x80, 0x80, 0x80-A))
       end
       
-      if Pads.check(pad, PAD_CROSS) then
+      if Pads.check(pad, PAD_CROSS) and A == 0 then
         QIN = -1
         Q = 1
       end
@@ -773,6 +781,70 @@ function secrerr(RET)
     Screen.flip()
   end
   OrbIntro(1)
+end
+
+function Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, NEEDS_CURRENT, port)
+  local A = 0x80
+  local Q = 0x7f
+  local QIN = 1
+  local pad = 0
+  local SHOULD_WIPE = false
+  local JAP_FOLD = string.format("mc%d:/%s", port, "BIEXEC-SYSTEM")
+  local USA_FOLD = string.format("mc%d:/%s", port, "BAEXEC-SYSTEM")
+  local EUR_FOLD = string.format("mc%d:/%s", port, "BEEXEC-SYSTEM")
+  local CHN_FOLD = string.format("mc%d:/%s", port, "BCEXEC-SYSTEM")
+  while A > 0 do
+    Screen.clear()
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, A))
+    A = A-1
+    Screen.flip()
+  end
+  A = 0x80
+  while true do
+    Screen.clear()
+    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 80+Q)
+
+    if Q < 0x20 then
+      pad = Pads.get()
+      if A > 0 then A = A-1 end
+
+      promptkeys(1, LNG_YES, 1, LNG_NO, 0, 0, A)
+      Font.ftPrint(font, 50, 40,  0, 630, 64, LNG_WARNING, Color.new(0x80, 0x80, 0x80, 0x80-A))
+      Font.ftPrint(font, 50, 100, 0, 630, 64, LNG_WARN_CONFLICT0, Color.new(0x80, 0x80, 0x80, 0x80-A))
+      Font.ftPrint(font, 50, 160, 0, 630, 64, LNG_WARN_CONFLICT1, Color.new(0x80, 0x80, 0x80, 0x80-A))
+      Font.ftPrint(font, 50, 260, 0, 630, 64, LNG_WARN_CONFLICT2, Color.new(0x70, 0x70, 0x70, 0x80-A))
+
+
+      if Pads.check(pad, PAD_CROSS) then
+        QIN = -1
+        Q = 1
+        SHOULD_WIPE = true
+      end
+      if Pads.check(pad, PAD_CIRCLE) then
+        QIN = -1
+        Q = 1
+      end
+    end
+    if Q > 0 and Q < 0x80 then Q=Q-QIN end
+    if Q > 0x7f then break end
+    Screen.flip()
+  end
+  A = 0
+  while A < 0x80 do
+    Screen.clear()
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, A))
+    A = A+1
+    Screen.flip()
+  end
+
+  if SHOULD_WIPE then
+    if NEEDS_USA then System.WipeDirectory(USA_FOLD) end
+    if NEEDS_CHN then System.WipeDirectory(CHN_FOLD) end
+    if NEEDS_JAP then System.WipeDirectory(JAP_FOLD) end
+    if NEEDS_EUR then System.WipeDirectory(EUR_FOLD) end
+    if NEEDS_CURRENT then System.WipeDirectory(string.format("mc%d:/%s", port, KELFBinder.getsysupdatefolder())) end
+  end
 end
 
 function WarnIncompatibleMachine()
@@ -810,33 +882,57 @@ end
 function performExpertINST(port, slot, UPDT)
   Screen.clear()
   Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+  Screen.flip()
   local FLAGS = 0
+  local NEEDS_JAP = false
+  local NEEDS_USA = false
+  local NEEDS_EUR = false
+  local NEEDS_CHN = false
+  local FOLDS_CONFLICT = false
+  local JAP_FOLD = string.format("mc%d:/%s", port, "BIEXEC-SYSTEM")
+  local USA_FOLD = string.format("mc%d:/%s", port, "BAEXEC-SYSTEM")
+  local EUR_FOLD = string.format("mc%d:/%s", port, "BEEXEC-SYSTEM")
+  local CHN_FOLD = string.format("mc%d:/%s", port, "BCEXEC-SYSTEM")
+
+  if UPDT[0] == 1 or UPDT[1] == 1 or UPDT[2] == 1 or UPDT[3] == 1 then NEEDS_JAP = true end
+  if UPDT[4] == 1 or UPDT[5] == 1 or UPDT[6] == 1 then NEEDS_USA = true end
+  if UPDT[7] == 1 or UPDT[8] == 1 then NEEDS_EUR = true end
+  if UPDT[9] == 1 then NEEDS_CHN = true end
+
+  if NEEDS_JAP and System.doesDirExist(JAP_FOLD) then FOLDS_CONFLICT = true end
+  if NEEDS_USA and System.doesDirExist(USA_FOLD) then FOLDS_CONFLICT = true end
+  if NEEDS_EUR and System.doesDirExist(EUR_FOLD) then FOLDS_CONFLICT = true end
+  if NEEDS_CHN and System.doesDirExist(CHN_FOLD) then FOLDS_CONFLICT = true end
   for i=0,9 do
     if UPDT[i] == 1 then
       FLAGS = FLAGS | (1 << (i+1))
     end
   end
+  if FOLDS_CONFLICT then Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, false, port) end
+  Screen.clear()
+  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
   Font.ftPrint(font, 320, 20,  8, 400, 64, LNG_INSTALLING)
   Screen.flip()
-  if UPDT[0] == 1 or UPDT[1] == 1 or UPDT[2] == 1 or UPDT[3] == 1 then
-    System.createDirectory(string.format("mc%d:/%s", port, "BIEXEC-SYSTEM"))
+
+  if NEEDS_JAP then
+    System.createDirectory(JAP_FOLD)
     KELFBinder.setSysUpdateFoldProps(port, slot, "BIEXEC-SYSTEM")
     System.copyFile("INSTALL/ASSETS/JAP.sys", string.format("mc%d:/%s/icon.sys", port, "BIEXEC-SYSTEM"))
     System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BIEXEC-SYSTEM"))
   end
-  if UPDT[4] == 1 or UPDT[5] == 1 or UPDT[6] == 1 then
+  if NEEDS_USA then
     System.createDirectory(string.format("mc%d:/%s", port, "BAEXEC-SYSTEM"))
     KELFBinder.setSysUpdateFoldProps(port, slot, "BAEXEC-SYSTEM")
     System.copyFile("INSTALL/ASSETS/USA.sys", string.format("mc%d:/%s/icon.sys", port, "BAEXEC-SYSTEM"))
     System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BAEXEC-SYSTEM"))
   end
-  if UPDT[7] == 1 or UPDT[8] == 1 then
+  if NEEDS_EUR then
     System.createDirectory(string.format("mc%d:/%s", port, "BEEXEC-SYSTEM"))
     KELFBinder.setSysUpdateFoldProps(port, slot, "BEEXEC-SYSTEM")
     System.copyFile("INSTALL/ASSETS/EUR.sys", string.format("mc%d:/%s/icon.sys", port, "BEEXEC-SYSTEM"))
     System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BEEXEC-SYSTEM"))
   end
-  if UPDT[9] == 1 then
+  if NEEDS_CHN then
     System.createDirectory(string.format("mc%d:/%s", port, "BCEXEC-SYSTEM"))
     KELFBinder.setSysUpdateFoldProps(port, slot, "BCEXEC-SYSTEM")
     System.copyFile("INSTALL/ASSETS/CHN.sys", string.format("mc%d:/%s/icon.sys", port, "BCEXEC-SYSTEM"))
@@ -903,6 +999,34 @@ function SystemInfo()
     if Pads.check(pad, PAD_CIRCLE) and D == 0 then break end
   end
 end
+
+function Credits()
+  local pad = 0
+  local Q = 1
+  local QINC = 1
+  while Q > 0 do
+    Screen.clear()
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    ORBMAN(0x80)
+    Graphics.drawScaleImage(LOGO, 192.0, 40.0, 256, 128, Color.new(128, 128, 128, Q))
+    Font.ftPrint(font, 320, 200 , 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
+    Font.ftPrint(font, 320, 220 , 8, 630, 16, LNG_CRDTS1, Color.new(128, 128, 128, Q))
+    Font.ftPrint(font, 320, 240 , 8, 630, 16, LNG_CRDTS2, Color.new(128, 128, 128, Q))
+    Font.ftPrint(font, 320, 260 , 8, 630, 16, LNG_CRDTS3, Color.new(128, 128, 128, Q))
+    Font.ftPrint(font, 320, 300 , 8, 630, 16, LNG_CRDTS5, Color.new(128, 128, 128, Q))
+    Font.ftPrint(font, 320, 320 , 8, 630, 16, "krHACKen, uyjulian, HWNJ", Color.new(128, 128, 128, Q))
+    Font.ftPrint(font, 320, 340 , 8, 630, 16, "sp193, Leo Oliveira", Color.new(128, 128, 128, Q))
+    Font.ftPrint(font, 320, 380 , 8, 630, 16, LNG_CRDTS4, Color.new(240, 240, 240, Q))
+    Screen.flip()
+    if (Q ~= 0x80) then Q=Q+QINC end
+    pad = Pads.get()
+    if Pads.check(pad, PAD_CROSS) then
+      QINC = -1
+      Q = (0x80-1)
+    end
+  end
+end
+
 -- SCRIPT BEHAVIOUR BEGINS --
 --SystemInfo()
 
@@ -962,6 +1086,8 @@ while true do
   elseif TT == 3 then
     SystemInfo()
   elseif TT == 4 then
+    Credits()
+  elseif TT == 5 then
     Ask2quit()
   end
   -- SYSTEM UPDATE

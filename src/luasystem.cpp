@@ -232,6 +232,71 @@ static int lua_removeDir(lua_State *L)
 
     return 0;
 }
+//=============================================================
+/// DeleteFolder(); function was SP193's FreeMcBoot installer.
+//thanks to SP193 for all his work
+static int DeleteFolder(const char *folder)
+{
+    printf("\n\n\n\n%s: START!\n", __FUNCTION__);
+	DIR *d = opendir(folder);
+	size_t path_len = strlen(folder);
+	int r = -1;
+
+	if (d)
+	{
+		DPRINTF("Detected [%s], deleting...\n",folder);
+		struct dirent *p;
+
+		r = 0;
+		while (!r && (p = readdir(d)))
+		{
+			int r2 = -1;
+			char *buf;
+			size_t len;
+
+			/* Skip the names "." and ".." as we don't want to recurse on them. */
+			if (!strcmp(p->d_name, ".") || !strcmp(p->d_name, ".."))
+				continue;
+
+			len = path_len + strlen(p->d_name) + 2;
+			buf = (char*)malloc(len);
+
+			if (buf)
+			{
+				struct stat statbuf;
+
+				snprintf(buf, len, "%s/%s", folder, p->d_name);
+				if (!stat(buf, &statbuf))
+				{
+					if (S_ISDIR(statbuf.st_mode))
+						r2 = DeleteFolder(buf);
+					else
+						r2 = unlink(buf);
+				}
+				free(buf);
+			}
+			r = r2;
+		}
+		closedir(d);
+	}
+
+	if (!r)
+		r = rmdir(folder);
+
+	return r;
+}
+//=============================================================
+
+static int lua_wipedir(lua_State *L)
+{
+    const char *path = luaL_checkstring(L, 1);
+    if (!path)
+        return luaL_error(L, "Argument error: lua_wipedir takes a directory name as string as argument.");
+    DeleteFolder(path);
+
+    return 0;
+}
+
 
 static int lua_movefile(lua_State *L)
 {
@@ -728,6 +793,7 @@ static const luaL_Reg System_functions[] = {
     {"listDirectory", lua_dir},
     {"createDirectory", lua_createDir},
     {"removeDirectory", lua_removeDir},
+    {"WipeDirectory", lua_wipedir},
     {"moveFile", lua_movefile},
     {"copyFile", lua_copyfile},
     {"threadCopyFile", lua_copyasync},
