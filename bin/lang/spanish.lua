@@ -74,3 +74,6 @@
 	LNG_WARN_CONFLICT0 = "La tarjeta seleccionada ya tiene una actualización instalada"
 	LNG_WARN_CONFLICT1 = "Limpiar las carpetas necesarias antes de instalar?"
 	LNG_WARN_CONFLICT2 = "Nota: si no limpias las carpetas, la actualización\n se instala de todos modos. pero en un ambiente sucio"
+	LNG_FMCBINST_CRAP0 = "Multi Instalación de FreeMcBoot detectada!"
+	LNG_FMCBINST_CRAP1 = "La tarjeta de memoria debe ser formateada antes de instalar."
+	LNG_FMCBINST_CRAP2 = "hay riezgo de corromper el sistema de archivos si no se formatea"

@@ -373,6 +373,10 @@ function DVDPlayerINST(port, slot, target_region)
 end
 
 function NormalInstall(port, slot)
+
+  if System.doesFileExist(string.format("mc%d:SYS-CONF/FMCBUINST.dat", port)) or 
+     System.doesFileExist(string.format("mc%u:SYS-CONF/uninstall.dat", port)) then WarnIncompatibleMachine() return end
+
   local RET
   local REG = KELFBinder.getsystemregion()
   local TARGET_FOLD = string.format("mc%d:/%s", port, KELFBinder.getsysupdatefolder())
@@ -783,6 +787,48 @@ function secrerr(RET)
   OrbIntro(1)
 end
 
+function WarnOfShittyFMCBInst()
+  local A = 0x80
+  local AIN = -1
+  local Q = 0x7f
+  local QIN = 1
+  local pad = 0
+  while A > 0 do
+    Screen.clear()
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, A))
+    A = A-1
+    Screen.flip()
+  end
+  A = 0x80
+  while true do
+    Screen.clear()
+    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 80+Q)
+    Font.ftPrint(font, 320,  60,  8, 630, 64, LNG_WARNING, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    Font.ftPrint(font, 320,  80,  8, 630, 64, LNG_FMCBINST_CRAP0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    Font.ftPrint(font, 320, 120,  8, 630, 64, LNG_FMCBINST_CRAP1, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    Font.ftPrint(font, 320, 190,  8, 630, 64, LNG_FMCBINST_CRAP2, Color.new(0x80, 0x80, A, 0x80-Q))
+
+    if Q < 10 then
+      pad = Pads.get()
+    end
+
+    if Pads.check(pad, PAD_CROSS) then
+      QIN = -1
+      Q = 1
+    end
+
+    if Q ~= 0 then Q = Q-QIN end
+
+    A=A+AIN
+    if A == 0x40 then AIN = -1 end
+    if A == 0 then AIN = 1 end
+    if Q > 0x7f then break end
+    Screen.flip()
+  end
+  OrbIntro(1)
+end
+
 function Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, NEEDS_CURRENT, port)
   local A = 0x80
   local Q = 0x7f
@@ -868,7 +914,7 @@ function WarnIncompatibleMachine()
     if A > 0 then A = A-1 end
     promptkeys(1, LNG_CONTINUE, 0, 0, 0, 0, Q)
     Font.ftPrint(font, 320, 40,  8, 630, 64, LNG_COMPAT0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
-    Font.ftPrint(font, 320, 100,  8, 630, 64, LNG_COMPAT1, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    Font.ftPrint(font, 320, 100, 8, 630, 64, LNG_COMPAT1, Color.new(0x80, 0x80, 0x80, 0x80-Q))
     if Pads.check(pad, PAD_CROSS) then
       QIN = -1
       Q = 1
@@ -883,6 +929,10 @@ function performExpertINST(port, slot, UPDT)
   Screen.clear()
   Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
   Screen.flip()
+
+  if System.doesFileExist(string.format("mc%d:SYS-CONF/FMCBUINST.dat", port)) or 
+     System.doesFileExist(string.format("mc%u:SYS-CONF/uninstall.dat", port)) then WarnIncompatibleMachine() return end
+
   local FLAGS = 0
   local NEEDS_JAP = false
   local NEEDS_USA = false
