@@ -53,7 +53,7 @@ local R = 0.1
 local RINCREMENT = 0.00018
 
 Language = KELFBinder.getsystemLanguage()
-Language = 3
+--Language = 3
 if System.doesFileExist("lang/global.lua") then dofile("lang/global.lua")
 elseif Language == 0 then if System.doesFileExist("lang/japanese.lua") then dofile("lang/japanese.lua") end
 elseif Language == 2 then if System.doesFileExist("lang/french.lua") then dofile("lang/french.lua") end
@@ -881,7 +881,7 @@ function InsufficientSpace(NEEDED, AVAILABLE)
     ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 80+Q)
     Font.ftPrint(font, 320,  60,  8, 630, 64, LNG_ERROR, Color.new(0x80, 0x80, 0x80, 0x80-Q))
     Font.ftPrint(font, 320,  80,  8, 630, 64, LNG_NOT_ENOUGH_SPACE0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
-    Font.ftPrint(font, 320,  80,  8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, NEEDED/1024, AVAILABLE/1024), Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    Font.ftPrint(font, 320,  120,  8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, NEEDED/1024, AVAILABLE/1024), Color.new(0x80, 0x80, 0x80, 0x80-Q))
 
     if Q < 10 then
       pad = Pads.get()
@@ -1190,16 +1190,14 @@ function Credits()
 end
 
 -- SCRIPT BEHAVIOUR BEGINS --
---SystemInfo()
 
---greeting()
+greeting()
 if ROMVERN > 220 then WarnIncompatibleMachine() end
---OrbIntro(0)
+OrbIntro(0)
 while true do
   local TT = MainMenu()
   WaitWithORBS(50)
-  -- SYSTEM UPDATE
-  if (TT == 1) then
+  if (TT == 1) then -- SYSTEM UPDATE
     local TTT = Installmodepicker()
     WaitWithORBS(50)
     if TTT == 1 then
