@@ -77,6 +77,9 @@
 	LNG_FMCBINST_CRAP0 = "FreeMcBoot Multi Installation detected!"
 	LNG_FMCBINST_CRAP1 = "The Memory Card must be formatted before installing."
 	LNG_FMCBINST_CRAP2 = "There is risk of FileSystem corruption if the card is not formatted"
+	LNG_ERROR = "Error!"
+	LNG_NOT_ENOUGH_SPACE0 = "There is not enough space on the selected Memory Card"
+	LNG_NOT_ENOUGH_SPACE1 = "Needed space  %.1f Kb - Available Space %.1f Kb"
 
 
 if System.doesFileExist("INSTALL/runner.PAR") then

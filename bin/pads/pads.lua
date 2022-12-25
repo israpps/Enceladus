@@ -113,6 +113,22 @@ function FadeWIthORBS()
   end
 end
 
+function GetFileSizeX(PATH)
+  local FD = System.openFile(PATH, FREAD)
+  local SIZE = System.sizeFile(FD)
+  System.closeFile(FD)
+  return SIZE
+end
+
+function CalculateRequiredSpace(port, FILECOUNT, FOLDERCOUNT, SIZECOUNT)
+  local TotalRequiredSpace = SIZECOUNT
+  local AvailableSpace = 0
+  local mcinfo = System.getMCInfo(port)
+  TotalRequiredSpace = TotalRequiredSpace + ((FILECOUNT + FOLDERCOUNT + 3) / 2) --  A new cluster is required for every two files.
+  AvailableSpace = (mcinfo.freemem * 1024)
+  return AvailableSpace, TotalRequiredSpace
+end
+
 function promptkeys(SELECT, ST, CANCEL, CT, REFRESH, RT, ALFA)
   if SELECT == 1 then
     Graphics.drawScaleImage(cross, 90.0, 410.0, 16, 16, Color.new(0x80, 0x80, 0x80, 0x80-ALFA))
@@ -144,7 +160,7 @@ function greeting()
       end
       Graphics.drawImage(LOGO, 64.0, 50.0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 20  , 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
-      Font.ftPrint(font, 320, 40  , 8, 630, 16, " Closed BETA - 007 ", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 40  , 8, 630, 16, " Closed BETA - 008 ", Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 320 , 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 340 , 8, 630, 16, LNG_CRDTS1, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 360 , 8, 630, 16, LNG_CRDTS2, Color.new(128, 128, 128, Q))
@@ -375,11 +391,25 @@ end
 function NormalInstall(port, slot)
 
   if System.doesFileExist(string.format("mc%d:SYS-CONF/FMCBUINST.dat", port)) or 
-     System.doesFileExist(string.format("mc%u:SYS-CONF/uninstall.dat", port)) then WarnIncompatibleMachine() return end
+     System.doesFileExist(string.format("mc%u:SYS-CONF/uninstall.dat", port)) then WarnOfShittyFMCBInst() return end
 
   local RET
   local REG = KELFBinder.getsystemregion()
   local TARGET_FOLD = string.format("mc%d:/%s", port, KELFBinder.getsysupdatefolder())
+  local FOLDCOUNT = 1 -- the system update folder that we'll be dealing with
+  local FILECOUNT = 2 -- icons + whatever updates you push
+  local NEEDED_SPACE = 1024 + 964 -- 1kb + icon.sys size to begin with
+  local AvailableSpace = 0
+  NEEDED_SPACE = NEEDED_SPACE + GetFileSizeX("INSTALL/ASSETS/PS2BBL.icn")
+
+  if IS_PSX == 1 then
+    NEEDED_SPACE = NEEDED_SPACE + GetFileSizeX(PSX_SYSUPDATE)
+  else
+    NEEDED_SPACE = NEEDED_SPACE + GetFileSizeX(SYSUPDATE_MAIN)
+  end
+  AvailableSpace, NEEDED_SPACE = CalculateRequiredSpace(port, FILECOUNT, FOLDCOUNT, NEEDED_SPACE)
+  if AvailableSpace < NEEDED_SPACE then InsufficientSpace(NEEDED_SPACE, AvailableSpace) return end
+
   if System.doesDirExist(TARGET_FOLD) then
     Ask2WipeSysUpdateDirs(false, false, false, false, true, port)
   end
@@ -394,7 +424,6 @@ function NormalInstall(port, slot)
     System.copyFile("INSTALL/ASSETS/CHN.sys", string.format("%s/icon.sys", TARGET_FOLD))
   end
   System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("%s/icon.sys", TARGET_FOLD)) --icon is the same for all
-
   KELFBinder.setSysUpdateFoldProps(port, slot, KELFBinder.getsysupdatefolder())
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
   Screen.clear()
@@ -404,7 +433,8 @@ function NormalInstall(port, slot)
   else
     Font.ftPrint(font, 320, 20  , 8, 600, 64, string.format(LNG_INSTPMPT, SYSUPDATEPATH))
   end
-    Screen.flip()
+  Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, NEEDED_SPACE/1024, AvailableSpace/1024))
+  Screen.flip()
   if (ROMVERN == 100) or (ROMVERN == 101) then -- PROTOKERNEL NEEDS TWO UPDATES TO FUNCTION
     Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, "BIEXEC-SYSTEM/osd130.elf")) -- SCPH-18000
     if (ROMVERN == 100) then
@@ -477,6 +507,9 @@ function MemcardPickup()
     Screen.flip()
     local pad = Pads.get()
     if Pads.check(pad, PAD_CROSS) and (D == 0) and (HC == true) then
+      mcinfo0 = System.getMCInfo(0) -- since memcard pickup does not auto check every n time. do a check before proceeding...
+      mcinfo1 = System.getMCInfo(1)
+      A = 0x20
       D = 1
       if (mcinfo0.type == 2 and T == 0) or (mcinfo1.type == 2 and T == 1) then
         Screen.clear()
@@ -829,6 +862,47 @@ function WarnOfShittyFMCBInst()
   OrbIntro(1)
 end
 
+function InsufficientSpace(NEEDED, AVAILABLE)
+  local A = 0x80
+  local AIN = -1
+  local Q = 0x7f
+  local QIN = 1
+  local pad = 0
+  while A > 0 do
+    Screen.clear()
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, A))
+    A = A-1
+    Screen.flip()
+  end
+  A = 0x80
+  while true do
+    Screen.clear()
+    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 80+Q)
+    Font.ftPrint(font, 320,  60,  8, 630, 64, LNG_ERROR, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    Font.ftPrint(font, 320,  80,  8, 630, 64, LNG_NOT_ENOUGH_SPACE0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    Font.ftPrint(font, 320,  80,  8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, NEEDED/1024, AVAILABLE/1024), Color.new(0x80, 0x80, 0x80, 0x80-Q))
+
+    if Q < 10 then
+      pad = Pads.get()
+    end
+
+    if Pads.check(pad, PAD_CROSS) then
+      QIN = -1
+      Q = 1
+    end
+
+    if Q ~= 0 then Q = Q-QIN end
+
+    A=A+AIN
+    if A == 0x40 then AIN = -1 end
+    if A == 0 then AIN = 1 end
+    if Q > 0x7f then break end
+    Screen.flip()
+  end
+  OrbIntro(1)
+end
+
 function Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, NEEDS_CURRENT, port)
   local A = 0x80
   local Q = 0x7f
@@ -931,43 +1005,73 @@ function performExpertINST(port, slot, UPDT)
   Screen.flip()
 
   if System.doesFileExist(string.format("mc%d:SYS-CONF/FMCBUINST.dat", port)) or
-     System.doesFileExist(string.format("mc%u:SYS-CONF/uninstall.dat", port)) then WarnIncompatibleMachine() return end
-
+     System.doesFileExist(string.format("mc%u:SYS-CONF/uninstall.dat", port)) then WarnOfShittyFMCBInst() return end
+  local AvailableSpace = 0
   local FLAGS = 0
-  local SIZE_NEED = 0
-  local FD = System.openFile(SYSUPDATE_MAIN, FREAD)
-  local SYSUPDATE_SIZE = System.sizeFile(FD)
-  System.closeFile(FD)
+  local SIZE_NEED = 1024 -- FreeMcBoot installed automatically adds 1024 to the needed space counter
+  local SIZE_NEED2 = 0
+  local SYSUPDATE_MAIN_SIZE = GetFileSizeX(SYSUPDATE_MAIN)
+  local ICONSIZE = GetFileSizeX("INSTALL/ASSETS/PS2BBL.icn")
   local NEEDS_JAP = false
   local NEEDS_USA = false
   local NEEDS_EUR = false
   local NEEDS_CHN = false
   local FOLDS_CONFLICT = false
+  local FILECOUNT = 0
+  local FOLDERCOUNT = 0
   local JAP_FOLD = string.format("mc%d:/%s", port, "BIEXEC-SYSTEM")
   local USA_FOLD = string.format("mc%d:/%s", port, "BAEXEC-SYSTEM")
   local EUR_FOLD = string.format("mc%d:/%s", port, "BEEXEC-SYSTEM")
   local CHN_FOLD = string.format("mc%d:/%s", port, "BCEXEC-SYSTEM")
-
   if UPDT[0] == 1 or UPDT[1] == 1 or UPDT[2] == 1 or UPDT[3] == 1 then NEEDS_JAP = true end
   if UPDT[4] == 1 or UPDT[5] == 1 or UPDT[6] == 1 then NEEDS_USA = true end
   if UPDT[7] == 1 or UPDT[8] == 1 then NEEDS_EUR = true end
   if UPDT[9] == 1 then NEEDS_CHN = true end
 
-  if NEEDS_JAP and System.doesDirExist(JAP_FOLD) then FOLDS_CONFLICT = true end
-  if NEEDS_USA and System.doesDirExist(USA_FOLD) then FOLDS_CONFLICT = true end
-  if NEEDS_EUR and System.doesDirExist(EUR_FOLD) then FOLDS_CONFLICT = true end
-  if NEEDS_CHN and System.doesDirExist(CHN_FOLD) then FOLDS_CONFLICT = true end
+  if NEEDS_JAP and System.doesDirExist(JAP_FOLD) then
+     FOLDS_CONFLICT = true
+     FOLDERCOUNT = FOLDERCOUNT+1
+     FILECOUNT = FILECOUNT + 2
+     SIZE_NEED = SIZE_NEED + (964 + ICONSIZE)
+    end
+  if NEEDS_USA and System.doesDirExist(USA_FOLD) then
+    FOLDS_CONFLICT = true
+    FOLDERCOUNT = FOLDERCOUNT+1
+    FILECOUNT = FILECOUNT + 2
+    SIZE_NEED = SIZE_NEED + (964 + ICONSIZE)
+  end
+  if NEEDS_EUR and System.doesDirExist(EUR_FOLD) then
+    FOLDS_CONFLICT = true
+    FOLDERCOUNT = FOLDERCOUNT+1
+    FILECOUNT = FILECOUNT + 2
+    SIZE_NEED = SIZE_NEED + (964 + ICONSIZE)
+  end
+  if NEEDS_CHN and System.doesDirExist(CHN_FOLD) then
+    FOLDS_CONFLICT = true
+    FOLDERCOUNT = FOLDERCOUNT+1
+    FILECOUNT = FILECOUNT + 2
+    SIZE_NEED = SIZE_NEED + (964 + ICONSIZE)
+  end
+
   for i=0,9 do
     if UPDT[i] == 1 then
       FLAGS = FLAGS | (1 << (i+1))
-      if i == 0 or 1 == 1 then SIZE_NEED = SIZE_NEED + 7000 else
-      SIZE_NEED = SIZE_NEED + SYSUPDATE_SIZE end
+      if i < 2 then -- if index is on the protokernel patches...
+        SIZE_NEED = (SIZE_NEED + 7056)
+      else
+        SIZE_NEED = (SIZE_NEED + SYSUPDATE_MAIN_SIZE)
+      end
+      FILECOUNT = (FILECOUNT + 1)
     end
   end
+
+  AvailableSpace, SIZE_NEED2 = CalculateRequiredSpace(port, FILECOUNT, FOLDERCOUNT, SIZE_NEED)
+  if AvailableSpace < SIZE_NEED2 then InsufficientSpace(SIZE_NEED2, AvailableSpace) return end
   if FOLDS_CONFLICT then Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, false, port) end
   Screen.clear()
   Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
-  Font.ftPrint(font, 320, 20,  8, 400, 64, LNG_INSTALLING)
+  Font.ftPrint(font, 320, 20, 8, 400, 64, LNG_INSTALLING)
+  Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, SIZE_NEED2/1024, AvailableSpace/1024))
   Screen.flip()
 
   if NEEDS_JAP then
@@ -1088,9 +1192,9 @@ end
 -- SCRIPT BEHAVIOUR BEGINS --
 --SystemInfo()
 
-greeting()
+--greeting()
 if ROMVERN > 220 then WarnIncompatibleMachine() end
-OrbIntro(0)
+--OrbIntro(0)
 while true do
   local TT = MainMenu()
   WaitWithORBS(50)

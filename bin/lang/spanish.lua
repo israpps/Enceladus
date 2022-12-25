@@ -77,3 +77,6 @@
 	LNG_FMCBINST_CRAP0 = "Multi Instalación de FreeMcBoot detectada!"
 	LNG_FMCBINST_CRAP1 = "La tarjeta de memoria debe ser formateada antes de instalar."
 	LNG_FMCBINST_CRAP2 = "hay riezgo de corromper el sistema de archivos si no se formatea"
+	LNG_ERROR = "Error!"
+	LNG_NOT_ENOUGH_SPACE0 = "No hay espacio suficiente en la Memory Card"
+	LNG_NOT_ENOUGH_SPACE1 = "Espacio requerido  %.1f Kb - Espacio disponible %.1f Kb"
