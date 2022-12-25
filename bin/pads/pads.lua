@@ -144,7 +144,7 @@ function greeting()
       end
       Graphics.drawImage(LOGO, 64.0, 50.0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 20  , 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
-      Font.ftPrint(font, 320, 40  , 8, 630, 16, " Closed BETA - 006 ", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 40  , 8, 630, 16, " Closed BETA - 007 ", Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 320 , 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 340 , 8, 630, 16, LNG_CRDTS1, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 360 , 8, 630, 16, LNG_CRDTS2, Color.new(128, 128, 128, Q))
@@ -930,10 +930,14 @@ function performExpertINST(port, slot, UPDT)
   Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
   Screen.flip()
 
-  if System.doesFileExist(string.format("mc%d:SYS-CONF/FMCBUINST.dat", port)) or 
+  if System.doesFileExist(string.format("mc%d:SYS-CONF/FMCBUINST.dat", port)) or
      System.doesFileExist(string.format("mc%u:SYS-CONF/uninstall.dat", port)) then WarnIncompatibleMachine() return end
 
   local FLAGS = 0
+  local SIZE_NEED = 0
+  local FD = System.openFile(SYSUPDATE_MAIN, FREAD)
+  local SYSUPDATE_SIZE = System.sizeFile(FD)
+  System.closeFile(FD)
   local NEEDS_JAP = false
   local NEEDS_USA = false
   local NEEDS_EUR = false
@@ -956,6 +960,8 @@ function performExpertINST(port, slot, UPDT)
   for i=0,9 do
     if UPDT[i] == 1 then
       FLAGS = FLAGS | (1 << (i+1))
+      if i == 0 or 1 == 1 then SIZE_NEED = SIZE_NEED + 7000 else
+      SIZE_NEED = SIZE_NEED + SYSUPDATE_SIZE end
     end
   end
   if FOLDS_CONFLICT then Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, false, port) end
@@ -1037,8 +1043,10 @@ function SystemInfo()
     Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_SYSTEMINFO, Color.new(220, 220, 220, 0x80-A))
 
     Font.ftPrint(font, 50, 60,  0, 630, 32, string.format("ROMVER = [%s]", ROMVER), Color.new(220, 220, 220, 0x80-A))
-    Font.ftPrint(font, 50, 80,  0, 630, 32, string.format(LNG_SUPATH, UPDTPATH), Color.new(220, 220, 220, 0x80-A))
+    Font.ftPrint(font, 50, 80,  0, 630, 32, string.format(LNG_CONSOLE_MODEL, KELFBinder.getConsoleModel()), Color.new(220, 220, 220, 0x80-A))
     Font.ftPrint(font, 50, 100,  0, 630, 32, string.format(LNG_IS_COMPATIBLE, COMPATIBLE_WITH_UPDATES), Color.new(220, 220, 220, 0x80-A))
+    if ROMVERN < 221 then
+    Font.ftPrint(font, 50, 120,  0, 630, 32, string.format(LNG_SUPATH, UPDTPATH), Color.new(220, 220, 220, 0x80-A)) end
 
     promptkeys(0,LNG_CT0, 1, LNG_CT4,0, 0, A)
     if A > 0 then A=A-1 end
