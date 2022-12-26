@@ -41,39 +41,9 @@ local BGSCS       = Graphics.loadImage("pads/background_success.png")
 local CURSOR      = Graphics.loadImage("pads/firefly.png")
 local REDCURSOR   = Graphics.loadImage("pads/firefly_error.png")
 local GREENCURSOR = Graphics.loadImage("pads/firefly_success.png")
--- EXTRA INSTALL ASSETS
-
-EXTRA_INST_COUNT = 9 -- SIZE OF THE EXTRA_INST_SRC TABLE
-EXTRA_INST_SRC = {
-  "INSTALL/ASSETS/PS2BBL/icon.sys",
-  "INSTALL/ASSETS/PS2BBL/PS2BBL.icn",
-  "INSTALL/ASSETS/PS2BBL/CONFIG.INI",
-  "INSTALL/ASSETS/BOOT/BOOT.ELF",
-  "INSTALL/ASSETS/BOOT/icon.sys",
-  "INSTALL/ASSETS/BOOT/BOOT.icn",
-  "INSTALL/ASSETS/APPS/APPS.icn",
-  "INSTALL/ASSETS/APPS/icon.sys",
-  "INSTALL/ASSETS/APPS/OPNPS2LD.ELF"
-}
-EXTRA_INST_FOLDE = 3 -- SIZE OF THE EXTRA_INST_MKD TABLE
-EXTRA_INST_MKD = {
-  "PS2BBL",
-  "BOOT",
-  "APPS"
-}
-
-EXTRA_INST_DST = { -- CONTAINS TARGET PATHS FOR THE FILES LISTED ON EXTRA_INST_SRC
-  "PS2BBL/icon.sys",
-  "PS2BBL/PS2BBL.icn",
-  "PS2BBL/CONFIG.INI",
-  "BOOT/BOOT.ELF",
-  "BOOT/icon.sys",
-  "BOOT/BOOT.icn",
-  "APPS/APPS.icn",
-  "APPS/icon.sys",
-  "APPS/OPNPS2LD.ELF"
-}
---
+EXTRA_INST_COUNT = 0
+EXTRA_INST_FOLDE = 0
+dofile("INSTALL/EXTINST.lua")
 Graphics.setImageFilters(LOGO       , LINEAR)
 Graphics.setImageFilters(BG         , LINEAR)
 Graphics.setImageFilters(BGERR      , LINEAR)
@@ -337,7 +307,7 @@ function Installmodepicker()
       Font.ftPrint(font, 321 , 230, 0, 630, 16, LNG_IMPMP3, Color.new(0, 0xde, 0xff, 0x80-A)) else
       Font.ftPrint(font, 320 , 230, 0, 630, 16, LNG_IMPMP3, Color.new(200, 200, 200, 0x80-A))
     end
-    
+
     Font.ftPrint(font, 80 , 350, 0, 600, 32, PROMTPS[T], Color.new(128, 128, 128, 0x80-A))
     promptkeys(1,LNG_CT0, 1, LNG_CT1,0, 0, A)
     if A > 0 then A=A-1 end
@@ -1133,7 +1103,7 @@ function performExpertINST(port, slot, UPDT)
     end
   end
 
-  FILECOUNT, FOLDCOUNT, NEEDED_SPACE = PreExtraAssetsInstall(FILECOUNT, FOLDCOUNT, NEEDED_SPACE)
+  FILECOUNT, FOLDERCOUNT, SIZE_NEED = PreExtraAssetsInstall(FILECOUNT, FOLDERCOUNT, SIZE_NEED)
   AvailableSpace, SIZE_NEED2 = CalculateRequiredSpace(port, FILECOUNT, FOLDERCOUNT, SIZE_NEED)
   if AvailableSpace < SIZE_NEED2 then InsufficientSpace(SIZE_NEED2, AvailableSpace) return end
   if FOLDS_CONFLICT then Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, false, port) end
