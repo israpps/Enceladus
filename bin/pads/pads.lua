@@ -225,7 +225,7 @@ function greeting()
       end
       Graphics.drawImage(LOGO, 64.0, 50.0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 20  , 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
-      Font.ftPrint(font, 320, 40  , 8, 630, 16, " Closed BETA - 008 ", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 40  , 8, 630, 16, "Closed BETA - 009", Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 320 , 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 340 , 8, 630, 16, LNG_CRDTS1, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 360 , 8, 630, 16, LNG_CRDTS2, Color.new(128, 128, 128, Q))
