@@ -166,15 +166,15 @@ end
 
 function promptkeys(SELECT, ST, CANCEL, CT, REFRESH, RT, ALFA)
   if SELECT == 1 then
-    Graphics.drawScaleImage(cross, 90.0, 410.0, 16, 16, Color.new(0x80, 0x80, 0x80, 0x80-ALFA))
+    Graphics.drawScaleImage(cross, 80.0, 400.0, 32, 32, Color.new(0x80, 0x80, 0x80, 0x80-ALFA))
     Font.ftPrint(font, 110 , 407, 0, 400, 16, ST, Color.new(0x80, 0x80, 0x80, 0x80-ALFA))
   end
   if CANCEL == 1 then
-    Graphics.drawScaleImage(circle, 180.0, 410.0, 16, 16, Color.new(0x80, 0x80, 0x80, 0x80-ALFA))
+    Graphics.drawScaleImage(circle, 170.0, 400.0, 32, 32, Color.new(0x80, 0x80, 0x80, 0x80-ALFA))
     Font.ftPrint(font, 200 , 407, 0, 400, 16, CT, Color.new(0x80, 0x80, 0x80, 0x80-ALFA))
   end
   if REFRESH == 1 then
-    Graphics.drawScaleImage(triangle, 270.0, 410.0, 16, 16, Color.new(0x80, 0x80, 0x80, 0x80-ALFA))
+    Graphics.drawScaleImage(triangle, 260.0, 400.0, 32, 32, Color.new(0x80, 0x80, 0x80, 0x80-ALFA))
     Font.ftPrint(font, 290 , 407, 0, 400, 16, RT, Color.new(0x80, 0x80, 0x80, 0x80-ALFA))
   end
 
