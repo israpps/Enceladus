@@ -18,6 +18,7 @@ bin/rl_intro.lua
 bin/SLUS_209.46
 bin/System/index.lua
 *.elf
+!bin/INSTALL/**/*.ELF
 *.o
 *.adp
 *.wav

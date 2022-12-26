@@ -215,6 +215,7 @@ static int lua_dir(lua_State *L)
 
 static int lua_createDir(lua_State *L)
 {
+    printf("%s: start\n", __FUNCTION__);
     const char *path = luaL_checkstring(L, 1);
     if (!path)
         return luaL_error(L, "Argument error: System.createDirectory(directory) takes a directory name as string as argument.");

@@ -12,7 +12,7 @@ Secrman.init()
 ROMVERN = KELFBinder.getROMversion()
 KELFBinder.InitConsoleModel()
 IS_PSX = 0
-if System.doesFileExist("rom0:PSXVER") then 
+if System.doesFileExist("rom0:PSXVER") then
   IS_PSX = 1
 else
   IS_PSX = 0
@@ -41,7 +41,39 @@ local BGSCS       = Graphics.loadImage("pads/background_success.png")
 local CURSOR      = Graphics.loadImage("pads/firefly.png")
 local REDCURSOR   = Graphics.loadImage("pads/firefly_error.png")
 local GREENCURSOR = Graphics.loadImage("pads/firefly_success.png")
+-- EXTRA INSTALL ASSETS
 
+EXTRA_INST_COUNT = 9 -- SIZE OF THE EXTRA_INST_SRC TABLE
+EXTRA_INST_SRC = {
+  "INSTALL/ASSETS/PS2BBL/icon.sys",
+  "INSTALL/ASSETS/PS2BBL/PS2BBL.icn",
+  "INSTALL/ASSETS/PS2BBL/CONFIG.INI",
+  "INSTALL/ASSETS/BOOT/BOOT.ELF",
+  "INSTALL/ASSETS/BOOT/icon.sys",
+  "INSTALL/ASSETS/BOOT/BOOT.icn",
+  "INSTALL/ASSETS/APPS/APPS.icn",
+  "INSTALL/ASSETS/APPS/icon.sys",
+  "INSTALL/ASSETS/APPS/OPNPS2LD.ELF"
+}
+EXTRA_INST_FOLDE = 3 -- SIZE OF THE EXTRA_INST_MKD TABLE
+EXTRA_INST_MKD = {
+  "PS2BBL",
+  "BOOT",
+  "APPS"
+}
+
+EXTRA_INST_DST = { -- CONTAINS TARGET PATHS FOR THE FILES LISTED ON EXTRA_INST_SRC
+  "PS2BBL/icon.sys",
+  "PS2BBL/PS2BBL.icn",
+  "PS2BBL/CONFIG.INI",
+  "BOOT/BOOT.ELF",
+  "BOOT/icon.sys",
+  "BOOT/BOOT.icn",
+  "APPS/APPS.icn",
+  "APPS/icon.sys",
+  "APPS/OPNPS2LD.ELF"
+}
+--
 Graphics.setImageFilters(LOGO       , LINEAR)
 Graphics.setImageFilters(BG         , LINEAR)
 Graphics.setImageFilters(BGERR      , LINEAR)
@@ -118,6 +150,39 @@ function GetFileSizeX(PATH)
   local SIZE = System.sizeFile(FD)
   System.closeFile(FD)
   return SIZE
+end
+
+function PreExtraAssetsInstall(FILECOUNT, FOLDERCOUNT, SIZECOUNT)
+  --FILECOUNT = FILECOUNT + EXTRA_INST_COUNT -- originally it sums the count
+  FOLDERCOUNT = FOLDERCOUNT + EXTRA_INST_FOLDE
+
+  for i=1,EXTRA_INST_FOLDE do
+      FOLDERCOUNT = FOLDERCOUNT + 1
+  end
+
+  for i=1,EXTRA_INST_COUNT do -- @EXTRA_INST_COUNT
+    if System.doesFileExist(EXTRA_INST_SRC[i]) then -- CHECK FOR EXISTENCE, OTHERWISE, PROGRAM CRASHES!
+      SIZECOUNT = SIZECOUNT + GetFileSizeX(EXTRA_INST_SRC[i])
+      FILECOUNT = FILECOUNT + 1 -- only add the confirmed files
+    end
+  end --]]
+
+  return FILECOUNT, FOLDERCOUNT, SIZECOUNT
+end
+
+function InstallExtraAssets(port)
+----------------------
+  for i=1,EXTRA_INST_FOLDE do
+    -- if System.doesDirExist(string.format("INSTALL/ASSETS/%s", EXTRA_INST_MKD[i])) then -- only create the folder if source exists...
+    System.createDirectory(string.format("mc%d:/%s", port, EXTRA_INST_MKD[i]))
+    -- end
+  end
+
+  for i=1,EXTRA_INST_COUNT do
+    if System.doesFileExist(EXTRA_INST_SRC[i]) then -- CHECK FOR EXISTENCE, OTHERWISE, PROGRAM CRASHES!
+      System.copyFile(EXTRA_INST_SRC[i], string.format("mc%d:/%s", port, EXTRA_INST_DST[i]))
+    end
+  end
 end
 
 function CalculateRequiredSpace(port, FILECOUNT, FOLDERCOUNT, SIZECOUNT)
@@ -407,6 +472,7 @@ function NormalInstall(port, slot)
   else
     NEEDED_SPACE = NEEDED_SPACE + GetFileSizeX(SYSUPDATE_MAIN)
   end
+  FILECOUNT, FOLDCOUNT, NEEDED_SPACE = PreExtraAssetsInstall(FILECOUNT, FOLDCOUNT, NEEDED_SPACE)
   AvailableSpace, NEEDED_SPACE = CalculateRequiredSpace(port, FILECOUNT, FOLDCOUNT, NEEDED_SPACE)
   if AvailableSpace < NEEDED_SPACE then InsufficientSpace(NEEDED_SPACE, AvailableSpace) return end
 
@@ -451,6 +517,8 @@ function NormalInstall(port, slot)
     RET = Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH))
     if RET < 0 then secrerr(RET) return end
   end
+  -- KELF install finished! deal with extra files now!
+  InstallExtraAssets(port)
   secrerr(RET)
 end
 
@@ -1065,6 +1133,7 @@ function performExpertINST(port, slot, UPDT)
     end
   end
 
+  FILECOUNT, FOLDCOUNT, NEEDED_SPACE = PreExtraAssetsInstall(FILECOUNT, FOLDCOUNT, NEEDED_SPACE)
   AvailableSpace, SIZE_NEED2 = CalculateRequiredSpace(port, FILECOUNT, FOLDERCOUNT, SIZE_NEED)
   if AvailableSpace < SIZE_NEED2 then InsufficientSpace(SIZE_NEED2, AvailableSpace) return end
   if FOLDS_CONFLICT then Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, false, port) end
@@ -1101,15 +1170,17 @@ function performExpertINST(port, slot, UPDT)
 
   if UPDT[0] == 1 then
     RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_100, string.format("mc%d:/BIEXEC-SYSTEM/osdsys.elf", port), 0) 
-    if RET < 0 then secrerr(RET) end
+    if RET < 0 then secrerr(RET) return end
   end
   if UPDT[1] == 1 then
     RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_101, string.format("mc%d:/BIEXEC-SYSTEM/osd110.elf", port), 0) 
-    if RET < 0 then secrerr(RET) end
+    if RET < 0 then secrerr(RET) return end
   end
 
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
   local RET = Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH), FLAGS)
+  if RET < 0 then secrerr(RET) return end
+  InstallExtraAssets(port)
   System.sleep(2)
   secrerr(RET)
 end
@@ -1191,9 +1262,9 @@ end
 
 -- SCRIPT BEHAVIOUR BEGINS --
 
-greeting()
+-- greeting()
 if ROMVERN > 220 then WarnIncompatibleMachine() end
-OrbIntro(0)
+-- OrbIntro(0)
 while true do
   local TT = MainMenu()
   WaitWithORBS(50)
