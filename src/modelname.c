@@ -51,7 +51,7 @@ static int ReadModelName(char *name)
                 read(fd, name, MODEL_NAME_MAX_LEN);
                 close(fd);
             } else
-                strcpy(name, "Unknown");
+                strcpy(name, "?");
         }
 
         return 0; // Original returned -1
@@ -60,7 +60,7 @@ static int ReadModelName(char *name)
             if (stat & 0x80)
                 return -2;
             if ((stat & 0x40) || name[0] == '\0')
-                strcpy(name, "unknown");
+                strcpy(name, "??");
 
             return 0; // Original returned -1
         } else

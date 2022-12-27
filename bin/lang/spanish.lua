@@ -42,7 +42,7 @@
 	LNG_REGS2 = "Europa - SCPH-XXX0[2-4]"
 	LNG_REGS3 = "China - SCPH-XXX09"
 	LNG_EIO = "ERROR I/O"
-	LNG_SECRMANERR = "SECRDOWNLOADFILE Falló!\nPosible error Magicgate"
+	LNG_SECRMANERR = "SECRDOWNLOADFILE Falló! - Posible error Magicgate"
 	LNG_ENOMEM = "MEMORY ALLOCATION ERROR!"
 	LNG_EUNKNOWN = "error desconocido!"
 	LNG_INSTERR = "Installacáon Fallida! (%d)"

@@ -1,6 +1,6 @@
 Screen.clear()
 Font.ftInit()
-font = Font.ftLoad("pads/font.ttf")
+font = Font.ftLoad("pads/font2.ttf")
 Font.ftSetCharSize(font, 940, 940)
 
 
@@ -63,7 +63,7 @@ local R = 0.1
 local RINCREMENT = 0.00018
 
 Language = KELFBinder.getsystemLanguage()
---Language = 3
+-- Language = 3
 if System.doesFileExist("lang/global.lua") then dofile("lang/global.lua")
 elseif Language == 0 then if System.doesFileExist("lang/japanese.lua") then dofile("lang/japanese.lua") end
 elseif Language == 2 then if System.doesFileExist("lang/french.lua") then dofile("lang/french.lua") end
@@ -203,8 +203,10 @@ function greeting()
         Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
       end
       Graphics.drawImage(LOGO, 64.0, 50.0, Color.new(128, 128, 128, Q))
-      Font.ftPrint(font, 320, 20  , 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
-      Font.ftPrint(font, 320, 40  , 8, 630, 16, "Closed BETA - 010", Color.new(128, 128, 128, Q))
+      if IS_NOT_PUBLIC_READY then
+        Font.ftPrint(font, 320, 20  , 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
+        Font.ftPrint(font, 320, 40  , 8, 630, 16, "Closed BETA - 010", Color.new(128, 128, 128, Q))
+      end
       Font.ftPrint(font, 320, 320 , 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 340 , 8, 630, 16, LNG_CRDTS1, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 360 , 8, 630, 16, LNG_CRDTS2, Color.new(128, 128, 128, Q))
@@ -627,7 +629,7 @@ function expertINSTprompt()
     Font.ftPrint(font, 310, 150, 0, 630, 16, LNG_REGS1, Color.new(250, 250, 250, 0x80))
     Font.ftPrint(font, 310, 230, 0, 630, 16, LNG_REGS2, Color.new(250, 250, 250, 0x80-A))
     Font.ftPrint(font, 310, 290, 0, 630, 16, LNG_REGS3, Color.new(250, 250, 250, 0x80-A))
-    Font.ftPrint(font, 20, 340, 0, 600, 32, UPDTT[T], Color.new(250, 250, 250, 0x80-A))
+    Font.ftPrint(font, 20, 340, 0, 600, 32, UPDTT[T], Color.new(200, 200, 200, 0x80-A))
     if T == JAP_ROM_100 then
       Font.ftPrint(font, 321, 70, 0, 400, 16, "osdsys.elf", Color.new(200^(UPDT[0]+1), 0xde, 0xff, 0x80-A)) else
       Font.ftPrint(font, 320, 70, 0, 400, 16, "osdsys.elf", Color.new(200^(UPDT[0]+1), 0xde, 0xff, 0x50-A))
@@ -743,7 +745,7 @@ function AdvancedINSTprompt()
       Font.ftPrint(font, 320 , 230, 0, 630, 16, "PSX DESR", Color.new(200, 200, 200, 0x80-A))
     end
 
-    Font.ftPrint(font, 80 , 350, 0, 600, 32, PROMTPS[T], Color.new(128, 128, 128, 0x80-A))
+    Font.ftPrint(font, 80 , 350, 0, 600, 32, PROMTPS[T], Color.new(0x70, 0x70, 0x70, 0x80-A))
     promptkeys(1,LNG_CT0, 1, LNG_CT1,0, 0, A)
     if A > 0 then A=A-1 end
     Screen.flip()
@@ -856,7 +858,6 @@ function secrerr(RET)
       end
 
       if Pads.check(pad, PAD_CROSS) and A == 0 then
-
         QIN = -1
         Q = 1
       end

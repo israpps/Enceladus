@@ -41,7 +41,7 @@
 	LNG_REGS2 = "Europe - SCPH-XXX0[2-4]"
 	LNG_REGS3 = "China - SCPH-XXX09"
 	LNG_EIO = "I/O ERROR"
-	LNG_SECRMANERR = "SECRDOWNLOADFILE Failed!\nPossible MagicGate error"
+	LNG_SECRMANERR = "SECRDOWNLOADFILE Failed! - Possible MagicGate error"
 	LNG_ENOMEM = "MEMORY ALLOCATION ERROR!"
 	LNG_SOURCE_KELF_GONE = "input KELF can't be opened"
 	LNG_EUNKNOWN = "Unknown error!"
@@ -81,7 +81,7 @@
 	LNG_NOT_ENOUGH_SPACE0 = "There is not enough space on the selected Memory Card"
 	LNG_NOT_ENOUGH_SPACE1 = "Needed space  %.1f Kb - Available Space %.1f Kb"
 
-
+IS_NOT_PUBLIC_READY = true
 if System.doesFileExist("INSTALL/runner.PAR") then
 	dofile("INSTALL/runner.PAR");
   elseif System.doesFileExist("System/index.lua") then
