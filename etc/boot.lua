@@ -80,6 +80,8 @@
 	LNG_ERROR = "Error!"
 	LNG_NOT_ENOUGH_SPACE0 = "There is not enough space on the selected Memory Card"
 	LNG_NOT_ENOUGH_SPACE1 = "Needed space  %.1f Kb - Available Space %.1f Kb"
+	LNG_INCOMPATIBLE_CARD = "This device is not compatible!"
+	LNG_INSTALLING_EXTRA = "Installing aditional files..."
 
 IS_NOT_PUBLIC_READY = true
 if System.doesFileExist("INSTALL/runner.PAR") then

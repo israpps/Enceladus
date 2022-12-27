@@ -473,13 +473,11 @@ function NormalInstall(port, slot)
   System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("%s/icon.sys", TARGET_FOLD)) --icon is the same for all
   KELFBinder.setSysUpdateFoldProps(port, slot, KELFBinder.getsysupdatefolder())
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
+  if IS_PSX == 1 then SYSUPDATEPATH =  "BIEXEC-SYSTEM/xosdmain.elf" end
   Screen.clear()
   Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
-  if IS_PSX == 1 then
-    Font.ftPrint(font, 320, 20  , 8, 600, 64, string.format(LNG_INSTPMPT, "BIEXEC-SYSTEM/xosdmain.elf"))
-  else
-    Font.ftPrint(font, 320, 20  , 8, 600, 64, string.format(LNG_INSTPMPT, SYSUPDATEPATH))
-  end
+  Font.ftPrint(font, 320, 20  , 8, 600, 64, LNG_INSTALLING)
+  Font.ftPrint(font, 320, 45 , 8, 600, 64, SYSUPDATEPATH)
   Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, NEEDED_SPACE/1024, AvailableSpace/1024))
   Screen.flip()
   if (ROMVERN == 100) or (ROMVERN == 101) then -- PROTOKERNEL NEEDS TWO UPDATES TO FUNCTION
@@ -499,6 +497,13 @@ function NormalInstall(port, slot)
     if RET < 0 then secrerr(RET) return end
   end
   -- KELF install finished! deal with extra files now!
+  Screen.clear()
+  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
+  Font.ftPrint(font, 320, 20 , 8, 400, 64, LNG_INSTALLING)
+  Font.ftPrint(font, 320, 45 , 8, 600, 64, SYSUPDATEPATH)
+  Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, NEEDED_SPACE/1024, AvailableSpace/1024))
+  Font.ftPrint(font, 320, 120, 8, 400, 64, LNG_INSTALLING_EXTRA)
+  Screen.flip()
   InstallExtraAssets(port)
   secrerr(RET)
 end
@@ -536,7 +541,10 @@ function MemcardPickup()
 
     if mcinfo0.type == 2 then
       Font.ftPrint(font, 80, 270,  0, 630, 32, string.format(LNG_MEMCARD1, 1, mcinfo0.freemem), Color.new(0x80, 0x80, 0x80, 0x80-A))
+    elseif mcinfo1.type ~= 0 then
+      Font.ftPrint(font, 360, 270,  0, 630, 32, LNG_INCOMPATIBLE_CARD, Color.new(0x80, 0x80, 0x80, 0x80-A))
     end
+
     if T == 0 then
       Graphics.drawScaleImage(mi0, 80.0+32, 180.0, 64, 64, Color.new(0x90, 0x90, 0x90, Q))
     else
@@ -544,6 +552,8 @@ function MemcardPickup()
     end
     if mcinfo1.type == 2 then
       Font.ftPrint(font, 360, 270,  0, 630, 32, string.format(LNG_MEMCARD1, 2, mcinfo1.freemem), Color.new(0x80, 0x80, 0x80, 0x80-A))
+    elseif mcinfo1.type ~= 0 then
+      Font.ftPrint(font, 360, 270,  0, 630, 32, LNG_INCOMPATIBLE_CARD, Color.new(0x80, 0x80, 0x80, 0x80-A))
     end
     if T == 1 then
       Graphics.drawScaleImage(mi1, 360.0+32, 180.0, 64, 64, Color.new(0x90, 0x90, 0x90, Q))
@@ -1161,6 +1171,13 @@ function performExpertINST(port, slot, UPDT)
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
   local RET = Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH), FLAGS)
   if RET < 0 then secrerr(RET) return end
+
+  Screen.clear()
+  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
+  Font.ftPrint(font, 320, 20, 8, 400, 64, LNG_INSTALLING)
+  Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, SIZE_NEED2/1024, AvailableSpace/1024))
+  Font.ftPrint(font, 320, 120, 8, 400, 64, LNG_INSTALLING_EXTRA)
+  Screen.flip()
   InstallExtraAssets(port)
   System.sleep(2)
   secrerr(RET)
