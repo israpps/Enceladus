@@ -2,6 +2,14 @@ Screen.clear()
 Font.ftInit()
 font = Font.ftLoad("pads/font.ttf")
 Font.ftSetCharSize(font, 940, 940)
+
+
+--Sound.initADPCM()
+Sound.setVolume(100)
+SND_OK = Sound.loadADPCM("pads/ok.adp")
+Sound.setADPCMVolume(0, 100)
+
+
 local temporaryVar = System.openFile("rom0:ROMVER", FREAD)
 local temporaryVar_size = System.sizeFile(temporaryVar)
 ROMVER = System.readFile(temporaryVar, temporaryVar_size)
@@ -97,7 +105,7 @@ function WaitWithORBS(NN)
   N = NN
   while N > 1 do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
     Screen.flip()
     N = N-1
@@ -108,7 +116,7 @@ function FadeWIthORBS()
   local A = 0x80
   while A > 0 do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(A)
     Screen.flip()
     A = A-1
@@ -189,9 +197,9 @@ function greeting()
       if Q > 0x80 then W = -1 end
       if Q > 1 then Q = Q+W else CONTINUE = false end
       if W > 0 then
-        Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(Q, Q, Q, Q))
+        Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0, Color.new(Q, Q, Q, Q))
       else
-        Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+        Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
       end
       Graphics.drawImage(LOGO, 64.0, 50.0, Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 20  , 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
@@ -212,9 +220,9 @@ function OrbIntro(BGQ)
   while X > 0 do
     Screen.clear()
     if BGQ == 0 then
-      Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+      Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     else
-      Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+      Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
       if Q > 0 then Q=Q-1 end
     end
     ORBMANex(CURSOR, 0x70-A, 180, 180, 80+X)
@@ -230,7 +238,7 @@ function MainMenu()
   local A = 0x80
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
     Font.ftPrint(font, 320, 20,  8, 630, 32, LNG_MM1, Color.new(220, 220, 220, 0x90-A))
     if T == 1 then
@@ -291,7 +299,7 @@ function Installmodepicker()
   }
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
     --Font.ftPrint(font, 150, 20,  0, 630, 32, LNG_IMPMP0, Color.new(220, 220, 220, 0x80-A))
 
@@ -353,7 +361,7 @@ function DVDPlayerRegionPicker()
   }
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
     Font.ftPrint(font, 320, 20,  8, 630, 32, LNG_PICK_DVDPLAYER_REG, Color.new(220, 220, 220, 0x80-A))
 
@@ -373,7 +381,7 @@ function DVDPlayerRegionPicker()
       Font.ftPrint(font, 321 , 270, 0, 630, 16, LNG_CHN, Color.new(0, 0xde, 0xff, 0x80-A)) else
       Font.ftPrint(font, 320 , 270, 0, 630, 16, LNG_CHN, Color.new(200, 200, 200, 0x80-A))
     end
-    
+
     Font.ftPrint(font, 320 , 350, 8, 600, 32, PROMTPS[T], Color.new(128, 128, 128, 0x80-A))
     promptkeys(1,LNG_CT0, 1, LNG_CT1,0, 0, A)
     if A > 0 then A=A-1 end
@@ -414,10 +422,10 @@ function DVDPlayerINST(port, slot, target_region)
   System.createDirectory(string.format("mc%d:/%s", port, TARGET_FOLD))
   KELFBinder.setSysUpdateFoldProps(port, slot, TARGET_FOLD)
   Screen.clear()
-  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
   Font.ftPrint(font, 320, 20  , 8, 600, 64, string.format(LNG_INSTPMPT, TARGET_KELF))
   Screen.flip()
-  
+
   RET = Secrman.downloadfile(port, slot, DVDPLAYERUPDATE, TARGET_KELF)
   if RET < 0 then secrerr(RET) return end
   secrerr(RET)
@@ -425,7 +433,7 @@ end
 
 function NormalInstall(port, slot)
 
-  if System.doesFileExist(string.format("mc%d:SYS-CONF/FMCBUINST.dat", port)) or 
+  if System.doesFileExist(string.format("mc%d:SYS-CONF/FMCBUINST.dat", port)) or
      System.doesFileExist(string.format("mc%u:SYS-CONF/uninstall.dat", port)) then WarnOfShittyFMCBInst() return end
 
   local RET
@@ -463,7 +471,7 @@ function NormalInstall(port, slot)
   KELFBinder.setSysUpdateFoldProps(port, slot, KELFBinder.getsysupdatefolder())
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
   Screen.clear()
-  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
   if IS_PSX == 1 then
     Font.ftPrint(font, 320, 20  , 8, 600, 64, string.format(LNG_INSTPMPT, "BIEXEC-SYSTEM/xosdmain.elf"))
   else
@@ -519,7 +527,7 @@ function MemcardPickup()
     end
 
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
     Font.ftPrint(font, 320, 20,  8, 630, 32, LNG_MEMCARD0, Color.new(0x80, 0x80, 0x80, 0x80-A))
 
@@ -611,7 +619,7 @@ function expertINSTprompt()
   end
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
     Font.ftPrint(font, 320, 20,  8, 630, 32, LNG_EXPERTINST_PROMPT)
     Font.ftPrint(font, 310, 50,  0, 630, 16, LNG_REGS0, Color.new(250, 250, 250, 0x80-A))
@@ -810,7 +818,7 @@ function secrerr(RET)
   local pad = 0
   while A > 0 do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, A))
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, A))
     A = A-1
     Screen.flip()
   end
@@ -818,10 +826,10 @@ function secrerr(RET)
   while true do
     Screen.clear()
     if RET == 1 then
-      Graphics.drawScaleImage(BGSCS, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+      Graphics.drawScaleImage(BGSCS, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
       ORBMANex(GREENCURSOR, 0x80-Q-1, 180, 180, 80+Q)
     else
-      Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+      Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
       ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 80+Q)
     end
     if Q < 0x20 then
@@ -845,8 +853,9 @@ function secrerr(RET)
       elseif RET ~= 1 then -- only write unknown error if retcode is not a success
         Font.ftPrint(font, 320, 60,  8, 630, 64, LNG_EUNKNOWN, Color.new(0x80, 0x80, 0x80, 0x80-A))
       end
-      
+
       if Pads.check(pad, PAD_CROSS) and A == 0 then
+
         QIN = -1
         Q = 1
       end
@@ -866,14 +875,14 @@ function WarnOfShittyFMCBInst()
   local pad = 0
   while A > 0 do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, A))
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, A))
     A = A-1
     Screen.flip()
   end
   A = 0x80
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
     ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 80+Q)
     Font.ftPrint(font, 320,  60,  8, 630, 64, LNG_WARNING, Color.new(0x80, 0x80, 0x80, 0x80-Q))
     Font.ftPrint(font, 320,  80,  8, 630, 64, LNG_FMCBINST_CRAP0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
@@ -908,14 +917,14 @@ function InsufficientSpace(NEEDED, AVAILABLE)
   local pad = 0
   while A > 0 do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, A))
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, A))
     A = A-1
     Screen.flip()
   end
   A = 0x80
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
     ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 80+Q)
     Font.ftPrint(font, 320,  60,  8, 630, 64, LNG_ERROR, Color.new(0x80, 0x80, 0x80, 0x80-Q))
     Font.ftPrint(font, 320,  80,  8, 630, 64, LNG_NOT_ENOUGH_SPACE0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
@@ -953,14 +962,14 @@ function Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, NEEDS
   local CHN_FOLD = string.format("mc%d:/%s", port, "BCEXEC-SYSTEM")
   while A > 0 do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, A))
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, A))
     A = A-1
     Screen.flip()
   end
   A = 0x80
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
     ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 80+Q)
 
     if Q < 0x20 then
@@ -991,7 +1000,7 @@ function Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, NEEDS
   A = 0
   while A < 0x80 do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, A))
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, A))
     A = A+1
     Screen.flip()
   end
@@ -1012,14 +1021,14 @@ function WarnIncompatibleMachine()
   local pad = 0
   while A > 0 do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, A))
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, A))
     A = A-1
     Screen.flip()
   end
   A = 0x80
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 480.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
+    Graphics.drawScaleImage(BGERR, 0.0, 0.0, 640.0, 448.0, Color.new(0x80, 0x80, 0x80, 0x80-Q))
     ORBMANex(REDCURSOR, 0x80-Q-1, 180, 180, 80+Q)
 
     pad = Pads.get()
@@ -1039,7 +1048,7 @@ end
 
 function performExpertINST(port, slot, UPDT)
   Screen.clear()
-  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
   Screen.flip()
 
   if System.doesFileExist(string.format("mc%d:SYS-CONF/FMCBUINST.dat", port)) or
@@ -1108,7 +1117,7 @@ function performExpertINST(port, slot, UPDT)
   if AvailableSpace < SIZE_NEED2 then InsufficientSpace(SIZE_NEED2, AvailableSpace) return end
   if FOLDS_CONFLICT then Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, false, port) end
   Screen.clear()
-  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
   Font.ftPrint(font, 320, 20, 8, 400, 64, LNG_INSTALLING)
   Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, SIZE_NEED2/1024, AvailableSpace/1024))
   Screen.flip()
@@ -1139,11 +1148,11 @@ function performExpertINST(port, slot, UPDT)
   end
 
   if UPDT[0] == 1 then
-    RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_100, string.format("mc%d:/BIEXEC-SYSTEM/osdsys.elf", port), 0) 
+    RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_100, string.format("mc%d:/BIEXEC-SYSTEM/osdsys.elf", port), 0)
     if RET < 0 then secrerr(RET) return end
   end
   if UPDT[1] == 1 then
-    RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_101, string.format("mc%d:/BIEXEC-SYSTEM/osd110.elf", port), 0) 
+    RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_101, string.format("mc%d:/BIEXEC-SYSTEM/osd110.elf", port), 0)
     if RET < 0 then secrerr(RET) return end
   end
 
@@ -1163,14 +1172,14 @@ function Ask2quit()
     if Q < 1  then QQ = 1 end
     Q = Q+QQ
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     Font.ftPrint(font, 320, 40 , 8, 630, 16, LNG_WANNAQUIT)
     promptkeys(1,LNG_YES,1,LNG_NO, 1,LNG_RWLE, 0)
     ORBMAN(0x80-Q)
     local pad = Pads.get()
-    if Pads.check(pad, PAD_CROSS) then System.exitToBrowser() end
+    if Pads.check(pad, PAD_CROSS) then  System.exitToBrowser() end
     if Pads.check(pad, PAD_CIRCLE) then break end
-    if Pads.check(pad, PAD_TRIANGLE) then if System.doesFileExist("INSTALL/CORE/BACKDOOR.ELF") then System.loadELF("INSTALL/CORE/BACKDOOR.ELF") end end
+    if Pads.check(pad, PAD_TRIANGLE) then  if System.doesFileExist("INSTALL/CORE/BACKDOOR.ELF") then System.loadELF("INSTALL/CORE/BACKDOOR.ELF") end end
     Screen.flip()
   end
 end
@@ -1183,7 +1192,7 @@ function SystemInfo()
   if ROMVERN > 220 then COMPATIBLE_WITH_UPDATES = LNG_NO end
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
     Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_SYSTEMINFO, Color.new(220, 220, 220, 0x80-A))
 
@@ -1191,7 +1200,8 @@ function SystemInfo()
     Font.ftPrint(font, 50, 80,  0, 630, 32, string.format(LNG_CONSOLE_MODEL, KELFBinder.getConsoleModel()), Color.new(220, 220, 220, 0x80-A))
     Font.ftPrint(font, 50, 100,  0, 630, 32, string.format(LNG_IS_COMPATIBLE, COMPATIBLE_WITH_UPDATES), Color.new(220, 220, 220, 0x80-A))
     if ROMVERN < 221 then
-    Font.ftPrint(font, 50, 120,  0, 630, 32, string.format(LNG_SUPATH, UPDTPATH), Color.new(220, 220, 220, 0x80-A)) end
+      Font.ftPrint(font, 50, 120,  0, 630, 32, string.format(LNG_SUPATH, UPDTPATH), Color.new(220, 220, 220, 0x80-A))
+    end
 
     promptkeys(0,LNG_CT0, 1, LNG_CT4,0, 0, A)
     if A > 0 then A=A-1 end
@@ -1209,7 +1219,7 @@ function Credits()
   local QINC = 1
   while Q > 0 do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 480.0)
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
     Graphics.drawScaleImage(LOGO, 192.0, 40.0, 256, 128, Color.new(128, 128, 128, Q))
     Font.ftPrint(font, 320, 200 , 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
