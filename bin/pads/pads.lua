@@ -4,10 +4,10 @@ font = Font.ftLoad("pads/font.ttf")
 Font.ftSetCharSize(font, 940, 940)
 
 
---Sound.initADPCM()
-Sound.setVolume(100)
-SND_OK = Sound.loadADPCM("pads/ok.adp")
-Sound.setADPCMVolume(0, 100)
+-- Sound.setVolume(100)
+-- Sound.setADPCMVolume(0, 100)
+-- SND_INTRO = Sound.loadADPCM("pads/BOOT.ADP")
+-- Sound.playADPCM(0, SND_INTRO)
 
 
 local temporaryVar = System.openFile("rom0:ROMVER", FREAD)
@@ -192,6 +192,7 @@ function greeting()
   local CONTINUE = true
   local Q = 2
   local W = 1
+  -- Sound.playADPCM(0, SND_INTRO)
     while CONTINUE do
       Screen.clear()
       if Q > 0x80 then W = -1 end
@@ -1242,9 +1243,9 @@ end
 
 -- SCRIPT BEHAVIOUR BEGINS --
 
--- greeting()
+greeting()
 if ROMVERN > 220 then WarnIncompatibleMachine() end
--- OrbIntro(0)
+OrbIntro(0)
 while true do
   local TT = MainMenu()
   WaitWithORBS(50)

@@ -35,6 +35,7 @@ static int lua_loadadpcm(lua_State *L) {
 }
 
 static int lua_playadpcm(lua_State *L) {
+    // printf("%s: start\n", __FUNCTION__);
 	int argc = lua_gettop(L);
 	if (argc != 2) return luaL_error(L, "playADPCM takes 2 arguments");
 	sound_playadpcm(luaL_checkinteger(L, 1), (audsrv_adpcm_t *)luaL_checkinteger(L, 2));
