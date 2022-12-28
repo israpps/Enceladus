@@ -90,7 +90,7 @@
 	LNG_ROM_VERSION = "Version: [%d]"
 	LNG_ROM_REGION = "Region: [%s]"
 	LNG_ROM_MACHINETYPE = "Machine Type: [%s]"
-	LNG_ROM_DATE = "Date"
+	LNG_ROM_DATE = "Date: %s"
 
 
 IS_NOT_PUBLIC_READY = true
