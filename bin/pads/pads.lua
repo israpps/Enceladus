@@ -1217,7 +1217,7 @@ function SystemInfo()
 
     Font.ftPrint(font, 50, 60,  0, 630, 32, string.format("ROMVER = [%s]", ROMVER), Color.new(220, 220, 220, 0x80-A))
     Font.ftPrint(font, 50, 80,  0, 630, 32, string.format(LNG_CONSOLE_MODEL, KELFBinder.getConsoleModel()), Color.new(220, 220, 220, 0x80-A))
-    Font.ftPrint(font, 50, 100,  0, 630, 32, string.format(LNG_IS_COMPATIBLE, COMPATIBLE_WITH_UPDATES), Color.new(220, 220, 220, 0x80-A))
+    Font.ftPrint(font, 50, 100, 0, 630, 32, string.format(LNG_IS_COMPATIBLE, COMPATIBLE_WITH_UPDATES), Color.new(220, 220, 220, 0x80-A))
     if ROMVERN < 221 then
       Font.ftPrint(font, 50, 120,  0, 630, 32, string.format(LNG_SUPATH, UPDTPATH), Color.new(220, 220, 220, 0x80-A))
     end
