@@ -1,12 +1,12 @@
 Screen.clear()
 Font.ftInit()
-font = Font.ftLoad("pads/font2.ttf")
+font = Font.ftLoad("common/font2.ttf")
 Font.ftSetCharSize(font, 940, 940)
 
 
 -- Sound.setVolume(100)
 -- Sound.setADPCMVolume(0, 100)
--- SND_INTRO = Sound.loadADPCM("pads/BOOT.ADP")
+-- SND_INTRO = Sound.loadADPCM("common/BOOT.ADP")
 -- Sound.playADPCM(0, SND_INTRO)
 
 
@@ -35,20 +35,20 @@ System.closeFile(temporaryVar)
 KERNEL_PATCH_100 = "INSTALL/KELF/OSDSYS.KERNEL"
 KERNEL_PATCH_101 = "INSTALL/KELF/OSD110.KERNEL"
 
-local circle = Graphics.loadImage("pads/circle.png")
-local cross = Graphics.loadImage("pads/cross.png")
-local triangle = Graphics.loadImage("pads/triangle.png")
+local circle = Graphics.loadImage("common/circle.png")
+local cross = Graphics.loadImage("common/cross.png")
+local triangle = Graphics.loadImage("common/triangle.png")
 
-local MC2         = Graphics.loadImage("pads/mc_ps2.png")
-local MC1         = Graphics.loadImage("pads/mc_ps1.png")
-local MCU         = Graphics.loadImage("pads/mc_empty.png")
-local LOGO        = Graphics.loadImage("pads/logo.png")
-local BG          = Graphics.loadImage("pads/background.png")
-local BGERR       = Graphics.loadImage("pads/background_error.png")
-local BGSCS       = Graphics.loadImage("pads/background_success.png")
-local CURSOR      = Graphics.loadImage("pads/firefly.png")
-local REDCURSOR   = Graphics.loadImage("pads/firefly_error.png")
-local GREENCURSOR = Graphics.loadImage("pads/firefly_success.png")
+local MC2         = Graphics.loadImage("common/mc_ps2.png")
+local MC1         = Graphics.loadImage("common/mc_ps1.png")
+local MCU         = Graphics.loadImage("common/mc_empty.png")
+local LOGO        = Graphics.loadImage("common/logo.png")
+local BG          = Graphics.loadImage("common/background.png")
+local BGERR       = Graphics.loadImage("common/background_error.png")
+local BGSCS       = Graphics.loadImage("common/background_success.png")
+local CURSOR      = Graphics.loadImage("common/firefly.png")
+local REDCURSOR   = Graphics.loadImage("common/firefly_error.png")
+local GREENCURSOR = Graphics.loadImage("common/firefly_success.png")
 EXTRA_INST_COUNT  = 0
 EXTRA_INST_FOLDE  = 0
 dofile("INSTALL/EXTINST.lua")
@@ -207,11 +207,11 @@ function greeting()
       Font.ftPrint(font, 320, 20, 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
       Font.ftPrint(font, 320, 40, 8, 630, 16, "Closed BETA - 011", Color.new(128, 128, 128, Q))
     end
-    Font.ftPrint(font, 320, 320, 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
-    Font.ftPrint(font, 320, 340, 8, 630, 16, LNG_CRDTS1, Color.new(128, 128, 128, Q))
-    Font.ftPrint(font, 320, 360, 8, 630, 16, LNG_CRDTS2, Color.new(128, 128, 128, Q))
-    Font.ftPrint(font, 320, 380, 8, 630, 16, LNG_CRDTS3, Color.new(128, 128, 128, Q))
-    Font.ftPrint(font, 320, 400, 8, 630, 16, LNG_CRDTS4, Color.new(240, 240, 240, Q))
+    Font.ftPrint(font, 320, 310, 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
+    Font.ftPrint(font, 320, 330, 8, 630, 16, LNG_CRDTS1, Color.new(128, 128, 128, Q))
+    Font.ftPrint(font, 320, 350, 8, 630, 16, LNG_CRDTS2, Color.new(128, 128, 128, Q))
+    Font.ftPrint(font, 320, 370, 8, 630, 16, LNG_CRDTS3, Color.new(128, 128, 128, Q))
+    Font.ftPrint(font, 320, 390, 8, 630, 16, LNG_CRDTS4, Color.new(240, 240, 240, Q))
     Screen.flip()
   end
 end

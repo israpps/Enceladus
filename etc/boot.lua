@@ -84,8 +84,8 @@
 	LNG_INSTALLING_EXTRA = "Installing aditional files..."
 
 IS_NOT_PUBLIC_READY = true
-if System.doesFileExist("INSTALL/runner.PAR") then
-	dofile("INSTALL/runner.PAR");
+if System.doesFileExist("INSTALL/KELFBinder.lua") then
+	dofile("INSTALL/KELFBinder.lua");
   elseif System.doesFileExist("System/index.lua") then
 	dofile("System/index.lua");
   elseif System.doesFileExist("System/script.lua") then
