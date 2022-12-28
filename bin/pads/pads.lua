@@ -76,27 +76,20 @@ else
 end
 
 function ORBMAN(Q)
-  R = R + RINCREMENT
+  R = R+RINCREMENT
   if R > 200 and RINCREMENT > 0 then RINCREMENT = -0.00018 end
-  if R < 0 and RINCREMENT < 0 then RINCREMENT = 0.00018 end
-  Graphics.drawImage(CURSOR, 180 + (80 * math.cos(math.deg(R * 2.1 + 1.1))), 180 + (80 * math.sin(math.deg(R * 2.1 + 1.1))
-    ), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 180 + (80 * math.cos(math.deg(R * 2.1 + 1.2))), 180 + (80 * math.sin(math.deg(R * 2.1 + 1.2))
-    ), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 180 + (80 * math.cos(math.deg(R * 2.1 + 1.3))), 180 + (80 * math.sin(math.deg(R * 2.1 + 1.3))
-    ), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 180 + (80 * math.cos(math.deg(R * 2.1 + 1.4))), 180 + (80 * math.sin(math.deg(R * 2.1 + 1.4))
-    ), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 180 + (80 * math.cos(math.deg(R * 2.1 + 1.7))), 180 + (80 * math.sin(math.deg(R * 2.1 + 1.7))
-    ), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 180 + (80 * math.cos(math.deg(R * 2.1 + 1.8))), 180 + (80 * math.sin(math.deg(R * 2.1 + 1.8))
-    ), Color.new(128, 128, 128, Q))
-  Graphics.drawImage(CURSOR, 180 + (80 * math.cos(math.deg(R * 2.1 + 1.9))), 180 + (80 * math.sin(math.deg(R * 2.1 + 1.9))
-    ), Color.new(128, 128, 128, Q))
+  if R < 0   and RINCREMENT < 0 then RINCREMENT =  0.00018 end
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.1))), 180+(80*math.sin(math.deg(R*2.1+1.1))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.2))), 180+(80*math.sin(math.deg(R*2.1+1.2))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.3))), 180+(80*math.sin(math.deg(R*2.1+1.3))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.4))), 180+(80*math.sin(math.deg(R*2.1+1.4))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.7))), 180+(80*math.sin(math.deg(R*2.1+1.7))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.8))), 180+(80*math.sin(math.deg(R*2.1+1.8))), Color.new(128, 128, 128, Q))
+  Graphics.drawImage(CURSOR, 180+(80*math.cos(math.deg(R*2.1+1.9))), 180+(80*math.sin(math.deg(R*2.1+1.9))), Color.new(128, 128, 128, Q))
 end
 
 function ORBMANex(IMG, Q, X, Z, POW)
-  R = R + RINCREMENT
+  R = R+RINCREMENT
   if R > 200 and RINCREMENT > 0 then RINCREMENT = -0.00018 end
   if R < 0   and RINCREMENT < 0 then RINCREMENT =  0.00018 end
   Graphics.drawImage(IMG, X+(POW*math.cos(math.deg(R*2.1+1.1))), Z+(POW*math.sin(math.deg(R*2.1+1.1))), Color.new(128, 128, 128, Q))
