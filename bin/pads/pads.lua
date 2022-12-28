@@ -1198,7 +1198,7 @@ function Ask2quit()
     local pad = Pads.get()
     if Pads.check(pad, PAD_CROSS) then  System.exitToBrowser() end
     if Pads.check(pad, PAD_CIRCLE) then break end
-    if Pads.check(pad, PAD_TRIANGLE) then  if System.doesFileExist("INSTALL/CORE/BACKDOOR.ELF") then System.loadELF("INSTALL/CORE/BACKDOOR.ELF") end end
+    if Pads.check(pad, PAD_TRIANGLE) then  if System.doesFileExist("INSTALL/CORE/BACKDOOR.ELF") then System.loadELF(System.getbootpath().."INSTALL/CORE/BACKDOOR.ELF") end end
     Screen.flip()
   end
 end
