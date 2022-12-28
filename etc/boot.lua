@@ -21,7 +21,7 @@
 	LNG_IMPMP1 = "Normal Install"
 	LNG_IMPMP2 = "Advanced Install"
 	LNG_IMPMP3 = "Expert Install"
-	LNG_INSTPMPT = "BINDING KELF\n\n%s\n"
+	LNG_INSTPMPT = "Binding KELF"
 	LNG_INSTPMPT1 = "Installation finished!"
 	LNG_MEMCARD0 = "Choose a Memory Card"
 	LNG_MEMCARD1 = "Memory Card %d\nFree space %d kb"
@@ -47,6 +47,7 @@
 	LNG_EUNKNOWN = "Unknown error!"
 	LNG_INSTERR = "Installation failed! (%d)"
 	LNG_INSTALLING = "Installing System Updates..."
+	LNG_INSTALLINGDVD = "Installing DVDPlayer Update..."
 	LNG_INSTFINISH = "Installation finished!"
 	LNG_WANNAQUIT = "Exit application?"
 	LNG_YES = "Yes"
@@ -82,6 +83,15 @@
 	LNG_NOT_ENOUGH_SPACE1 = "Needed space  %.1f Kb - Available Space %.1f Kb"
 	LNG_INCOMPATIBLE_CARD = "This device is not compatible!"
 	LNG_INSTALLING_EXTRA = "Installing aditional files..."
+	LNG_CREATING_DIRS = "Creating folders..."
+	LNG_COPYING_ICONS = "copying system folder icons..."
+	LNG_SET_FOLD_PROPS = "Applying copy protection to system folders..."
+	LNG_ROM = "ROM Data:"
+	LNG_ROM_VERSION = "Version: [%d]"
+	LNG_ROM_REGION = "Region: [%s]"
+	LNG_ROM_MACHINETYPE = "Machine Type: [%s]"
+	LNG_ROM_DATE = "Date"
+
 
 IS_NOT_PUBLIC_READY = true
 if System.doesFileExist("INSTALL/runner.PAR") then

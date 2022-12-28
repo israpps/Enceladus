@@ -14,7 +14,7 @@ extern "C" {
 
 static int KELFBinderHelperFunctionsInited = false;
 static unsigned long int ROMVERSION;
-static unsigned int MACHINETYPE;
+static unsigned int MACHINETYPE_;
 // static int ROMYEAR, ROMMONTH, ROMDAY;
 static char ROMREGION;
 
@@ -45,7 +45,7 @@ static int lua_KELFBinderInit(lua_State *L)
     const char *ROMVER = luaL_checkstring(L, 1);
     char ROMVNUM[4 + 1];
     ROMREGION = GET_CONSOLE_REGION(ROMVER[4]);
-    MACHINETYPE = GET_MACHINE_TYPE(ROMVER[5]);
+    MACHINETYPE_ = GET_MACHINE_TYPE(ROMVER[5]);
     strncpy(ROMVNUM, ROMVER, 4);
     ROMVNUM[4] = '\0';
     ROMVERSION = strtoul(ROMVNUM, NULL, 10); // convert ROM version to unsigned long int for further use on automatic Install, use hex numbers to compare!! (eg: to check for rom 1.20 do ROMVERSION == 0x120)
@@ -67,10 +67,20 @@ static int lua_KELFBinderDeInit(lua_State *L)
 static int lua_calcsysupdatepath(lua_State *L)
 {
     DPRINTF("%s: start\n", __func__);
-    int ver = ROMVERSION, region = ROMREGION;
+    int argc = lua_gettop(L);
     if (!KELFBinderHelperFunctionsInited)
-        return luaL_error(L, "error initializing kelfbinder helper service!");
+        return luaL_error(L, "error kelfbinder helper service needs to be initialized first!\n");
 
+    if (argc == 1) // a specific install has been specified, check it
+    {
+        int index = luaL_checkinteger(L, 1);
+        if ((index >= 0) && (index < SYSTEM_UPDATE_COUNT)) // if it is inside of boundaries
+        {
+            lua_pushstring(L, sysupdate_paths[index]);
+            return 1;
+        } else {return luaL_error(L, "%s: invalid system update ID was requested (%d)\n", __FUNCTION__, index);}
+    } // if no argumment was passed, calculate system update based on current system
+    int ver = ROMVERSION, region = ROMREGION;
     if (region == CONSOLE_REGIONS::JAPAN) {
         switch (ver) {
             case 100:
@@ -123,6 +133,28 @@ static int lua_calcsysupdatepath(lua_State *L)
 static int lua_getsystemregion(lua_State *L)
 {
     DPRINTF("%s: start\n", __func__);
+    lua_pushinteger(L, ROMREGION);
+    return 1;
+}
+
+static int lua_getmachinetypeStr(lua_State *L)
+{
+    DPRINTF("%s: start\n", __func__);
+    switch (MACHINETYPE_)
+    {
+    case MACHINETYPE::CEX:
+        lua_pushstring(L, "CEX");
+        break;
+    case MACHINETYPE::DEX:
+        lua_pushstring(L, "DEX");
+        break;
+    case MACHINETYPE::TOOL:
+        lua_pushstring(L, "TOOL");
+        break;
+    default:
+        lua_pushstring(L, "?");
+        break;
+    }
     lua_pushinteger(L, ROMREGION);
     return 1;
 }
@@ -272,6 +304,7 @@ static const luaL_Reg KELFBinder_functions[] = {
     {"InitConsoleModel", lua_initConsoleModel},
     {"getConsoleModel", lua_getConsoleModel},
     {"getDVDPlayerFolder",lua_getDVDPlayerUpdatefolder},
+    {"getMachineType",lua_getmachinetypeStr},
     {0, 0}
 };
 

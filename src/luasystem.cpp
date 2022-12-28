@@ -528,6 +528,22 @@ static int lua_readfile(lua_State *L)
     return 1;
 }
 
+static int lua_readfile_align(lua_State *L)
+{
+    int argc = lua_gettop(L);
+    if (argc != 3)
+        return luaL_error(L, "wrong number of arguments");
+    int file = luaL_checkinteger(L, 1);
+    int align = luaL_checkinteger(L, 2);
+    uint32_t size = luaL_checkinteger(L, 3);
+    uint8_t *buffer = (uint8_t *)memalign(64, size + 1);
+    int len = read(file, buffer, size);
+    buffer[len] = 0;
+    lua_pushlstring(L, (const char *)buffer, len);
+    free(buffer);
+    return 1;
+}
+
 
 static int lua_writefile(lua_State *L)
 {
@@ -784,6 +800,7 @@ static const luaL_Reg System_functions[] = {
     {"getbootpath", lua_getbootpath},
     {"openFile", lua_openfile},
     {"readFile", lua_readfile},
+    {"readFileAlign", lua_readfile_align},
     {"writeFile", lua_writefile},
     {"closeFile", lua_closefile},
     {"seekFile", lua_seekfile},

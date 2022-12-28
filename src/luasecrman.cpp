@@ -44,7 +44,7 @@ static int lua_deinitsecrman(lua_State *L)
 static int SignKELF(void *buffer, int size, unsigned char port, unsigned char slot)
 {
     DPRINTF("%s: start\n", __func__);
-    int result, InitSemaID, mcInitRes;
+    int result;// InitSemaID, mcInitRes;
 
     /*	An IOP reboot would be done by the Utility Disc,
             to allow the SecrDownloadFile function of secrman_special to work on a
@@ -117,7 +117,7 @@ static int lua_secrdownloadfile(lua_State *L) {
         printf("\nFlags are %%d=%d or %%x=%x\n", flags, flags);
     }
 
-    printf("\n\n\n\n\n\n\n%s: Starting with %d argumments:\n"
+    printf("-------------\n%s: Starting with %d argumments:\n"
            "[Port]: %d\n"
            "[Slot]: %d\n"
            "[input KELF]: %s\n"
@@ -210,10 +210,42 @@ static int lua_secrdownloadfile(lua_State *L) {
 	return 1;
 }
 
+static int lua_secrdownloadbuffer(lua_State *L) {
+	int argc = lua_gettop(L);
+#ifndef SKIP_ERROR_HANDLING
+	if (argc != 5) return luaL_error(L, "wrong number of arguments");
+#endif
+    int port = luaL_checkinteger(L, 1);
+    int slot = luaL_checkinteger(L, 2);
+    const char* input_buffer = luaL_checkstring(L, 3);
+    int size = luaL_checkinteger(L, 4);
+    const char* dest = luaL_checkstring(L, 5);
+
+    printf("-------------\n%s: Starting with %d argumments:\n"
+           "[Port]: %d\n"
+           "[Slot]: %d\n"
+           "[input buffer size]: %d\n"
+           "[output KELF]: %s\n"
+           , __func__, argc,
+           port, slot, sizeof(input_buffer), dest);
+	int result = 0;
+    char* buf = (char*)input_buffer;
+
+	if((result=SignKELF(buf, size, port, slot))<0){
+		//free(buf);
+	}
+
+    lua_pushinteger(L, result);
+    lua_pushlstring(L, buf, size);
+    free(buf);
+	return 2;
+}
+
 static const luaL_Reg Secrman_functions[] = {
     {"init", lua_initsecrman},
     {"deinit", lua_deinitsecrman},
     {"downloadfile", lua_secrdownloadfile},
+    {"downloadbuffer", lua_secrdownloadbuffer},
     //{"signKELFfile", lua_signKELFfile},
     {0, 0}};
 

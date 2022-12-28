@@ -15,7 +15,7 @@ const char *sysupdate_paths[SYSTEM_UPDATE_COUNT] = {
     "BEEXEC-SYSTEM/osd130.elf",  /// EUR, ROM v1.20, 'C' Chassis (release model SCPH-3000[2-4])
     "BEEXEC-SYSTEM/osdmain.elf", /// any EUR model with chassis D or newer
 
-    /// standard CHINA updates
+    /// standard CHINA update
     "BCEXEC-SYSTEM/osdmain.elf", /// no known chinese models use sub-standard paths, covering a whole region with one file is so cool isn't it?
 
 };

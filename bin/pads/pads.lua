@@ -130,6 +130,27 @@ function GetFileSizeX(PATH)
   return SIZE
 end
 
+function Readfile2bufAlign(PATH)
+  local FD = System.openFile(PATH, FREAD)
+  local SIZE = System.sizeFile(FD)
+  local BUF = System.readFileAlign(FD, 64, SIZE)
+  return BUF
+end
+
+function Instprogress(NEEDED_SPACE, AvailableSpace, progress, total, SYSUPDATEPATH)
+  Screen.clear()
+  local width = ((progress*100)/total)
+  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
+  Font.ftPrint(font, 320, 20 , 8, 400, 64, LNG_INSTALLING)
+  Font.ftPrint(font, 320, 45 , 8, 600, 64, SYSUPDATEPATH)
+  Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, NEEDED_SPACE/1024, AvailableSpace/1024))
+  Font.ftPrint(font, 320, 120, 8, 400, 64, LNG_INSTALLING_EXTRA)
+  Graphics.drawRect(15, 300, 610, 34, Color.new(48, 48, 48, 0x80))
+  Graphics.drawRect(20, 302, width*6, 30, Color.new(0, 0, 0x80, 0x80))
+  Font.ftPrint(font, 320, 310, 8, 400, 64, width.."%")
+  Screen.flip()
+end
+
 function PreExtraAssetsInstall(FILECOUNT, FOLDERCOUNT, SIZECOUNT)
   --FILECOUNT = FILECOUNT + EXTRA_INST_COUNT -- originally it sums the count
   FOLDERCOUNT = FOLDERCOUNT + EXTRA_INST_FOLDE
@@ -426,7 +447,7 @@ function DVDPlayerINST(port, slot, target_region)
   KELFBinder.setSysUpdateFoldProps(port, slot, TARGET_FOLD)
   Screen.clear()
   Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
-  Font.ftPrint(font, 320, 20  , 8, 600, 64, string.format(LNG_INSTPMPT, TARGET_KELF))
+  Font.ftPrint(font, 320, 20  , 8, 600, 64, LNG_INSTALLINGDVD)
   Screen.flip()
 
   RET = Secrman.downloadfile(port, slot, DVDPLAYERUPDATE, TARGET_KELF)
@@ -438,7 +459,7 @@ function NormalInstall(port, slot)
 
   if System.doesFileExist(string.format("mc%d:SYS-CONF/FMCBUINST.dat", port)) or
      System.doesFileExist(string.format("mc%u:SYS-CONF/uninstall.dat", port)) then WarnOfShittyFMCBInst() return end
-
+  local total = 6
   local RET
   local REG = KELFBinder.getsystemregion()
   local TARGET_FOLD = string.format("mc%d:/%s", port, KELFBinder.getsysupdatefolder())
@@ -460,7 +481,9 @@ function NormalInstall(port, slot)
   if System.doesDirExist(TARGET_FOLD) then
     Ask2WipeSysUpdateDirs(false, false, false, false, true, port)
   end
+  Instprogress(NEEDED_SPACE, AvailableSpace, 0, total, LNG_CREATING_DIRS)
   System.createDirectory(TARGET_FOLD)
+  Instprogress(NEEDED_SPACE, AvailableSpace, 1, total, LNG_COPYING_ICONS)
   if REG == 0 then -- JAP
     System.copyFile("INSTALL/ASSETS/JAP.sys", string.format("%s/icon.sys", TARGET_FOLD))
   elseif REG == 1 or REG == 2 then --USA or ASIA
@@ -470,16 +493,15 @@ function NormalInstall(port, slot)
   elseif REG == 4 then
     System.copyFile("INSTALL/ASSETS/CHN.sys", string.format("%s/icon.sys", TARGET_FOLD))
   end
+
+  Instprogress(NEEDED_SPACE, AvailableSpace, 2, total, LNG_COPYING_ICONS)
   System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("%s/icon.sys", TARGET_FOLD)) --icon is the same for all
+  Instprogress(NEEDED_SPACE, AvailableSpace, 3, total, LNG_SET_FOLD_PROPS)
+  -- TODO
   KELFBinder.setSysUpdateFoldProps(port, slot, KELFBinder.getsysupdatefolder())
+  Instprogress(NEEDED_SPACE, AvailableSpace, 4, total, LNG_INSTALLING)
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
   if IS_PSX == 1 then SYSUPDATEPATH =  "BIEXEC-SYSTEM/xosdmain.elf" end
-  Screen.clear()
-  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
-  Font.ftPrint(font, 320, 20  , 8, 600, 64, LNG_INSTALLING)
-  Font.ftPrint(font, 320, 45 , 8, 600, 64, SYSUPDATEPATH)
-  Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, NEEDED_SPACE/1024, AvailableSpace/1024))
-  Screen.flip()
   if (ROMVERN == 100) or (ROMVERN == 101) then -- PROTOKERNEL NEEDS TWO UPDATES TO FUNCTION
     Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, "BIEXEC-SYSTEM/osd130.elf")) -- SCPH-18000
     if (ROMVERN == 100) then
@@ -496,15 +518,11 @@ function NormalInstall(port, slot)
     RET = Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH))
     if RET < 0 then secrerr(RET) return end
   end
+  Instprogress(NEEDED_SPACE, AvailableSpace, 5, total, LNG_INSTALLING_EXTRA)
   -- KELF install finished! deal with extra files now!
-  Screen.clear()
-  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
-  Font.ftPrint(font, 320, 20 , 8, 400, 64, LNG_INSTALLING)
-  Font.ftPrint(font, 320, 45 , 8, 600, 64, SYSUPDATEPATH)
-  Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, NEEDED_SPACE/1024, AvailableSpace/1024))
-  Font.ftPrint(font, 320, 120, 8, 400, 64, LNG_INSTALLING_EXTRA)
-  Screen.flip()
+  -- TODO
   InstallExtraAssets(port)
+  Instprogress(NEEDED_SPACE, AvailableSpace, 6, total, LNG_INSTPMPT1)
   secrerr(RET)
 end
 
@@ -1129,6 +1147,7 @@ function performExpertINST(port, slot, UPDT)
   if AvailableSpace < SIZE_NEED2 then InsufficientSpace(SIZE_NEED2, AvailableSpace) return end
   if FOLDS_CONFLICT then Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, false, port) end
   Screen.clear()
+  local INPUT_KELF = Readfile2bufAlign(SYSUPDATE_MAIN)
   Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
   Font.ftPrint(font, 320, 20, 8, 400, 64, LNG_INSTALLING)
   Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, SIZE_NEED2/1024, AvailableSpace/1024))
@@ -1169,7 +1188,13 @@ function performExpertINST(port, slot, UPDT)
   end
 
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
-  local RET = Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH), FLAGS)
+  --local RET = Secrman.downloadfile(port, slot, SYSUPDATE_MAIN, string.format("mc%d:/%s", port, SYSUPDATEPATH), FLAGS)
+  for i = 0,9 do
+    if UPDT[i] == 1 then
+      RET = Secrman.downloadbuffer(port, slot, INPUT_KELF, SYSUPDATE_MAIN_SIZE, string.format("mc%d:/%s", port, KELFBinder.calculateSysUpdatePath(i)))
+      if RET < 0 then secrerr(RET) return end
+    end
+  end
   if RET < 0 then secrerr(RET) return end
 
   Screen.clear()
@@ -1209,26 +1234,33 @@ function SystemInfo()
   local UPDTPATH = KELFBinder.calculateSysUpdatePath()
   local COMPATIBLE_WITH_UPDATES = LNG_YES
   if ROMVERN > 220 then COMPATIBLE_WITH_UPDATES = LNG_NO end
+  local ROMVERDATE = string.format("%s/%s/%s", string.sub(ROMVER, 6, 4), string.sub(ROMVER, 10, 2), string.sub(ROMVER, 12, 2))
   while true do
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
     Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_SYSTEMINFO, Color.new(220, 220, 220, 0x80-A))
 
-    Font.ftPrint(font, 50, 60,  0, 630, 32, string.format("ROMVER = [%s]", ROMVER), Color.new(220, 220, 220, 0x80-A))
+    
     Font.ftPrint(font, 50, 80,  0, 630, 32, string.format(LNG_CONSOLE_MODEL, KELFBinder.getConsoleModel()), Color.new(220, 220, 220, 0x80-A))
     Font.ftPrint(font, 50, 100,  0, 630, 32, string.format(LNG_IS_COMPATIBLE, COMPATIBLE_WITH_UPDATES), Color.new(220, 220, 220, 0x80-A))
     if ROMVERN < 221 then
       Font.ftPrint(font, 50, 120,  0, 630, 32, string.format(LNG_SUPATH, UPDTPATH), Color.new(220, 220, 220, 0x80-A))
     end
+    Font.ftPrint(font, 50, 120,  0, 630, 32, string.format("ROM VER = [%s]", ROMVER), Color.new(220, 220, 220, 0x80-A))
+    Font.ftPrint(font, 50, 120,  0, 630, 32, string.format("ROM VER = [%s]", ROMVER), Color.new(220, 220, 220, 0x80-A))
+    Font.ftPrint(font, 50, 120,  0, 630, 32, string.format("ROM VER = [%s]", ROMVER), Color.new(220, 220, 220, 0x80-A))
+    Font.ftPrint(font, 50, 120,  0, 630, 32, string.format(LNG_ROM_MACHINETYPE, ROMVER), Color.new(220, 220, 220, 0x80-A))
+    Font.ftPrint(font, 55, 120,  0, 630, 32, string.format(LNG_ROM_DATE, ROMVERDATE), Color.new(220, 220, 220, 0x80-A))
 
     promptkeys(0,LNG_CT0, 1, LNG_CT4,0, 0, A)
     if A > 0 then A=A-1 end
-    Screen.flip()
     local pad = Pads.get()
     if D > 0 then D = D+1 end
     if D > 10 then D = 0 end
     if Pads.check(pad, PAD_CIRCLE) and D == 0 then break end
+    if Pads.check(pad, PAD_TRIANGLE) and D == 0 then Font.ftPrint(font, 50, 60,  0, 630, 32, string.format("ROMVER = [%s]", ROMVER), Color.new(220, 220, 220, 0x80-A)) end
+    Screen.flip()
   end
 end
 
