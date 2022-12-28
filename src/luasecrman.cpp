@@ -44,7 +44,7 @@ static int lua_deinitsecrman(lua_State *L)
 static int SignKELF(void *buffer, int size, unsigned char port, unsigned char slot)
 {
     DPRINTF("%s: start\n", __func__);
-    int result, InitSemaID, mcInitRes;
+    int result;//, InitSemaID, mcInitRes;
 
     /*	An IOP reboot would be done by the Utility Disc,
             to allow the SecrDownloadFile function of secrman_special to work on a
@@ -64,7 +64,7 @@ static int SignKELF(void *buffer, int size, unsigned char port, unsigned char sl
         // DEBUG_PRINTF("Error signing file.\n");
         result = -EINVAL;
     }
-
+    
     return result;
 }
 
@@ -112,9 +112,8 @@ static int lua_secrdownloadfile(lua_State *L) {
 
     if (argc == 5)
     {
-        printf("5 argumments, trying to load flags...");
         flags = luaL_checkinteger(L, 5);
-        printf("\nFlags are %%d=%d or %%x=%x\n", flags, flags);
+        printf("%s: Flags are %%d=%d or %%x=%x\n", __FUNCTION__, flags, flags);
     }
 
     printf("--------------------\n%s: Starting with %d argumments:\n"
