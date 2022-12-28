@@ -155,7 +155,6 @@ static int lua_getmachinetypeStr(lua_State *L)
         lua_pushstring(L, "?");
         break;
     }
-    lua_pushinteger(L, ROMREGION);
     return 1;
 }
 
@@ -303,8 +302,8 @@ static const luaL_Reg KELFBinder_functions[] = {
     {"getsystemLanguage", lua_getosdconfigLNG},
     {"InitConsoleModel", lua_initConsoleModel},
     {"getConsoleModel", lua_getConsoleModel},
-    {"getDVDPlayerFolder",lua_getDVDPlayerUpdatefolder},
-    {"getMachineType",lua_getmachinetypeStr},
+    {"getDVDPlayerFolder", lua_getDVDPlayerUpdatefolder},
+    {"getMachineType", lua_getmachinetypeStr},
     {0, 0}
 };
 
