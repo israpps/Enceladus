@@ -422,16 +422,20 @@ function DVDPlayerINST(port, slot, target_region)
   local RET
   local TARGET_FOLD = KELFBinder.getDVDPlayerFolder(target_region)
   local TARGET_KELF = string.format("mc%d:/%s/dvdplayer.elf", port, TARGET_FOLD)
-  System.createDirectory(string.format("mc%d:/%s", port, TARGET_FOLD))
-  KELFBinder.setSysUpdateFoldProps(port, slot, TARGET_FOLD)
-  Screen.clear()
-  Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
-  Font.ftPrint(font, 320, 20  , 8, 600, 64, string.format(LNG_INSTPMPT, TARGET_KELF))
-  Screen.flip()
 
-  RET = Secrman.downloadfile(port, slot, DVDPLAYERUPDATE, TARGET_KELF)
-  if RET < 0 then secrerr(RET) return end
-  secrerr(RET)
+  if System.doesFileExist(DVDPLAYERUPDATE) then
+    Screen.clear()
+    Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
+    Font.ftPrint(font, 320, 20  , 8, 600, 64, string.format(LNG_INSTPMPT, TARGET_KELF))
+    Screen.flip()
+    System.createDirectory(string.format("mc%d:/%s", port, TARGET_FOLD))
+    KELFBinder.setSysUpdateFoldProps(port, slot, TARGET_FOLD)
+    RET = Secrman.downloadfile(port, slot, DVDPLAYERUPDATE, TARGET_KELF)
+    if RET < 0 then secrerr(RET) return end
+    secrerr(RET)
+  else
+    secrerr(-201)
+  end
 end
 
 function NormalInstall(port, slot)
@@ -1324,5 +1328,3 @@ while true do
 end
 Screen.clear(Color.new(0xff, 0, 0, 0))
 while true do end
-
-
