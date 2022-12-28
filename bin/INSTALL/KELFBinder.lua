@@ -51,7 +51,12 @@ local REDCURSOR   = Graphics.loadImage("common/firefly_error.png")
 local GREENCURSOR = Graphics.loadImage("common/firefly_success.png")
 EXTRA_INST_COUNT  = 0
 EXTRA_INST_FOLDE  = 0
-dofile("INSTALL/EXTINST.lua")
+
+if System.doesFileExist("INSTALL/EXTINST.lua") then dofile("INSTALL/EXTINST.lua") else
+  Screen.clear(Color.new(128, 0, 128))
+  Screen.flip()
+  while true do end
+end
 Graphics.setImageFilters(LOGO, LINEAR)
 Graphics.setImageFilters(BG, LINEAR)
 Graphics.setImageFilters(BGERR, LINEAR)
@@ -133,34 +138,40 @@ end
 function PreExtraAssetsInstall(FILECOUNT, FOLDERCOUNT, SIZECOUNT)
   --FILECOUNT = FILECOUNT + EXTRA_INST_COUNT -- originally it sums the count
   FOLDERCOUNT = FOLDERCOUNT + EXTRA_INST_FOLDE
-
-  for i = 1, EXTRA_INST_FOLDE do
-    FOLDERCOUNT = FOLDERCOUNT + 1
-  end
-
-  for i = 1, EXTRA_INST_COUNT do -- @EXTRA_INST_COUNT
-    if System.doesFileExist(EXTRA_INST_SRC[i]) then -- CHECK FOR EXISTENCE, OTHERWISE, PROGRAM CRASHES!
-      SIZECOUNT = SIZECOUNT + GetFileSizeX(EXTRA_INST_SRC[i])
-      FILECOUNT = FILECOUNT + 1 -- only add the confirmed files
+  if EXTRA_INST_FOLDE > 0 then
+    for i = 1, EXTRA_INST_FOLDE do
+      FOLDERCOUNT = FOLDERCOUNT + 1
     end
-  end --]]
+  end
+  if EXTRA_INST_COUNT > 0 then
+    for i = 1, EXTRA_INST_COUNT do -- @EXTRA_INST_COUNT
+      if System.doesFileExist(EXTRA_INST_SRC[i]) then -- CHECK FOR EXISTENCE, OTHERWISE, PROGRAM CRASHES!
+        SIZECOUNT = SIZECOUNT + GetFileSizeX(EXTRA_INST_SRC[i])
+        FILECOUNT = FILECOUNT + 1 -- only add the confirmed files
+      end
+    end --]]
+  end
 
   return FILECOUNT, FOLDERCOUNT, SIZECOUNT
 end
 
 function InstallExtraAssets(port)
   ----------------------
-  for i = 1, EXTRA_INST_FOLDE do
-    -- if System.doesDirExist(string.format("INSTALL/ASSETS/%s", EXTRA_INST_MKD[i])) then -- only create the folder if source exists...
-    System.createDirectory(string.format("mc%d:/%s", port, EXTRA_INST_MKD[i]))
-    -- end
-  end
-
-  for i = 1, EXTRA_INST_COUNT do
-    if System.doesFileExist(EXTRA_INST_SRC[i]) then -- CHECK FOR EXISTENCE, OTHERWISE, PROGRAM CRASHES!
-      System.copyFile(EXTRA_INST_SRC[i], string.format("mc%d:/%s", port, EXTRA_INST_DST[i]))
+  if EXTRA_INST_FOLDE > 0 then
+    for i = 1, EXTRA_INST_FOLDE do
+      -- if System.doesDirExist(string.format("INSTALL/ASSETS/%s", EXTRA_INST_MKD[i])) then -- only create the folder if source exists...
+      System.createDirectory(string.format("mc%d:/%s", port, EXTRA_INST_MKD[i]))
+      -- end
     end
   end
+  if EXTRA_INST_COUNT > 0 then
+    for i = 1, EXTRA_INST_COUNT do
+      if System.doesFileExist(EXTRA_INST_SRC[i]) then -- CHECK FOR EXISTENCE, OTHERWISE, PROGRAM CRASHES!
+        System.copyFile(EXTRA_INST_SRC[i], string.format("mc%d:/%s", port, EXTRA_INST_DST[i]))
+      end
+    end
+  end
+
 end
 
 function CalculateRequiredSpace(port, FILECOUNT, FOLDERCOUNT, SIZECOUNT)
@@ -205,7 +216,7 @@ function greeting()
     Graphics.drawImage(LOGO, 64.0, 50.0, Color.new(128, 128, 128, Q))
     if IS_NOT_PUBLIC_READY then
       Font.ftPrint(font, 320, 20, 8, 630, 16, "THIS IS NOT A PUBLIC-READY VERSION!", Color.new(128, 128, 128, Q))
-      Font.ftPrint(font, 320, 40, 8, 630, 16, "Closed BETA - 011", Color.new(128, 128, 128, Q))
+      Font.ftPrint(font, 320, 40, 8, 630, 16, "Closed BETA - "..BETANUM, Color.new(128, 128, 128, Q))
     end
     Font.ftPrint(font, 320, 310, 8, 630, 16, LNG_CRDTS0, Color.new(128, 128, 128, Q))
     Font.ftPrint(font, 320, 330, 8, 630, 16, LNG_CRDTS1, Color.new(128, 128, 128, Q))

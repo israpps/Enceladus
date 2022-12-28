@@ -1,3 +1,4 @@
+Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
 	LNG_CRDTS0 = "Coded by El_isra (aka: Matias Israelson)"
 	LNG_CRDTS1 = "Based on Enceladus by Daniel Santos"
 	LNG_CRDTS2 = "SECRMAN and SECRSIF taken from Free McBoot 1.9 series installer"
@@ -83,6 +84,7 @@
 	LNG_INCOMPATIBLE_CARD = "This device is not compatible!"
 	LNG_INSTALLING_EXTRA = "Installing aditional files..."
 
+	BETANUM = "011"
 IS_NOT_PUBLIC_READY = true
 if System.doesFileExist("INSTALL/KELFBinder.lua") then
 	dofile("INSTALL/KELFBinder.lua");
@@ -99,3 +101,7 @@ if System.doesFileExist("INSTALL/KELFBinder.lua") then
   elseif System.doesFileExist("system.lua") then
 	dofile("system.lua");
 end
+
+Screen.clear(Color.new(0xff, 0xff, 0xff))
+Screen.flip()
+while true do end

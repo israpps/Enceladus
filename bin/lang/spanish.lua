@@ -80,3 +80,5 @@
 	LNG_ERROR = "Error!"
 	LNG_NOT_ENOUGH_SPACE0 = "No hay espacio suficiente en la Memory Card"
 	LNG_NOT_ENOUGH_SPACE1 = "Espacio requerido  %.1f Kb - Espacio disponible %.1f Kb"
+	LNG_INCOMPATIBLE_CARD = "Dispositivo incompatible!"
+	LNG_INSTALLING_EXTRA = "Instalando archivos adicionales..."
