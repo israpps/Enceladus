@@ -117,7 +117,7 @@ static int lua_secrdownloadfile(lua_State *L) {
         printf("\nFlags are %%d=%d or %%x=%x\n", flags, flags);
     }
 
-    printf("\n\n\n\n\n\n\n%s: Starting with %d argumments:\n"
+    printf("--------------------\n%s: Starting with %d argumments:\n"
            "[Port]: %d\n"
            "[Slot]: %d\n"
            "[input KELF]: %s\n"
