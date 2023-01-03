@@ -41,7 +41,7 @@ Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
 	LNG_EXPERTINST_PROMPT1 = "This console uses:"
 	LNG_REGS0 = "Japan - SCPH-XXX00"
 	LNG_REGS1 = "USA and Asia"
-	LNG_REGS2 = "Europe - SCPH-XXX0[2-4]"
+	LNG_REGS2 = "Europe / Oceania- SCPH-XXX0[2-4]"
 	LNG_REGS3 = "China - SCPH-XXX09"
 	LNG_EIO = "I/O ERROR"
 	LNG_SECRMANERR = "SECRDOWNLOADFILE Failed! - Possible MagicGate error"

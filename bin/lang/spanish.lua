@@ -41,7 +41,7 @@
 	LNG_EXPERTINST_PROMPT1 = "Esta consola usa:"
 	LNG_REGS0 = "Japón - SCPH-XXX00"
 	LNG_REGS1 = "USA y Asia"
-	LNG_REGS2 = "Europa - SCPH-XXX0[2-4]"
+	LNG_REGS2 = "Europa / Oceania - SCPH-XXX0[2-4]"
 	LNG_REGS3 = "China - SCPH-XXX09"
 	LNG_EIO = "ERROR I/O"
 	LNG_SECRMANERR = "SECRDOWNLOADFILE Falló! - Posible error Magicgate"
