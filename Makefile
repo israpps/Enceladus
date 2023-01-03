@@ -1,5 +1,3 @@
-.SILENT:                                                                              
-
 define HEADER
                                                                        
 
@@ -20,13 +18,15 @@ export HEADER
 #----------------------- Configuration flags ----------------------#
 #------------------------------------------------------------------#
 #-------------------------- Reset the IOP -------------------------#
-RESET_IOP = 1
+RESET_IOP ?= 1
 #---------------------- enable DEBUGGING MODE ---------------------#
-DEBUG = 0
+DEBUG ?= 0
 #----------------------- Set IP for PS2Client ---------------------#
-PS2LINK_IP = 192.168.1.10
+PS2LINK_IP ?= 192.168.1.10
 #------------------------------------------------------------------#
-
+ifeq ($(DEBUG),0)
+.SILENT:
+endif
 EE_BIN = KELFBinder.elf
 EE_BIN_PKD = KELFBinder_pkd.elf
 
@@ -89,7 +89,11 @@ all: $(EXT_LIBS) $(EE_BIN)
 	$(EE_STRIP) $(EE_BIN)
 
 	echo "Compressing $(EE_BIN_PKD)...\n"
+ifeq ($(DEBUG),1)
+	ps2-packer -v $(EE_BIN) $(EE_BIN_PKD)
+else
 	ps2-packer $(EE_BIN) $(EE_BIN_PKD) > /dev/null
+endif
 	
 	mv $(EE_BIN) bin/
 	mv $(EE_BIN_PKD) bin/
@@ -213,15 +217,21 @@ reset:
 	ps2client -h $(PS2LINK_IP) reset   
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c | $(EE_OBJS_DIR)
+ifeq ($(DEBUG),0)
 	@echo " CC  - $@"
+endif
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_ASM_DIR)%.s | $(EE_OBJS_DIR)
+ifeq ($(DEBUG),0)
 	@echo " ASM - $@"
+endif
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.cpp | $(EE_OBJS_DIR)
+ifeq ($(DEBUG),0)
 	@echo " CXX - $@"
+endif
 	$(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS) -c $< -o $@
 
 include $(PS2SDK)/samples/Makefile.pref
