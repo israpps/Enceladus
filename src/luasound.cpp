@@ -1,7 +1,7 @@
 
 #include "include/luaplayer.h"
 #include "include/sound.h"
-
+#include "include/dbgprintf.h"
 static int lua_setformat(lua_State *L) {
     DPRINTF("%s: start\n", __FUNCTION__);
 	int argc = lua_gettop(L);
