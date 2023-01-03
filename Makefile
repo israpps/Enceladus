@@ -31,7 +31,7 @@ EE_BIN = KELFBinder.elf
 EE_BIN_PKD = KELFBinder_pkd.elf
 
 EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Lmodules/ds34bt/ee/ -Lmodules/ds34usb/ee/ -lpatches -lfileXio -lpad -ldebug -llua -lmath3d -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit -lpng -lz -lmc -laudsrv -lelf-loader -lds34bt -lds34usb
-EE_LIBS += -liopreboot
+EE_LIBS += -liopreboot -lpoweroff
 
 EE_INCS += -Isrc/include -I$(PS2DEV)/gsKit/include -I$(PS2SDK)/ports/include -I$(PS2SDK)/ports/include/freetype2 -I$(PS2SDK)/ports/include/zlib
 
@@ -70,7 +70,7 @@ IOP_MODULES = iomanx.o filexio.o \
 			  sio2man.o mcman.o mcserv.o padman.o libsd.o \
 			  usbd.o audsrv.o bdm.o bdmfs_vfat.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o \
-			  secrsif.o IOPRP.o secrman.o
+			  secrsif.o IOPRP.o secrman.o poweroff.o
 
 EMBEDDED_RSC = boot.o
 
@@ -113,6 +113,9 @@ EMBED/%.s: EMBED/%.png
 #-------------------- Embedded IOP Modules ------------------------#
 $(EE_ASM_DIR)iomanx.s: $(PS2SDK)/iop/irx/iomanX.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ iomanX_irx
+
+$(EE_ASM_DIR)poweroff.s: $(PS2SDK)/iop/irx/poweroff.irx | $(EE_ASM_DIR)
+	$(BIN2S) $< $@ poweroff_irx
 
 $(EE_ASM_DIR)filexio.s: $(PS2SDK)/iop/irx/fileXio.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ fileXio_irx

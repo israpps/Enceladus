@@ -447,6 +447,7 @@ function DVDPlayerINST(port, slot, target_region)
   local TARGET_KELF = string.format("mc%d:/%s/dvdplayer.elf", port, TARGET_FOLD)
 
   if System.doesFileExist(DVDPLAYERUPDATE) then
+    System.AllowPowerOffButton(0)
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     Font.ftPrint(font, 320, 20, 8, 600, 64, string.format(LNG_INSTPMPT, TARGET_KELF))
@@ -454,6 +455,7 @@ function DVDPlayerINST(port, slot, target_region)
     System.createDirectory(string.format("mc%d:/%s", port, TARGET_FOLD))
     KELFBinder.setSysUpdateFoldProps(port, slot, TARGET_FOLD)
     RET = Secrman.downloadfile(port, slot, DVDPLAYERUPDATE, TARGET_KELF)
+    System.AllowPowerOffButton(1)
     if RET < 0 then secrerr(RET) return end
     secrerr(RET)
   else
@@ -487,6 +489,7 @@ function NormalInstall(port, slot)
   if System.doesDirExist(TARGET_FOLD) then
     Ask2WipeSysUpdateDirs(false, false, false, false, true, port)
   end
+  System.AllowPowerOffButton(0)
   System.createDirectory(TARGET_FOLD)
   if REG == 0 then -- JAP
     System.copyFile("INSTALL/ASSETS/JAP.sys", string.format("%s/icon.sys", TARGET_FOLD))
@@ -534,6 +537,7 @@ function NormalInstall(port, slot)
   Font.ftPrint(font, 320, 120, 8, 400, 64, LNG_INSTALLING_EXTRA)
   Screen.flip()
   InstallExtraAssets(port)
+  System.AllowPowerOffButton(1)
   secrerr(RET)
 end
 
@@ -563,38 +567,38 @@ function MemcardPickup()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
     Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_MEMCARD0, Color.new(0x80, 0x80, 0x80, 0x80 - A))
-
+    
+    Font.ftPrint(font, 160, 270, 8, 630, 32, string.format(LNG_MEMCARD1, 1), Color.new(0x80, 0x80, 0x80, 0x80 - A))
     if mcinfo0.type == 2 then
-      Font.ftPrint(font, 80 + 64, 270, 8, 630, 32, string.format(LNG_MEMCARD1, 1), Color.new(0x80, 0x80, 0x80, 0x80 - A))
       if mcinfo0.format == 1 then
-        Font.ftPrint(font, 80 + 64, 290, 8, 630, 32, string.format(LNG_MEMCARD2, mcinfo0.freemem), Color.new(0x80, 0x80, 0x80, 0x80 - A))
+        Font.ftPrint(font, 160, 290, 8, 630, 32, string.format(LNG_MEMCARD2, mcinfo0.freemem), Color.new(0x80, 0x80, 0x80, 0x80 - A))
       else
-        Font.ftPrint(font, 80 + 64, 290, 8, 630, 32, LNG_UNFORMATTED_CARD, Color.new(0x80, 0, 0, 0x80-A))
+        Font.ftPrint(font, 160, 290, 8, 630, 32, LNG_UNFORMATTED_CARD, Color.new(0x80, 0, 0, 0x80-A))
       end
     elseif mcinfo0.type ~= 0 then
-      Font.ftPrint(font, 80 + 64, 270, 8, 630, 32, LNG_INCOMPATIBLE_CARD, Color.new(0x80, 0x80, 0x80, 0x80 - A))
+      Font.ftPrint(font, 160, 290, 8, 630, 32, LNG_INCOMPATIBLE_CARD, Color.new(0x80, 0x80, 0x80, 0x80 - A))
     end
 
     if T == 0 then
-      Graphics.drawScaleImage(mi0, 80.0 + 32, 180.0, 64, 64, Color.new(0x90, 0x90, 0x90, Q))
+      Graphics.drawScaleImage(mi0, 160.0 - 32, 180.0, 64, 64, Color.new(0x90, 0x90, 0x90, Q))
     else
-      Graphics.drawScaleImage(mi0, 80.0 + 32, 180.0, 64, 64, Color.new(0x80, 0x80, 0x80, 0x80 - A))
+      Graphics.drawScaleImage(mi0, 160.0 - 32, 180.0, 64, 64, Color.new(0x80, 0x80, 0x80, 0x80 - A))
     end
 
+    Font.ftPrint(font, 460, 270, 8, 630, 32, string.format(LNG_MEMCARD1, 2), Color.new(0x80, 0x80, 0x80, 0x80 - A))
     if mcinfo1.type == 2 then
-      Font.ftPrint(font, 360 + 64, 270, 8, 630, 32, string.format(LNG_MEMCARD1, 2), Color.new(0x80, 0x80, 0x80, 0x80 - A))
       if mcinfo1.format == 1 then
-        Font.ftPrint(font, 360 + 64, 290, 8, 630, 32, string.format(LNG_MEMCARD2, mcinfo1.freemem), Color.new(0x80, 0x80, 0x80, 0x80 - A))
+        Font.ftPrint(font, 460, 290, 8, 630, 32, string.format(LNG_MEMCARD2, mcinfo1.freemem), Color.new(0x80, 0x80, 0x80, 0x80 - A))
       else
-        Font.ftPrint(font, 360 + 64, 290, 8, 630, 32, LNG_UNFORMATTED_CARD, Color.new(0x80, 0, 0, 0x80-A))
+        Font.ftPrint(font, 460, 290, 8, 630, 32, LNG_UNFORMATTED_CARD, Color.new(0x80, 0, 0, 0x80-A))
       end
     elseif mcinfo1.type ~= 0 then
-      Font.ftPrint(font, 360 + 64, 270, 0, 630, 32, LNG_INCOMPATIBLE_CARD, Color.new(0x80, 0x80, 0x80, 0x80 - A))
+      Font.ftPrint(font, 460, 290, 8, 630, 32, LNG_INCOMPATIBLE_CARD, Color.new(0x80, 0x80, 0x80, 0x80 - A))
     end
-    if T == 1 then
-      Graphics.drawScaleImage(mi1, 360.0 + 32, 180.0, 64, 64, Color.new(0x90, 0x90, 0x90, Q))
+    if T == 1 then -- minus 32 so image center lies on 460
+      Graphics.drawScaleImage(mi1, 460.0 - 32, 180.0, 64, 64, Color.new(0x90, 0x90, 0x90, Q))
     else
-      Graphics.drawScaleImage(mi1, 360.0 + 32, 180.0, 64, 64, Color.new(0x80, 0x80, 0x80, 0x80 - A))
+      Graphics.drawScaleImage(mi1, 460.0 - 32, 180.0, 64, 64, Color.new(0x80, 0x80, 0x80, 0x80 - A))
     end
 
     if A > 0 then A = A - 1 end
@@ -1178,6 +1182,8 @@ function performExpertINST(port, slot, UPDT)
   AvailableSpace, SIZE_NEED2 = CalculateRequiredSpace(port, FILECOUNT, FOLDERCOUNT, SIZE_NEED)
   if AvailableSpace < SIZE_NEED2 then InsufficientSpace(SIZE_NEED2, AvailableSpace) return end
   if FOLDS_CONFLICT then Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, false, port) end
+  
+  System.AllowPowerOffButton(0)
   Screen.clear()
   Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
   Font.ftPrint(font, 320, 20, 8, 400, 64, LNG_INSTALLING)
@@ -1229,6 +1235,7 @@ function performExpertINST(port, slot, UPDT)
   Font.ftPrint(font, 320, 120, 8, 400, 64, LNG_INSTALLING_EXTRA)
   Screen.flip()
   InstallExtraAssets(port)
+  System.AllowPowerOffButton(1)
   System.sleep(2)
   secrerr(RET)
 end

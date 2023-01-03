@@ -12,6 +12,7 @@
 #include "include/dbgprintf.h"
 
 #define MAX_DIR_FILES 512
+extern int AllowPoweroff;
 
 static int lua_getCurrentDirectory(lua_State *L)
 {
@@ -62,6 +63,17 @@ static int lua_setCurrentDirectory(lua_State *L)
     chdir(__ps2_normalize_path(temp_path));
 
     return 1;
+}
+
+
+static int lua_AllowPowerOFF(lua_State *L)
+{
+    int argc = lua_gettop(L);
+    if (argc != 1)
+        return luaL_error(L, "AllowPoweroff needs 1 argumment only");
+    AllowPoweroff = luaL_checkinteger(L, 1);
+    //if (AllowPoweroff > 1) AllowPoweroff = 1;
+    return 0;
 }
 
 static int lua_curdir(lua_State *L)
@@ -782,6 +794,7 @@ static int lua_getbootpath(lua_State *L)
 
 static const luaL_Reg System_functions[] = {
     {"getbootpath", lua_getbootpath},
+    {"AllowPowerOffButton", lua_AllowPowerOFF},
     {"openFile", lua_openfile},
     {"readFile", lua_readfile},
     {"writeFile", lua_writefile},

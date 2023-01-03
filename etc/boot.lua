@@ -86,7 +86,7 @@ Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
 	LNG_INSTALLING_EXTRA = "Installing aditional files..."
 	LNG_UNFORMATTED_CARD = "unformatted"
 
-	BETANUM = "011"
+	BETANUM = "012"
 IS_NOT_PUBLIC_READY = true
 if System.doesFileExist("INSTALL/KELFBinder.lua") then
 	dofile("INSTALL/KELFBinder.lua");
