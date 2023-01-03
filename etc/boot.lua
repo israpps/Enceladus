@@ -38,6 +38,7 @@ Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
 	LNG_SUC8 = "Any European model excluding release models"
 	LNG_SUC9 = "The rare Chinese models"
 	LNG_EXPERTINST_PROMPT = "Select the system update executables"
+	LNG_EXPERTINST_PROMPT1 = "This console uses:"
 	LNG_REGS0 = "Japan - SCPH-XXX00"
 	LNG_REGS1 = "USA and Asia"
 	LNG_REGS2 = "Europe - SCPH-XXX0[2-4]"
@@ -62,6 +63,7 @@ Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
 	LNG_PICK_DVDPLAYER_REG = "Choose the DVD Player's update region"
 	LNG_JAP = "Japan"
 	LNG_USA = "USA"
+	LNG_ASI = "Asia"
 	LNG_USANASIA = "USA & Asia"
 	LNG_EUR = "Europe"
 	LNG_CHN = "China"
@@ -85,6 +87,7 @@ Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
 	LNG_INCOMPATIBLE_CARD = "incompatible device!"
 	LNG_INSTALLING_EXTRA = "Installing aditional files..."
 	LNG_UNFORMATTED_CARD = "unformatted"
+
 
 	BETANUM = "012"
 IS_NOT_PUBLIC_READY = true

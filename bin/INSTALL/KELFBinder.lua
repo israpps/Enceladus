@@ -49,6 +49,8 @@ local BGSCS       = Graphics.loadImage("common/background_success.png")
 local CURSOR      = Graphics.loadImage("common/firefly.png")
 local REDCURSOR   = Graphics.loadImage("common/firefly_error.png")
 local GREENCURSOR = Graphics.loadImage("common/firefly_success.png")
+local CHK_ = Graphics.loadImage("common/checkbox_empty.png")
+local CHKF = Graphics.loadImage("common/checkbox_filled.png")
 EXTRA_INST_COUNT  = 0
 EXTRA_INST_FOLDE  = 0
 
@@ -669,65 +671,84 @@ function expertINSTprompt()
   for i = 0, 10 do
     UPDT[i] = 0
   end
+  local REGI = {LNG_JAP, LNG_USA, LNG_ASI, LNG_EUR, LNG_CHN}
+  local SYSUP = KELFBinder.calculateSysUpdatePath()
+  SYSUP = string.sub(SYSUP, 15)
+  SYSUP = REGI[KELFBinder.getsystemregion()].." - "..SYSUP
   while true do
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
-    ORBMAN(0x80)
-    Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_EXPERTINST_PROMPT)
-    Font.ftPrint(font, 310, 50, 0, 630, 16, LNG_REGS0, Color.new(250, 250, 250, 0x80 - A))
-    Font.ftPrint(font, 310, 150, 0, 630, 16, LNG_REGS1, Color.new(250, 250, 250, 0x80))
-    Font.ftPrint(font, 310, 230, 0, 630, 16, LNG_REGS2, Color.new(250, 250, 250, 0x80 - A))
-    Font.ftPrint(font, 310, 290, 0, 630, 16, LNG_REGS3, Color.new(250, 250, 250, 0x80 - A))
-    Font.ftPrint(font, 20, 340, 0, 600, 32, UPDTT[T], Color.new(200, 200, 200, 0x80 - A))
+    ORBMAN(0x70)
+    Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_EXPERTINST_PROMPT, Color.new(0x80, 0x80, 0x80, 0x80 - A))
+    if ROMVERN < 230 then
+      Font.ftPrint(font, 320, 50, 8, 630, 32, LNG_EXPERTINST_PROMPT1, Color.new(0x80, 0x80, 0, 0x80 - A))
+      Font.ftPrint(font, 320, 65, 8, 630, 32, SYSUP, Color.new(0x70, 0x70, 0x70, 0x80 - A))
+    end
+    Font.ftPrint(font, 115, 120, 0, 630, 16, LNG_REGS0, Color.new(0x80, 0x80, 0, 0x80 - A))
+    Font.ftPrint(font, 115, 240, 0, 630, 16, LNG_REGS1, Color.new(0x80, 0x80, 0, 0x80 - A))
+    Font.ftPrint(font, 310, 120, 0, 630, 16, LNG_REGS2, Color.new(0x80, 0x80, 0, 0x80 - A))
+    Font.ftPrint(font, 310, 200, 0, 630, 16, LNG_REGS3, Color.new(0x80, 0x80, 0, 0x80 - A))
+    Font.ftPrint(font,  40, 340, 0, 600, 32, UPDTT[T] , Color.new(200, 200, 200, 0x80 - A))
+
+    if UPDT[0] == 1 then Graphics.drawImage(CHKF,  95, 142) else Graphics.drawImage(CHK_,  95, 142, Color.new(0x80, 0x80, 0x80, 0x80 - A)) end
+    if UPDT[1] == 1 then Graphics.drawImage(CHKF,  95, 162) else Graphics.drawImage(CHK_,  95, 162, Color.new(0x80, 0x80, 0x80, 0x80 - A)) end
+    if UPDT[2] == 1 then Graphics.drawImage(CHKF,  95, 182) else Graphics.drawImage(CHK_,  95, 182, Color.new(0x80, 0x80, 0x80, 0x80 - A)) end
+    if UPDT[3] == 1 then Graphics.drawImage(CHKF,  95, 202) else Graphics.drawImage(CHK_,  95, 202, Color.new(0x80, 0x80, 0x80, 0x80 - A)) end
+    if UPDT[4] == 1 then Graphics.drawImage(CHKF,  95, 262) else Graphics.drawImage(CHK_,  95, 262, Color.new(0x80, 0x80, 0x80, 0x80 - A)) end
+    if UPDT[5] == 1 then Graphics.drawImage(CHKF,  95, 282) else Graphics.drawImage(CHK_,  95, 282, Color.new(0x80, 0x80, 0x80, 0x80 - A)) end
+    if UPDT[6] == 1 then Graphics.drawImage(CHKF,  95, 302) else Graphics.drawImage(CHK_,  95, 302, Color.new(0x80, 0x80, 0x80, 0x80 - A)) end
+    if UPDT[7] == 1 then Graphics.drawImage(CHKF, 300, 142) else Graphics.drawImage(CHK_, 300, 142, Color.new(0x80, 0x80, 0x80, 0x80 - A)) end
+    if UPDT[8] == 1 then Graphics.drawImage(CHKF, 300, 162) else Graphics.drawImage(CHK_, 300, 162, Color.new(0x80, 0x80, 0x80, 0x80 - A)) end
+    if UPDT[9] == 1 then Graphics.drawImage(CHKF, 300, 222) else Graphics.drawImage(CHK_, 300, 222, Color.new(0x80, 0x80, 0x80, 0x80 - A)) end
     if T == JAP_ROM_100 then
-      Font.ftPrint(font, 321, 70, 0, 400, 16, "osdsys.elf", Color.new(200 ^ (UPDT[0] + 1), 0xde, 0xff, 0x80 - A))
+      Font.ftPrint(font, 115, 140, 0, 400, 16, "osdsys.elf", Color.new(0x80, 0x80, 0x80, 0x80 - A))
     else
-      Font.ftPrint(font, 320, 70, 0, 400, 16, "osdsys.elf", Color.new(200 ^ (UPDT[0] + 1), 0xde, 0xff, 0x50 - A))
+      Font.ftPrint(font, 115, 140, 0, 400, 16, "osdsys.elf", Color.new(0x80, 0x80, 0x80, 0x50 - A))
     end
     if T == JAP_ROM_101 then
-      Font.ftPrint(font, 321, 90, 0, 400, 16, "osd110.elf", Color.new(200 ^ (UPDT[1] + 1), 0xde, 0xff, 0x80 - A))
+      Font.ftPrint(font, 115, 160, 0, 400, 16, "osd110.elf", Color.new(0x80, 0xde, 0xff, 0x80 - A))
     else
-      Font.ftPrint(font, 320, 90, 0, 400, 16, "osd110.elf", Color.new(200 ^ (UPDT[1] + 1), 0xde, 0xff, 0x50 - A))
+      Font.ftPrint(font, 115, 160, 0, 400, 16, "osd110.elf", Color.new(0x80, 0xde, 0xff, 0x50 - A))
     end
     if T == JAP_ROM_120 then
-      Font.ftPrint(font, 321, 110, 0, 400, 16, "osd130.elf", Color.new(200 ^ (UPDT[2] + 1), 0xde, 0xff, 0x80 - A))
+      Font.ftPrint(font, 115, 180, 0, 400, 16, "osd130.elf", Color.new(0x80, 0xde, 0xff, 0x80 - A))
     else
-      Font.ftPrint(font, 320, 110, 0, 400, 16, "osd130.elf", Color.new(200 ^ (UPDT[2] + 1), 0xde, 0xff, 0x50 - A))
+      Font.ftPrint(font, 115, 180, 0, 400, 16, "osd130.elf", Color.new(0x80, 0xde, 0xff, 0x50 - A))
     end
     if T == JAP_STANDARD then
-      Font.ftPrint(font, 321, 130, 0, 400, 16, "osdmain.elf", Color.new(200 ^ (UPDT[3] + 1), 0xde, 0xff, 0x80 - A))
+      Font.ftPrint(font, 115, 200, 0, 400, 16, "osdmain.elf", Color.new(0x80, 0xde, 0xff, 0x80 - A))
     else
-      Font.ftPrint(font, 320, 130, 0, 400, 16, "osdmain.elf", Color.new(200 ^ (UPDT[3] + 1), 0xde, 0xff, 0x50 - A))
+      Font.ftPrint(font, 115, 200, 0, 400, 16, "osdmain.elf", Color.new(0x80, 0xde, 0xff, 0x50 - A))
     end
     if T == USA_ROM_110 then
-      Font.ftPrint(font, 321, 170, 0, 400, 16, "osd120.elf", Color.new(200 ^ (UPDT[4] + 1), 0xde, 0xff, 0x80 - A))
+      Font.ftPrint(font, 115, 260, 0, 400, 16, "osd120.elf", Color.new(0x80, 0xde, 0xff, 0x80 - A))
     else
-      Font.ftPrint(font, 320, 170, 0, 400, 16, "osd120.elf", Color.new(200 ^ (UPDT[4] + 1), 0xde, 0xff, 0x50 - A))
+      Font.ftPrint(font, 115, 260, 0, 400, 16, "osd120.elf", Color.new(0x80, 0xde, 0xff, 0x50 - A))
     end
     if T == USA_ROM_120 then
-      Font.ftPrint(font, 321, 190, 0, 400, 16, "osd130.elf", Color.new(200 ^ (UPDT[5] + 1), 0xde, 0xff, 0x80 - A))
+      Font.ftPrint(font, 115, 280, 0, 400, 16, "osd130.elf", Color.new(0x80, 0xde, 0xff, 0x80 - A))
     else
-      Font.ftPrint(font, 320, 190, 0, 400, 16, "osd130.elf", Color.new(200 ^ (UPDT[5] + 1), 0xde, 0xff, 0x50 - A))
+      Font.ftPrint(font, 115, 280, 0, 400, 16, "osd130.elf", Color.new(0x80, 0xde, 0xff, 0x50 - A))
     end
     if T == USA_STANDARD then
-      Font.ftPrint(font, 321, 210, 0, 400, 16, "osdmain.elf", Color.new(200 ^ (UPDT[6] + 1), 0xde, 0xff, 0x80 - A))
+      Font.ftPrint(font, 115, 300, 0, 400, 16, "osdmain.elf", Color.new(0x80, 0xde, 0xff, 0x80 - A))
     else
-      Font.ftPrint(font, 320, 210, 0, 400, 16, "osdmain.elf", Color.new(200 ^ (UPDT[6] + 1), 0xde, 0xff, 0x50 - A))
+      Font.ftPrint(font, 115, 300, 0, 400, 16, "osdmain.elf", Color.new(0x80, 0xde, 0xff, 0x50 - A))
     end
     if T == EUR_ROM_120 then
-      Font.ftPrint(font, 321, 250, 0, 400, 16, "osd130.elf", Color.new(200 ^ (UPDT[7] + 1), 0xde, 0xff, 0x80 - A))
+      Font.ftPrint(font, 320, 140, 0, 400, 16, "osd130.elf", Color.new(0x80, 0xde, 0xff, 0x80 - A))
     else
-      Font.ftPrint(font, 320, 250, 0, 400, 16, "osd130.elf", Color.new(200 ^ (UPDT[7] + 1), 0xde, 0xff, 0x50 - A))
+      Font.ftPrint(font, 320, 140, 0, 400, 16, "osd130.elf", Color.new(0x80, 0xde, 0xff, 0x50 - A))
     end
     if T == EUR_STANDARD then
-      Font.ftPrint(font, 321, 270, 0, 400, 16, "osdmain.elf", Color.new(200 ^ (UPDT[8] + 1), 0xde, 0xff, 0x80 - A))
+      Font.ftPrint(font, 320, 160, 0, 400, 16, "osdmain.elf", Color.new(0x80, 0xde, 0xff, 0x80 - A))
     else
-      Font.ftPrint(font, 320, 270, 0, 400, 16, "osdmain.elf", Color.new(200 ^ (UPDT[8] + 1), 0xde, 0xff, 0x50 - A))
+      Font.ftPrint(font, 320, 160, 0, 400, 16, "osdmain.elf", Color.new(0x80, 0xde, 0xff, 0x50 - A))
     end
     if T == CHN_STANDARD then
-      Font.ftPrint(font, 321, 310, 0, 400, 16, "osdmain.elf", Color.new(200 ^ (UPDT[9] + 1), 0xde, 0xff, 0x80 - A))
+      Font.ftPrint(font, 320, 220, 0, 400, 16, "osdmain.elf", Color.new(0x80, 0xde, 0xff, 0x80 - A))
     else
-      Font.ftPrint(font, 320, 310, 0, 400, 16, "osdmain.elf", Color.new(200 ^ (UPDT[9] + 1), 0xde, 0xff, 0x50 - A))
+      Font.ftPrint(font, 320, 220, 0, 400, 16, "osdmain.elf", Color.new(0x80, 0xde, 0xff, 0x50 - A))
     end
     if A > 0 then A = A - 1 end
     promptkeys(1, LNG_CT0, 1, LNG_CT1, 1, LNG_CT3, A)
@@ -774,6 +795,8 @@ function expertINSTprompt()
   Screen.clear()
   return UPDT
 end
+
+expertINSTprompt()
 
 function AdvancedINSTprompt()
   local T = 1
@@ -1278,7 +1301,7 @@ function SystemInfo()
       Color.new(220, 220, 220, 0x80 - A))
     Font.ftPrint(font, 50, 100, 0, 630, 32, string.format(LNG_IS_COMPATIBLE, COMPATIBLE_WITH_UPDATES),
       Color.new(220, 220, 220, 0x80 - A))
-    if ROMVERN < 221 then
+    if ROMVERN < 230 then
       Font.ftPrint(font, 50, 120, 0, 630, 32, string.format(LNG_SUPATH, UPDTPATH), Color.new(220, 220, 220, 0x80 - A))
     end
 
