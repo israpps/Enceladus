@@ -113,10 +113,10 @@ static int lua_secrdownloadfile(lua_State *L) {
     if (argc == 5)
     {
         flags = luaL_checkinteger(L, 5);
-        printf("%s: Flags are %%d=%d or %%x=%x\n", __FUNCTION__, flags, flags);
+        DPRINTF("%s: Flags are %%d=%d or %%x=%x\n", __FUNCTION__, flags, flags);
     }
 
-    printf("--------------------\n%s: Starting with %d argumments:\n"
+    DPRINTF("--------------------\n%s: Starting with %d argumments:\n"
            "[Port]: %d\n"
            "[Slot]: %d\n"
            "[input KELF]: %s\n"
@@ -128,13 +128,13 @@ static int lua_secrdownloadfile(lua_State *L) {
 	int result = 0;
 
 	int fd = open(file_tbo, O_RDONLY);
-    printf("luasecrdownloadfile: input fd is %d\n", fd);
+    DPRINTF("luasecrdownloadfile: input fd is %d\n", fd);
 	if(fd<0){
         lua_pushinteger(L, -201);
         return 1;
 	}
 	int size=lseek(fd, 0, SEEK_END);
-    printf("luasecrdownloadfile: KELF size is %d\n", size);
+    DPRINTF("luasecrdownloadfile: KELF size is %d\n", size);
 	if(size<0){
         close(fd);
         lua_pushinteger(L, -201);
@@ -156,37 +156,37 @@ static int lua_secrdownloadfile(lua_State *L) {
 			} 
             else 
             {
-                printf("luasecrdownloadfile: SignKELF returns %d\n", result);
+                DPRINTF("luasecrdownloadfile: SignKELF returns %d\n", result);
                 if (flags == 0)
                 {
-                    printf("flags was empty, performing normal install!\n");
+                    DPRINTF("flags was empty, performing normal install!\n");
 			        int McFileFD = open(dest, O_WRONLY|O_CREAT|O_TRUNC);
-                    printf("luasecrdownloadfile: %s fd is (%d)\n",dest, McFileFD);
+                    DPRINTF("luasecrdownloadfile: %s fd is (%d)\n",dest, McFileFD);
 			        int written = write(McFileFD, buf, size);
                     if (written != size)
                     {
                         result = -EIO;
                     }
-                    printf("luasecrdownloadfile: written %d\n", written);
+                    DPRINTF("luasecrdownloadfile: written %d\n", written);
 			        close(McFileFD);
                 }
                 else
                 {
-                    printf("flags was not empty, performing multiple installation\n");
+                    DPRINTF("flags was not empty, performing multiple installation\n");
                     int x = 0, TF = 0;
                     char output[64];
                     for (x=2; x<SYSTEM_UPDATE_COUNT; x++) // start from index 2, since 0 and 1 are kernel patches, wich require different value for file_tbo
                     {
                         TF = (1 << (x+1));
-                        printf("trying with %s ", sysupdate_paths[BSM2AI(TF)]);
+                        DPRINTF("trying with %s ", sysupdate_paths[BSM2AI(TF)]);
                         if (flags & TF)
                         {
                             sprintf(output, "mc%d:/%s", port, sysupdate_paths[BSM2AI(TF)]);
-                            printf("IT IS FLAGGED\n");
+                            DPRINTF("IT IS FLAGGED\n");
                             int McFileFD = open(output, O_WRONLY|O_CREAT|O_TRUNC);
-                            printf("luasecrdownloadfile: %s fd is (%d)\n",sysupdate_paths[BSM2AI(TF)], McFileFD);
+                            DPRINTF("luasecrdownloadfile: %s fd is (%d)\n",sysupdate_paths[BSM2AI(TF)], McFileFD);
                             int written = write(McFileFD, buf, size);
-                            printf("luasecrdownloadfile: written %d\n", written);
+                            DPRINTF("luasecrdownloadfile: written %d\n", written);
                             close(McFileFD);
                             if (written != size)
                             {
@@ -194,7 +194,7 @@ static int lua_secrdownloadfile(lua_State *L) {
                                 break;
                             }
                         } else
-                            printf("NOT FLAGGED\n");
+                            DPRINTF("NOT FLAGGED\n");
                     }
                 }
             }

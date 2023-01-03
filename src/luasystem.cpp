@@ -215,7 +215,7 @@ static int lua_dir(lua_State *L)
 
 static int lua_createDir(lua_State *L)
 {
-    printf("%s: start\n", __FUNCTION__);
+    DPRINTF("%s: start\n", __FUNCTION__);
     const char *path = luaL_checkstring(L, 1);
     if (!path)
         return luaL_error(L, "Argument error: System.createDirectory(directory) takes a directory name as string as argument.");
@@ -238,7 +238,7 @@ static int lua_removeDir(lua_State *L)
 //thanks to SP193 for all his work
 static int DeleteFolder(const char *folder)
 {
-    printf("\n\n\n\n%s: START!\n", __FUNCTION__);
+    DPRINTF("\n\n\n\n%s: START!\n", __FUNCTION__);
 	DIR *d = opendir(folder);
 	size_t path_len = strlen(folder);
 	int r = -1;
