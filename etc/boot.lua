@@ -83,6 +83,7 @@ Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
 	LNG_NOT_ENOUGH_SPACE1 = "Needed space  %.1f Kb - Available Space %.1f Kb"
 	LNG_INCOMPATIBLE_CARD = "This device is not compatible!"
 	LNG_INSTALLING_EXTRA = "Installing aditional files..."
+	LNG_UNFORMATTED_CARD = "Memory Card is not formatted"
 
 	BETANUM = "011"
 IS_NOT_PUBLIC_READY = true

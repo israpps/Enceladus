@@ -569,8 +569,11 @@ function MemcardPickup()
     Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_MEMCARD0, Color.new(0x80, 0x80, 0x80, 0x80 - A))
 
     if mcinfo0.type == 2 then
-      Font.ftPrint(font, 80, 270, 0, 630, 32, string.format(LNG_MEMCARD1, 1, mcinfo0.freemem),
-        Color.new(0x80, 0x80, 0x80, 0x80 - A))
+      if mcinfo0.format == 1 then
+        Font.ftPrint(font, 80, 270, 0, 630, 32, string.format(LNG_MEMCARD1, 1, mcinfo0.freemem), Color.new(0x80, 0x80, 0x80, 0x80 - A))
+      else
+        Font.ftPrint(font, 80, 270, 0, 630, 32, LNG_UNFORMATTED_CARD, Color.new(0x80, 0, 0, 0))
+      end
     elseif mcinfo0.type ~= 0 then
       Font.ftPrint(font, 360, 270, 0, 630, 32, LNG_INCOMPATIBLE_CARD, Color.new(0x80, 0x80, 0x80, 0x80 - A))
     end
@@ -581,8 +584,11 @@ function MemcardPickup()
       Graphics.drawScaleImage(mi0, 80.0 + 32, 180.0, 64, 64, Color.new(0x80, 0x80, 0x80, 0x80 - A))
     end
     if mcinfo1.type == 2 then
-      Font.ftPrint(font, 360, 270, 0, 630, 32, string.format(LNG_MEMCARD1, 2, mcinfo1.freemem),
-        Color.new(0x80, 0x80, 0x80, 0x80 - A))
+      if mcinfo1.format == 1 then
+      Font.ftPrint(font, 360, 270, 0, 630, 32, string.format(LNG_MEMCARD1, 2, mcinfo1.freemem), Color.new(0x80, 0x80, 0x80, 0x80 - A))
+    else
+      Font.ftPrint(font, 360, 270, 0, 630, 32, LNG_UNFORMATTED_CARD, Color.new(0x80, 0, 0, 0))
+    end
     elseif mcinfo1.type ~= 0 then
       Font.ftPrint(font, 360, 270, 0, 630, 32, LNG_INCOMPATIBLE_CARD, Color.new(0x80, 0x80, 0x80, 0x80 - A))
     end
@@ -601,7 +607,7 @@ function MemcardPickup()
       mcinfo1 = System.getMCInfo(1)
       A = 0x20
       D = 1
-      if (mcinfo0.type == 2 and T == 0) or (mcinfo1.type == 2 and T == 1) then
+      if (mcinfo0.type == 2 and T == 0 and mcinfo0.format == 1) or (mcinfo1.type == 2 and T == 1 and mcinfo1.format == 1) then
         Screen.clear()
         break
       end
