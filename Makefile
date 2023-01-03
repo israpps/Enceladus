@@ -46,7 +46,7 @@ endif
 
 ifeq ($(DEBUG),1)
 EE_CXXFLAGS += -DDEBUG
-EE_CFLAGS += -DDEBUG
+EE_CFLAGS += -DDEBUG -DCOMMON_PRINTF
 EE_CFLAGS += -O0 -g
 else
   EE_CFLAGS += -Os
