@@ -10,6 +10,8 @@
 #include <iopcontrol.h>
 #include <iopcontrol_special.h>
 #include <smod.h>
+#include <usbhdfsd-common.h>
+#include <libpwroff.h>
 #include <audsrv.h>
 #include <sys/stat.h>
 
@@ -38,7 +40,8 @@ extern "C" {
     extern unsigned char _n[]; \
     extern unsigned int size_##_n
 
-
+int AllowPoweroff;
+static int HaveFileXio;
 extern char bootString[];
 extern unsigned int size_bootString;
 
@@ -60,6 +63,7 @@ IMPORT_BIN2C(ds34bt_irx);
 IMPORT_BIN2C(secrsif_irx);
 IMPORT_BIN2C(secrman_irx);
 IMPORT_BIN2C(IOPRP);
+IMPORT_BIN2C(poweroff_irx);
 
 char boot_path[255];
 char ConsoleROMVER[17];
@@ -119,6 +123,20 @@ void initMC(void)
     mcSync(MC_WAIT, NULL, &ret);
 }
 
+void alternative_poweroff(void *arg)
+{ // Power button was pressed. If no installation is in progress, begin shutdown of the PS2.
+    DPRINTF("%s: called\n", __FUNCTION);
+    if (AllowPoweroff == 1) {
+        // If dev9.irx was loaded successfully, shut down DEV9.
+        // As required by some (typically 2.5") HDDs, issue the SCSI STOP UNIT command to avoid causing an emergency park.
+        if (HaveFileXio)
+            fileXioDevctl("mass:", USBMASS_DEVCTL_STOP_ALL, NULL, 0, NULL, 0);
+
+        /* Power-off the PlayStation 2 console. */
+        poweroffShutdown();
+    }
+}
+
 int main(int argc, char *argv[])
 {
     int fd;
@@ -155,7 +173,8 @@ int main(int argc, char *argv[])
     DPRINTF("[SIO2MAN.IRX]: ret=%d, stat=%d\n", ret, STAT);
     if (directorytoverify == NULL) {
         fileXioInit();
-    }
+        HaveFileXio = 1;
+    } else HaveFileXio = 0;
     if (directorytoverify != NULL) {
         closedir(directorytoverify);
     }
@@ -195,6 +214,8 @@ int main(int argc, char *argv[])
 
     ret = SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, &STAT);
     DPRINTF("[AUDSRV.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    ret = SifExecModuleBuffer(&poweroff_irx, size_poweroff_irx, 0, NULL, &STAT);
+    DPRINTF("[POWEROFF.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ret = SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, &STAT);
     DPRINTF("[SECRSIF.IRX]: ret=%d, stat=%d\n", ret, STAT);
 #ifndef RESET_IOP
@@ -216,6 +237,12 @@ int main(int argc, char *argv[])
         retries--;
     }
     DPRINTF("FINISHED WAITING FOR USB DEVICE READY\n");
+
+    DPRINTF("INITIALIZING POWEROFF\n");
+    poweroffInit();
+    DPRINTF("Hooking alternative poweroff\n");
+    AllowPoweroff = 1;
+    poweroffSetCallback(alternative_poweroff, NULL);
 
 	if ((fd = open("rom0:ROMVER", O_RDONLY)) > 0) // Reading ROMVER
 	{

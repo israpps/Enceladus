@@ -1,7 +1,6 @@
 #ifndef DPRINTF_H
 #define DPRINTF_H
 
-#define COMMON_PRINTF
 
 #ifdef SIO_PRINTF
     #define DPRINTF(x...) sio_printf(x);

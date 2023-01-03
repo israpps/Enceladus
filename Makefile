@@ -1,5 +1,3 @@
-.SILENT:                                                                              
-
 define HEADER
                                                                        
 
@@ -20,18 +18,20 @@ export HEADER
 #----------------------- Configuration flags ----------------------#
 #------------------------------------------------------------------#
 #-------------------------- Reset the IOP -------------------------#
-RESET_IOP = 1
+RESET_IOP ?= 1
 #---------------------- enable DEBUGGING MODE ---------------------#
-DEBUG = 0
+DEBUG ?= 0
 #----------------------- Set IP for PS2Client ---------------------#
-PS2LINK_IP = 192.168.1.10
+PS2LINK_IP ?= 192.168.1.10
 #------------------------------------------------------------------#
-
+ifeq ($(DEBUG),0)
+.SILENT:
+endif
 EE_BIN = KELFBinder.elf
 EE_BIN_PKD = KELFBinder_pkd.elf
 
 EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Lmodules/ds34bt/ee/ -Lmodules/ds34usb/ee/ -lpatches -lfileXio -lpad -ldebug -llua -lmath3d -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit -lpng -lz -lmc -laudsrv -lelf-loader -lds34bt -lds34usb
-EE_LIBS += -liopreboot
+EE_LIBS += -liopreboot -lpoweroff
 
 EE_INCS += -Isrc/include -I$(PS2DEV)/gsKit/include -I$(PS2SDK)/ports/include -I$(PS2SDK)/ports/include/freetype2 -I$(PS2SDK)/ports/include/zlib
 
@@ -46,7 +46,7 @@ endif
 
 ifeq ($(DEBUG),1)
 EE_CXXFLAGS += -DDEBUG
-EE_CFLAGS += -DDEBUG
+EE_CFLAGS += -DDEBUG -DCOMMON_PRINTF
 EE_CFLAGS += -O0 -g
 else
   EE_CFLAGS += -Os
@@ -70,7 +70,7 @@ IOP_MODULES = iomanx.o filexio.o \
 			  sio2man.o mcman.o mcserv.o padman.o libsd.o \
 			  usbd.o audsrv.o bdm.o bdmfs_vfat.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o \
-			  secrsif.o IOPRP.o secrman.o
+			  secrsif.o IOPRP.o secrman.o poweroff.o
 
 EMBEDDED_RSC = boot.o
 
@@ -89,7 +89,11 @@ all: $(EXT_LIBS) $(EE_BIN)
 	$(EE_STRIP) $(EE_BIN)
 
 	echo "Compressing $(EE_BIN_PKD)...\n"
+ifeq ($(DEBUG),1)
+	ps2-packer -v $(EE_BIN) $(EE_BIN_PKD)
+else
 	ps2-packer $(EE_BIN) $(EE_BIN_PKD) > /dev/null
+endif
 	
 	mv $(EE_BIN) bin/
 	mv $(EE_BIN_PKD) bin/
@@ -109,6 +113,9 @@ EMBED/%.s: EMBED/%.png
 #-------------------- Embedded IOP Modules ------------------------#
 $(EE_ASM_DIR)iomanx.s: $(PS2SDK)/iop/irx/iomanX.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ iomanX_irx
+
+$(EE_ASM_DIR)poweroff.s: $(PS2SDK)/iop/irx/poweroff.irx | $(EE_ASM_DIR)
+	$(BIN2S) $< $@ poweroff_irx
 
 $(EE_ASM_DIR)filexio.s: $(PS2SDK)/iop/irx/fileXio.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ fileXio_irx
@@ -213,15 +220,21 @@ reset:
 	ps2client -h $(PS2LINK_IP) reset   
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c | $(EE_OBJS_DIR)
+ifeq ($(DEBUG),0)
 	@echo " CC  - $@"
+endif
 	$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_ASM_DIR)%.s | $(EE_OBJS_DIR)
+ifeq ($(DEBUG),0)
 	@echo " ASM - $@"
+endif
 	$(EE_AS) $(EE_ASFLAGS) $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.cpp | $(EE_OBJS_DIR)
+ifeq ($(DEBUG),0)
 	@echo " CXX - $@"
+endif
 	$(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS) -c $< -o $@
 
 include $(PS2SDK)/samples/Makefile.pref

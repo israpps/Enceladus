@@ -12,6 +12,7 @@
 #include "include/dbgprintf.h"
 
 #define MAX_DIR_FILES 512
+extern int AllowPoweroff;
 
 static int lua_getCurrentDirectory(lua_State *L)
 {
@@ -62,6 +63,17 @@ static int lua_setCurrentDirectory(lua_State *L)
     chdir(__ps2_normalize_path(temp_path));
 
     return 1;
+}
+
+
+static int lua_AllowPowerOFF(lua_State *L)
+{
+    int argc = lua_gettop(L);
+    if (argc != 1)
+        return luaL_error(L, "AllowPoweroff needs 1 argumment only");
+    AllowPoweroff = luaL_checkinteger(L, 1);
+    //if (AllowPoweroff > 1) AllowPoweroff = 1;
+    return 0;
 }
 
 static int lua_curdir(lua_State *L)
@@ -215,7 +227,7 @@ static int lua_dir(lua_State *L)
 
 static int lua_createDir(lua_State *L)
 {
-    printf("%s: start\n", __FUNCTION__);
+    DPRINTF("%s: start\n", __FUNCTION__);
     const char *path = luaL_checkstring(L, 1);
     if (!path)
         return luaL_error(L, "Argument error: System.createDirectory(directory) takes a directory name as string as argument.");
@@ -238,7 +250,7 @@ static int lua_removeDir(lua_State *L)
 //thanks to SP193 for all his work
 static int DeleteFolder(const char *folder)
 {
-    printf("\n\n\n\n%s: START!\n", __FUNCTION__);
+    DPRINTF("\n\n\n\n%s: START!\n", __FUNCTION__);
 	DIR *d = opendir(folder);
 	size_t path_len = strlen(folder);
 	int r = -1;
@@ -782,6 +794,7 @@ static int lua_getbootpath(lua_State *L)
 
 static const luaL_Reg System_functions[] = {
     {"getbootpath", lua_getbootpath},
+    {"AllowPowerOffButton", lua_AllowPowerOFF},
     {"openFile", lua_openfile},
     {"readFile", lua_readfile},
     {"writeFile", lua_writefile},
