@@ -86,3 +86,4 @@
 	LNG_INCOMPATIBLE_CARD = "Dispositivo incompatible!"
 	LNG_INSTALLING_EXTRA = "Instalando archivos adicionales..."
 	LNG_UNFORMATTED_CARD = "sin formatear"
+-- TRADUCCION POR El_isra

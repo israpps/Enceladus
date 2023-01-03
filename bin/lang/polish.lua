@@ -81,3 +81,4 @@ LNG_FMCBINST_CRAP2 = "Istnieje ryzyko uszkodzenia systemu plików, jeśli karta 
 LNG_ERROR = "Błąd!"
 LNG_NOT_ENOUGH_SPACE0 = "Nie ma wystarczającej ilości wolnego miejsca na wybranej Karcie Pamięci"
 LNG_NOT_ENOUGH_SPACE1 = "Wymagane miejsce  %.1f Kb - Dostępne miejsce %.1f Kb"
+-- TRANSLATION BY OLOKOS [https://www.psx-place.com/members/olokos.92120]
