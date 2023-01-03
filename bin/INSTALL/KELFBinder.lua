@@ -641,7 +641,6 @@ function MemcardPickup()
 end
 
 function expertINSTprompt()
-  local FINAL = 0
   local T = 0
   local D = 15
   local A = 0x40
