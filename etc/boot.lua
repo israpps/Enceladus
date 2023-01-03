@@ -25,7 +25,8 @@ Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
 	LNG_INSTPMPT = "BINDING KELF\n\n%s\n"
 	LNG_INSTPMPT1 = "Installation finished!"
 	LNG_MEMCARD0 = "Choose a Memory Card"
-	LNG_MEMCARD1 = "Memory Card %d\nFree space %d kb"
+	LNG_MEMCARD1 = "Memory Card %d"
+	LNG_MEMCARD2 = "Free space %d kb"
 	LNG_SUC0 = "Kernel Patch for early SCPH-10000\nneeds SCPH-18000 update to function"
 	LNG_SUC1 = "Kernel Patch for late SCPH-10000 and SCPH-15000\nneeds SCPH-18000 update to function"
 	LNG_SUC2 = "SCPH-18000"
@@ -81,9 +82,9 @@ Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
 	LNG_ERROR = "Error!"
 	LNG_NOT_ENOUGH_SPACE0 = "There is not enough space on the selected Memory Card"
 	LNG_NOT_ENOUGH_SPACE1 = "Needed space  %.1f Kb - Available Space %.1f Kb"
-	LNG_INCOMPATIBLE_CARD = "This device is not compatible!"
+	LNG_INCOMPATIBLE_CARD = "incompatible device!"
 	LNG_INSTALLING_EXTRA = "Installing aditional files..."
-	LNG_UNFORMATTED_CARD = "Memory Card is not formatted"
+	LNG_UNFORMATTED_CARD = "unformatted"
 
 	BETANUM = "011"
 IS_NOT_PUBLIC_READY = true

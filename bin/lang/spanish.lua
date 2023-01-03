@@ -82,4 +82,4 @@
 	LNG_NOT_ENOUGH_SPACE1 = "Espacio requerido  %.1f Kb - Espacio disponible %.1f Kb"
 	LNG_INCOMPATIBLE_CARD = "Dispositivo incompatible!"
 	LNG_INSTALLING_EXTRA = "Instalando archivos adicionales..."
-	LNG_UNFORMATTED_CARD = "La Memory Card no está formateada"
+	LNG_UNFORMATTED_CARD = "sin formatear"
