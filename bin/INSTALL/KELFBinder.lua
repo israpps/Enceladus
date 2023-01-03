@@ -571,7 +571,7 @@ function MemcardPickup()
     if mcinfo0.type == 2 then
       Font.ftPrint(font, 80, 270, 0, 630, 32, string.format(LNG_MEMCARD1, 1, mcinfo0.freemem),
         Color.new(0x80, 0x80, 0x80, 0x80 - A))
-    elseif mcinfo1.type ~= 0 then
+    elseif mcinfo0.type ~= 0 then
       Font.ftPrint(font, 360, 270, 0, 630, 32, LNG_INCOMPATIBLE_CARD, Color.new(0x80, 0x80, 0x80, 0x80 - A))
     end
 
