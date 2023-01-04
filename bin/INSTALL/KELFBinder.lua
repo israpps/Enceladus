@@ -796,8 +796,6 @@ function expertINSTprompt()
   return UPDT
 end
 
-expertINSTprompt()
-
 function AdvancedINSTprompt()
   local T = 1
   local D = 15
