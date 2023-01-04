@@ -674,7 +674,7 @@ function expertINSTprompt()
   local REGI = {LNG_JAP, LNG_USA, LNG_ASI, LNG_EUR, LNG_CHN}
   local SYSUP = KELFBinder.calculateSysUpdatePath()
   SYSUP = string.sub(SYSUP, 15)
-  SYSUP = REGI[KELFBinder.getsystemregion()].." - "..SYSUP
+  SYSUP = REGI[KELFBinder.getsystemregion()+1].." - "..SYSUP
   while true do
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
@@ -1203,7 +1203,7 @@ function performExpertINST(port, slot, UPDT)
   AvailableSpace, SIZE_NEED2 = CalculateRequiredSpace(port, FILECOUNT, FOLDERCOUNT, SIZE_NEED)
   if AvailableSpace < SIZE_NEED2 then InsufficientSpace(SIZE_NEED2, AvailableSpace) return end
   if FOLDS_CONFLICT then Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, false, port) end
-  
+
   System.AllowPowerOffButton(0)
   Screen.clear()
   Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
