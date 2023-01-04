@@ -38,6 +38,7 @@ KERNEL_PATCH_101 = "INSTALL/KELF/OSD110.KERNEL"
 local circle = Graphics.loadImage("common/circle.png")
 local cross = Graphics.loadImage("common/cross.png")
 local triangle = Graphics.loadImage("common/triangle.png")
+local square = Graphics.loadImage("common/square.png")
 
 local MC2         = Graphics.loadImage("common/mc_ps2.png")
 local MC1         = Graphics.loadImage("common/mc_ps1.png")
