@@ -1,15 +1,5 @@
 Screen.clear()
-Font.ftInit()
-font = Font.ftLoad("common/font2.ttf")
-Font.ftSetCharSize(font, 940, 940)
-
-
--- Sound.setVolume(100)
--- Sound.setADPCMVolume(0, 100)
--- SND_INTRO = Sound.loadADPCM("common/BOOT.ADP")
--- Sound.playADPCM(0, SND_INTRO)
-
-
+FONTPATH = "common/font2.ttf"
 local temporaryVar = System.openFile("rom0:ROMVER", FREAD)
 local temporaryVar_size = System.sizeFile(temporaryVar)
 ROMVER = System.readFile(temporaryVar, temporaryVar_size)
@@ -83,6 +73,10 @@ elseif Language == 6 then if System.doesFileExist("lang/dutch.lua") then dofile(
 elseif Language == 7 then if System.doesFileExist("lang/portuguese.lua") then dofile("lang/portuguese.lua") end
 else
 end
+
+Font.ftInit()
+font = Font.ftLoad(FONTPATH)
+Font.ftSetCharSize(font, 940, 940)
 
 function ORBMAN(Q)
   R = R+RINCREMENT
