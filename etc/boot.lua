@@ -91,7 +91,7 @@ Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
 	LNG_EXTRA_INSTALL_DISABLE = "Extra files will not be installed"
 
 
-	BETANUM = "012"
+	BETANUM = "013"
 IS_NOT_PUBLIC_READY = true
 if System.doesFileExist("INSTALL/KELFBinder.lua") then
 	dofile("INSTALL/KELFBinder.lua");
