@@ -20,6 +20,7 @@ Secrman.init()
 ROMVERN = KELFBinder.getROMversion()
 KELFBinder.InitConsoleModel()
 IS_PSX = 0
+MUST_INSTALL_EXTRA_FILES = true
 if System.doesFileExist("rom0:PSXVER") then
   IS_PSX = 1
 else
@@ -141,12 +142,12 @@ end
 function PreExtraAssetsInstall(FILECOUNT, FOLDERCOUNT, SIZECOUNT)
   --FILECOUNT = FILECOUNT + EXTRA_INST_COUNT -- originally it sums the count
   FOLDERCOUNT = FOLDERCOUNT + EXTRA_INST_FOLDE
-  if EXTRA_INST_FOLDE > 0 then
+  if EXTRA_INST_FOLDE > 0 and MUST_INSTALL_EXTRA_FILES then
     for i = 1, EXTRA_INST_FOLDE do
       FOLDERCOUNT = FOLDERCOUNT + 1
     end
   end
-  if EXTRA_INST_COUNT > 0 then
+  if EXTRA_INST_COUNT > 0 and MUST_INSTALL_EXTRA_FILES then
     for i = 1, EXTRA_INST_COUNT do -- @EXTRA_INST_COUNT
       if System.doesFileExist(EXTRA_INST_SRC[i]) then -- CHECK FOR EXISTENCE, OTHERWISE, PROGRAM CRASHES!
         SIZECOUNT = SIZECOUNT + GetFileSizeX(EXTRA_INST_SRC[i])
@@ -160,14 +161,14 @@ end
 
 function InstallExtraAssets(port)
   ----------------------
-  if EXTRA_INST_FOLDE > 0 then
+  if EXTRA_INST_FOLDE > 0 and MUST_INSTALL_EXTRA_FILES then
     for i = 1, EXTRA_INST_FOLDE do
       -- if System.doesDirExist(string.format("INSTALL/ASSETS/%s", EXTRA_INST_MKD[i])) then -- only create the folder if source exists...
       System.createDirectory(string.format("mc%d:/%s", port, EXTRA_INST_MKD[i]))
       -- end
     end
   end
-  if EXTRA_INST_COUNT > 0 then
+  if EXTRA_INST_COUNT > 0 and MUST_INSTALL_EXTRA_FILES then
     for i = 1, EXTRA_INST_COUNT do
       if System.doesFileExist(EXTRA_INST_SRC[i]) then -- CHECK FOR EXISTENCE, OTHERWISE, PROGRAM CRASHES!
         System.copyFile(EXTRA_INST_SRC[i], string.format("mc%d:/%s", port, EXTRA_INST_DST[i]))
@@ -253,6 +254,7 @@ function MainMenu()
   local T = 1
   local D = 15
   local A = 0x80
+  local NA = 0
   while true do
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
@@ -285,13 +287,31 @@ function MainMenu()
     end
     if A > 0 then A = A - 1 end
     promptkeys(1, LNG_CT0, 0, 0, 0, 0, A)
+
+    if NA > 0 then
+      if MUST_INSTALL_EXTRA_FILES then
+        Font.ftPrint(font, 40, 40, 0, 630, 16,  LNG_EXTRA_INSTALL_ENABLE, Color.new(0x80, 0x80, 0, NA))
+      else
+        Font.ftPrint(font, 40, 40, 0, 630, 16, LNG_EXTRA_INSTALL_DISABLE, Color.new(0x80, 0x80, 0, NA))
+      end
+      NA = NA-1
+    end
+
     Screen.flip()
     local pad = Pads.get()
-
     if Pads.check(pad, PAD_CROSS) and D == 0 then
       D = 1
       Screen.clear()
       break
+    end
+
+    if Pads.check(pad, PAD_R1) and D == 0 then
+      NA = 0x80
+      MUST_INSTALL_EXTRA_FILES = true
+    end
+    if Pads.check(pad, PAD_L1) and D == 0 then
+      NA = 0x80
+      MUST_INSTALL_EXTRA_FILES = false
     end
 
     if Pads.check(pad, PAD_UP) and D == 0 then
@@ -301,6 +321,7 @@ function MainMenu()
       T = T + 1
       D = 1
     end
+
     if D > 0 then D = D + 1 end
     if D > 10 then D = 0 end
     if T < 1 then T = 5 end
@@ -537,7 +558,7 @@ function NormalInstall(port, slot)
   Font.ftPrint(font, 320, 45, 8, 600, 64, SYSUPDATEPATH)
   Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, NEEDED_SPACE / 1024, AvailableSpace /
     1024))
-  Font.ftPrint(font, 320, 120, 8, 400, 64, LNG_INSTALLING_EXTRA)
+  if MUST_INSTALL_EXTRA_FILES then Font.ftPrint(font, 320, 120, 8, 400, 64, LNG_INSTALLING_EXTRA) end
   Screen.flip()
   InstallExtraAssets(port)
   System.AllowPowerOffButton(1)
@@ -1254,7 +1275,7 @@ function performExpertINST(port, slot, UPDT)
   Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
   Font.ftPrint(font, 320, 20, 8, 400, 64, LNG_INSTALLING)
   Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, SIZE_NEED2 / 1024, AvailableSpace / 1024))
-  Font.ftPrint(font, 320, 120, 8, 400, 64, LNG_INSTALLING_EXTRA)
+  if MUST_INSTALL_EXTRA_FILES then Font.ftPrint(font, 320, 120, 8, 400, 64, LNG_INSTALLING_EXTRA) end
   Screen.flip()
   InstallExtraAssets(port)
   System.AllowPowerOffButton(1)
@@ -1277,8 +1298,7 @@ function Ask2quit()
     local pad = Pads.get()
     if Pads.check(pad, PAD_CROSS) then System.exitToBrowser() end
     if Pads.check(pad, PAD_CIRCLE) then break end
-    if Pads.check(pad, PAD_TRIANGLE) then if System.doesFileExist("INSTALL/CORE/BACKDOOR.ELF") then System.loadELF(System
-      .getbootpath() .. "INSTALL/CORE/BACKDOOR.ELF") end end
+    if Pads.check(pad, PAD_TRIANGLE) then if System.doesFileExist("INSTALL/CORE/BACKDOOR.ELF") then System.loadELF(System.getbootpath() .. "INSTALL/CORE/BACKDOOR.ELF") end end
     Screen.flip()
   end
 end

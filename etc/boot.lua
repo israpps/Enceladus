@@ -87,6 +87,8 @@ Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
 	LNG_INCOMPATIBLE_CARD = "incompatible device!"
 	LNG_INSTALLING_EXTRA = "Installing aditional files..."
 	LNG_UNFORMATTED_CARD = "unformatted"
+	LNG_EXTRA_INSTALL_ENABLE = "Extra files will be installed"
+	LNG_EXTRA_INSTALL_DISABLE = "Extra files will not be installed"
 
 
 	BETANUM = "012"

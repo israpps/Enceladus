@@ -86,4 +86,6 @@
 	LNG_INCOMPATIBLE_CARD = "Dispositivo incompatible!"
 	LNG_INSTALLING_EXTRA = "Instalando archivos adicionales..."
 	LNG_UNFORMATTED_CARD = "sin formatear"
+	LNG_EXTRA_INSTALL_ENABLE = "Se instalarán archivos extra"
+	LNG_EXTRA_INSTALL_DISABLE = "No se instalarán archivos extra"
 -- TRADUCCION POR El_isra
