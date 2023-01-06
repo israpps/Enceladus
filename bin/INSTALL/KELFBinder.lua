@@ -412,9 +412,9 @@ function DVDPlayerRegionPicker()
     Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_PICK_DVDPLAYER_REG, Color.new(220, 220, 220, 0x80 - A))
 
     if T == 1 then
-      Font.ftPrint(font, 321, 150, 0, 630, 16, LNG_JAP, Color.new(0, 0xde, 0xff, 0x80 - A))
+      Font.ftPrint(font, 321, 150, 0, 630, 16, LNG_JPN, Color.new(0, 0xde, 0xff, 0x80 - A))
     else
-      Font.ftPrint(font, 320, 150, 0, 630, 16, LNG_JAP, Color.new(200, 200, 200, 0x80 - A))
+      Font.ftPrint(font, 320, 150, 0, 630, 16, LNG_JPN, Color.new(200, 200, 200, 0x80 - A))
     end
     if T == 2 then
       Font.ftPrint(font, 321, 190, 0, 630, 16, LNG_USANASIA, Color.new(0, 0xde, 0xff, 0x80 - A))
@@ -515,8 +515,8 @@ function NormalInstall(port, slot)
   end
   System.AllowPowerOffButton(0)
   System.createDirectory(TARGET_FOLD)
-  if REG == 0 then -- JAP
-    System.copyFile("INSTALL/ASSETS/JAP.sys", string.format("%s/icon.sys", TARGET_FOLD))
+  if REG == 0 then -- JPN
+    System.copyFile("INSTALL/ASSETS/JPN.sys", string.format("%s/icon.sys", TARGET_FOLD))
   elseif REG == 1 or REG == 2 then --USA or ASIA
     System.copyFile("INSTALL/ASSETS/USA.sys", string.format("%s/icon.sys", TARGET_FOLD))
   elseif REG == 3 then
@@ -693,7 +693,7 @@ function expertINSTprompt()
   for i = 0, 10 do
     UPDT[i] = 0
   end
-  local REGI = {LNG_JAP, LNG_USA, LNG_ASI, LNG_EUR, LNG_CHN}
+  local REGI = {LNG_JPN, LNG_USA, LNG_ASI, LNG_EUR, LNG_CHN}
   local SYSUP = KELFBinder.calculateSysUpdatePath()
   SYSUP = string.sub(SYSUP, 15)
   SYSUP = REGI[KELFBinder.getsystemregion()+1].." - "..SYSUP
@@ -1059,13 +1059,13 @@ function InsufficientSpace(NEEDED, AVAILABLE)
   OrbIntro(1)
 end
 
-function Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, NEEDS_CURRENT, port)
+function Ask2WipeSysUpdateDirs(NEEDS_JPN, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, NEEDS_CURRENT, port)
   local A = 0x80
   local Q = 0x7f
   local QIN = 1
   local pad = 0
   local SHOULD_WIPE = false
-  local JAP_FOLD = string.format("mc%d:/%s", port, "BIEXEC-SYSTEM")
+  local JPN_FOLD = string.format("mc%d:/%s", port, "BIEXEC-SYSTEM")
   local USA_FOLD = string.format("mc%d:/%s", port, "BAEXEC-SYSTEM")
   local EUR_FOLD = string.format("mc%d:/%s", port, "BEEXEC-SYSTEM")
   local CHN_FOLD = string.format("mc%d:/%s", port, "BCEXEC-SYSTEM")
@@ -1117,7 +1117,7 @@ function Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, NEEDS
   if SHOULD_WIPE then
     if NEEDS_USA then System.WipeDirectory(USA_FOLD) end
     if NEEDS_CHN then System.WipeDirectory(CHN_FOLD) end
-    if NEEDS_JAP then System.WipeDirectory(JAP_FOLD) end
+    if NEEDS_JPN then System.WipeDirectory(JPN_FOLD) end
     if NEEDS_EUR then System.WipeDirectory(EUR_FOLD) end
     if NEEDS_CURRENT then System.WipeDirectory(string.format("mc%d:/%s", port, KELFBinder.getsysupdatefolder())) end
   end
@@ -1168,23 +1168,23 @@ function performExpertINST(port, slot, UPDT)
   local SIZE_NEED2 = 0
   local SYSUPDATE_MAIN_SIZE = GetFileSizeX(SYSUPDATE_MAIN)
   local ICONSIZE = GetFileSizeX("INSTALL/ASSETS/PS2BBL.icn")
-  local NEEDS_JAP = false
+  local NEEDS_JPN = false
   local NEEDS_USA = false
   local NEEDS_EUR = false
   local NEEDS_CHN = false
   local FOLDS_CONFLICT = false
   local FILECOUNT = 0
   local FOLDERCOUNT = 0
-  local JAP_FOLD = string.format("mc%d:/%s", port, "BIEXEC-SYSTEM")
+  local JPN_FOLD = string.format("mc%d:/%s", port, "BIEXEC-SYSTEM")
   local USA_FOLD = string.format("mc%d:/%s", port, "BAEXEC-SYSTEM")
   local EUR_FOLD = string.format("mc%d:/%s", port, "BEEXEC-SYSTEM")
   local CHN_FOLD = string.format("mc%d:/%s", port, "BCEXEC-SYSTEM")
-  if UPDT[0] == 1 or UPDT[1] == 1 or UPDT[2] == 1 or UPDT[3] == 1 then NEEDS_JAP = true end
+  if UPDT[0] == 1 or UPDT[1] == 1 or UPDT[2] == 1 or UPDT[3] == 1 then NEEDS_JPN = true end
   if UPDT[4] == 1 or UPDT[5] == 1 or UPDT[6] == 1 then NEEDS_USA = true end
   if UPDT[7] == 1 or UPDT[8] == 1 then NEEDS_EUR = true end
   if UPDT[9] == 1 then NEEDS_CHN = true end
 
-  if NEEDS_JAP and System.doesDirExist(JAP_FOLD) then
+  if NEEDS_JPN and System.doesDirExist(JPN_FOLD) then
     FOLDS_CONFLICT = true
     FOLDERCOUNT = FOLDERCOUNT + 1
     FILECOUNT = FILECOUNT + 2
@@ -1224,7 +1224,7 @@ function performExpertINST(port, slot, UPDT)
   FILECOUNT, FOLDERCOUNT, SIZE_NEED = PreExtraAssetsInstall(FILECOUNT, FOLDERCOUNT, SIZE_NEED)
   AvailableSpace, SIZE_NEED2 = CalculateRequiredSpace(port, FILECOUNT, FOLDERCOUNT, SIZE_NEED)
   if AvailableSpace < SIZE_NEED2 then InsufficientSpace(SIZE_NEED2, AvailableSpace) return end
-  if FOLDS_CONFLICT then Ask2WipeSysUpdateDirs(NEEDS_JAP, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, false, port) end
+  if FOLDS_CONFLICT then Ask2WipeSysUpdateDirs(NEEDS_JPN, NEEDS_USA, NEEDS_EUR, NEEDS_CHN, false, port) end
 
   System.AllowPowerOffButton(0)
   Screen.clear()
@@ -1233,30 +1233,10 @@ function performExpertINST(port, slot, UPDT)
   Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, SIZE_NEED2 / 1024, AvailableSpace / 1024))
   Screen.flip()
 
-  if NEEDS_JAP then
-    System.createDirectory(JAP_FOLD)
-    KELFBinder.setSysUpdateFoldProps(port, slot, "BIEXEC-SYSTEM")
-    System.copyFile("INSTALL/ASSETS/JAP.sys", string.format("mc%d:/%s/icon.sys", port, "BIEXEC-SYSTEM"))
-    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BIEXEC-SYSTEM"))
-  end
-  if NEEDS_USA then
-    System.createDirectory(string.format("mc%d:/%s", port, "BAEXEC-SYSTEM"))
-    KELFBinder.setSysUpdateFoldProps(port, slot, "BAEXEC-SYSTEM")
-    System.copyFile("INSTALL/ASSETS/USA.sys", string.format("mc%d:/%s/icon.sys", port, "BAEXEC-SYSTEM"))
-    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BAEXEC-SYSTEM"))
-  end
-  if NEEDS_EUR then
-    System.createDirectory(string.format("mc%d:/%s", port, "BEEXEC-SYSTEM"))
-    KELFBinder.setSysUpdateFoldProps(port, slot, "BEEXEC-SYSTEM")
-    System.copyFile("INSTALL/ASSETS/EUR.sys", string.format("mc%d:/%s/icon.sys", port, "BEEXEC-SYSTEM"))
-    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BEEXEC-SYSTEM"))
-  end
-  if NEEDS_CHN then
-    System.createDirectory(string.format("mc%d:/%s", port, "BCEXEC-SYSTEM"))
-    KELFBinder.setSysUpdateFoldProps(port, slot, "BCEXEC-SYSTEM")
-    System.copyFile("INSTALL/ASSETS/CHN.sys", string.format("mc%d:/%s/icon.sys", port, "BCEXEC-SYSTEM"))
-    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BCEXEC-SYSTEM"))
-  end
+  if NEEDS_JPN then System.createDirectory(JPN_FOLD) end
+  if NEEDS_USA then System.createDirectory(USA_FOLD) end
+  if NEEDS_EUR then System.createDirectory(EUR_FOLD) end
+  if NEEDS_CHN then System.createDirectory(CHN_FOLD) end
 
   if UPDT[0] == 1 then
     RET = Secrman.downloadfile(port, slot, KERNEL_PATCH_100, string.format("mc%d:/BIEXEC-SYSTEM/osdsys.elf", port), 0)
@@ -1277,6 +1257,28 @@ function performExpertINST(port, slot, UPDT)
   Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, SIZE_NEED2 / 1024, AvailableSpace / 1024))
   if MUST_INSTALL_EXTRA_FILES then Font.ftPrint(font, 320, 120, 8, 400, 64, LNG_INSTALLING_EXTRA) end
   Screen.flip()
+
+  if NEEDS_JPN then
+    KELFBinder.setSysUpdateFoldProps(port, slot, "BIEXEC-SYSTEM")
+    System.copyFile("INSTALL/ASSETS/JPN.sys", string.format("mc%d:/%s/icon.sys", port, "BIEXEC-SYSTEM"))
+    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BIEXEC-SYSTEM"))
+  end
+  if NEEDS_USA then
+    KELFBinder.setSysUpdateFoldProps(port, slot, "BAEXEC-SYSTEM")
+    System.copyFile("INSTALL/ASSETS/USA.sys", string.format("mc%d:/%s/icon.sys", port, "BAEXEC-SYSTEM"))
+    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BAEXEC-SYSTEM"))
+  end
+  if NEEDS_EUR then
+    KELFBinder.setSysUpdateFoldProps(port, slot, "BEEXEC-SYSTEM")
+    System.copyFile("INSTALL/ASSETS/EUR.sys", string.format("mc%d:/%s/icon.sys", port, "BEEXEC-SYSTEM"))
+    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BEEXEC-SYSTEM"))
+  end
+  if NEEDS_CHN then
+    KELFBinder.setSysUpdateFoldProps(port, slot, "BCEXEC-SYSTEM")
+    System.copyFile("INSTALL/ASSETS/CHN.sys", string.format("mc%d:/%s/icon.sys", port, "BCEXEC-SYSTEM"))
+    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BCEXEC-SYSTEM"))
+  end
+
   InstallExtraAssets(port)
   System.AllowPowerOffButton(1)
   System.sleep(2)

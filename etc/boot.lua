@@ -61,7 +61,7 @@ Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
 	LNG_COMPAT0 = "This console model does not support system updates."
 	LNG_COMPAT1 = "However, you can still use it to install updates."
 	LNG_PICK_DVDPLAYER_REG = "Choose the DVD Player's update region"
-	LNG_JAP = "Japan"
+	LNG_JPN = "Japan"
 	LNG_USA = "USA"
 	LNG_ASI = "Asia"
 	LNG_USANASIA = "USA & Asia"
