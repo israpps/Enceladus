@@ -521,7 +521,7 @@ function NormalInstall(port, slot)
   elseif REG == 4 then
     System.copyFile("INSTALL/ASSETS/CHN.sys", string.format("%s/icon.sys", TARGET_FOLD))
   end
-  System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("%s/icon.sys", TARGET_FOLD)) --icon is the same for all
+  System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("%s/PS2BBL.icn", TARGET_FOLD)) --icon is the same for all
   KELFBinder.setSysUpdateFoldProps(port, slot, KELFBinder.getsysupdatefolder())
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
   if IS_PSX == 1 then SYSUPDATEPATH = "BIEXEC-SYSTEM/xosdmain.elf" end
