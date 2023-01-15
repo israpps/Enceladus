@@ -1379,21 +1379,23 @@ while true do
         WaitWithORBS(50)
       end
     elseif TTT == 2 then
-      local memcard = 0
+      local port = 0
       local LOL = AdvancedINSTprompt()
       local UPDT = {}
       UPDT = PreAdvancedINSTstep(LOL)
       if UPDT["x"] == true then
-        memcard = MemcardPickup()
-        WaitWithORBS(30)
-        if UPDT[10] == 1 then -- IF PSX mode was selected
-          IS_PSX = 1 -- simulate runner console is a PSX to reduce code duplication
-          FadeWIthORBS()
-          NormalInstall(memcard, 0)
-          IS_PSX = 0
+        port = MemcardPickup()
+        if port ~= -1 then
+          WaitWithORBS(30)
+          if UPDT[10] == 1 then -- IF PSX mode was selected
+            IS_PSX = 1 -- simulate runner console is a PSX to reduce code duplication
+            FadeWIthORBS()
+            NormalInstall(port, 0)
+            IS_PSX = 0
+          end
         else
           FadeWIthORBS()
-          performExpertINST(memcard, 0, UPDT)
+          performExpertINST(port, 0, UPDT)
         end
       end
     elseif TTT == 3 then
