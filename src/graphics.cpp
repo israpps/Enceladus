@@ -10,6 +10,7 @@
 #include <png.h>
 
 #include "include/graphics.h"
+#include "include/embedded_images.h"
 #include "include/dbgprintf.h"
 
 #define DEG2RAD(x) ((x)*0.01745329251)
@@ -27,6 +28,21 @@ static float fps = 0.0f;
 
 static int frames = 0;
 static int frame_interval = -1;
+
+
+typedef struct {
+	uint8_t *buf;
+	size_t size;
+	size_t cur;
+} data_pointer;
+
+static int error_count = 0;
+static int warning_count = 0;
+
+typedef struct
+{
+   const char *file_name;
+}  pngtest_error_parameters;
 
 //2D drawing functions
 GSTEXTURE* loadpng(FILE* File, bool delayed)
@@ -1186,5 +1202,289 @@ void flipScreen()
 void graphicWaitVblankStart(){
 
 	gsKit_vsync_wait();
+
+}
+
+
+static void PNGCBAPI pngtest_warning(png_structp png_ptr, png_const_charp message)
+{
+   ++warning_count;
+
+   DPRINTF("%s: libpng warning: %s\n",__func__, message);
+}
+
+static void PNGCBAPI pngtest_error(png_structp png_ptr, png_const_charp message)
+{
+   ++error_count;
+
+   pngtest_warning(png_ptr, message);
+   
+   /* We can return because png_error calls the default handler, which is
+    * actually OK in this case.
+    */
+}
+
+
+static void PNG_read_data(png_structp png_ptr, png_bytep data, png_size_t length)
+{
+    data_pointer *d = ((data_pointer *)png_get_io_ptr(png_ptr));
+	if (d->cur + length > d->size)
+		length = d->size - d->cur;
+
+	memcpy(data, d->buf + d->cur, length);
+	d->cur += length;
+}
+// thanks to HWC for the embedded PNG feature to keep users away of Berion's work
+GSTEXTURE* luaP_loadHWCpng(int fotoID, bool delayed)
+{
+	GSTEXTURE* tex = (GSTEXTURE*)malloc(sizeof(GSTEXTURE));
+	tex->Delayed = delayed;
+
+	png_structp png_ptr;
+	png_infop info_ptr;
+	png_uint_32 width, height;
+	png_bytep *row_pointers;
+	pngtest_error_parameters error_parameters;
+
+	u32 sig_read = 0;
+        int row, i, k=0, j, bit_depth, color_type, interlace_type;
+
+	png_ptr = png_create_read_struct(PNG_LIBPNG_VER_STRING, (png_voidp) NULL, NULL, NULL);
+
+	if(!png_ptr)
+	{
+		DPRINTF("%s: PNG Read Struct Init Failed\n", __func__);
+		return NULL;
+	}
+
+	info_ptr = png_create_info_struct(png_ptr);
+
+	if(!info_ptr)
+	{
+		DPRINTF("%s: PNG Info Struct Init Failed\n", __func__);
+		png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
+		return NULL;
+	}
+	png_set_error_fn(png_ptr, &error_parameters, pngtest_error, pngtest_warning);
+	if(setjmp(png_jmpbuf(png_ptr)))
+	{
+		DPRINTF("%s: Got PNG Error!\n", __func__);
+		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
+		return NULL;
+	}
+	
+	data_pointer d;
+	d.buf = NULL;
+	d.size = NULL;
+
+	switch (fotoID)
+	{
+		case BACKGROUND:
+			d.buf = background;
+			d.size = size_background;
+			break;
+		case BACKGROUND_ERROR:
+			d.buf = background_error;
+			d.size = size_background_error;
+			break;
+		case BACKGROUND_SUCCESS:
+			d.buf = background_success;
+			d.size = size_background_success;
+			break;
+		case CHECKBOX_EMPTY:
+			d.buf = checkbox_empty;
+			d.size = size_checkbox_empty;
+			break;
+		case CHECKBOX_FILLED:
+			d.buf = checkbox_filled;
+			d.size = size_checkbox_filled;
+			break;
+		case CIRCLE:
+			d.buf = circle;
+			d.size = size_circle;
+			break;
+		case CROSS:
+			d.buf = cross;
+			d.size = size_cross;
+			break;
+		case FIREFLY:
+			d.buf = firefly;
+			d.size = size_firefly;
+			break;
+		case FIREFLY_ERROR:
+			d.buf = firefly_error;
+			d.size = size_firefly_error;
+			break;
+		case FIREFLY_SUCCESS:
+			d.buf = firefly_success;
+			d.size = size_firefly_success;
+			break;
+		case LOGO:
+			d.buf = logo;
+			d.size = size_logo;
+			break;
+		case MC_EMPTY:
+			d.buf = mc_empty;
+			d.size = size_mc_empty;
+			break;
+		case MC_PS1:
+			d.buf = mc_ps1;
+			d.size = size_mc_ps1;
+			break;
+		case MC_PS2:
+			d.buf = mc_ps2;
+			d.size = size_mc_ps2;
+			break;
+		case SQUARE:
+			d.buf = square;
+			d.size = size_square;
+			break;
+		case TRIANGLE:
+			d.buf = triangle;
+			d.size = size_triangle;
+			break;
+	}
+
+
+	d.cur = 0;
+	//png_set_error_fn(png_ptr, &error_parameters, pngtest_error, pngtest_warning);
+	DPRINTF("%s: Info: %p %d %d\n", d.buf, d.size,__func__,  fotoID);
+	png_set_read_fn(png_ptr, (png_voidp)&d, (png_rw_ptr)PNG_read_data);
+	
+	//png_init_io(png_ptr, hwc_credits_png);
+
+	png_set_sig_bytes(png_ptr, sig_read);
+	//png_set_sig_bytes(png_ptr, 8);
+
+	png_read_info(png_ptr, info_ptr);
+
+	png_get_IHDR(png_ptr, info_ptr, &width, &height, &bit_depth, &color_type,&interlace_type, NULL, NULL);
+
+	png_set_strip_16(png_ptr);
+
+	if (color_type == PNG_COLOR_TYPE_PALETTE)
+		png_set_expand(png_ptr);
+
+	if (color_type == PNG_COLOR_TYPE_GRAY && bit_depth < 8)
+		png_set_expand(png_ptr);
+
+	if (png_get_valid(png_ptr, info_ptr, PNG_INFO_tRNS))
+		png_set_tRNS_to_alpha(png_ptr);
+
+	png_set_filler(png_ptr, 0xff, PNG_FILLER_AFTER);
+
+	png_read_update_info(png_ptr, info_ptr);
+
+	tex->Width = width;
+	tex->Height = height;
+
+        tex->VramClut = 0;
+        tex->Clut = NULL;
+
+	if(png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_RGB_ALPHA)
+	{
+		int row_bytes = png_get_rowbytes(png_ptr, info_ptr);
+		tex->PSM = GS_PSM_CT32;
+		tex->Mem = (u32*)memalign(128, gsKit_texture_size_ee(tex->Width, tex->Height, tex->PSM));
+
+		row_pointers = (png_byte**)calloc(height, sizeof(png_bytep));
+
+		for (row = 0; row < height; row++) row_pointers[row] = (png_bytep)malloc(row_bytes);
+
+		png_read_image(png_ptr, row_pointers);
+
+		struct pixel { u8 r,g,b,a; };
+		struct pixel *Pixels = (struct pixel *) tex->Mem;
+
+		for (i = 0; i < tex->Height; i++) {
+			for (j = 0; j < tex->Width; j++) {
+				memcpy(&Pixels[k], &row_pointers[i][4 * j], 3);
+				Pixels[k++].a = row_pointers[i][4 * j + 3] >> 1;
+			}
+		}
+
+		for(row = 0; row < height; row++) free(row_pointers[row]);
+
+		free(row_pointers);
+	}
+	else if(png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_RGB)
+	{
+		int row_bytes = png_get_rowbytes(png_ptr, info_ptr);
+		tex->PSM = GS_PSM_CT24;
+		tex->Mem = (u32*)memalign(128, gsKit_texture_size_ee(tex->Width, tex->Height, tex->PSM));
+
+		row_pointers = (png_byte**)calloc(height, sizeof(png_bytep));
+
+		for(row = 0; row < height; row++) row_pointers[row] = (png_bytep)malloc(row_bytes);
+
+		png_read_image(png_ptr, row_pointers);
+
+		struct pixel3 { u8 r,g,b; };
+		struct pixel3 *Pixels = (struct pixel3 *) tex->Mem;
+
+		for (i = 0; i < tex->Height; i++) {
+			for (j = 0; j < tex->Width; j++) {
+				memcpy(&Pixels[k++], &row_pointers[i][4 * j], 3);
+			}
+		}
+
+		for(row = 0; row < height; row++) free(row_pointers[row]);
+
+		free(row_pointers);
+	}
+	else
+	{
+		DPRINTF("%s: This texture depth is not supported yet!\n", __func__);
+		return NULL;
+	}
+	if (fotoID == 1) {
+		tex->Filter = GS_FILTER_LINEAR;
+	} else {
+		tex->Filter = GS_FILTER_NEAREST;
+	}
+	png_read_end(png_ptr, NULL);
+	png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp) NULL);
+
+	if(!tex->Delayed)
+	{
+		tex->Vram = gsKit_vram_alloc(gsGlobal, gsKit_texture_size(tex->Width, tex->Height, tex->PSM), GSKIT_ALLOC_USERBUFFER);
+		if(tex->Vram == GSKIT_ALLOC_ERROR)
+		{
+			DPRINTF("%s: VRAM Allocation Failed. Will not upload texture.\n", __func__);
+			return NULL;
+		}
+
+		if(tex->Clut != NULL)
+		{
+			if(tex->PSM == GS_PSM_T4)
+				tex->VramClut = gsKit_vram_alloc(gsGlobal, gsKit_texture_size(8, 2, GS_PSM_CT32), GSKIT_ALLOC_USERBUFFER);
+			else
+				tex->VramClut = gsKit_vram_alloc(gsGlobal, gsKit_texture_size(16, 16, GS_PSM_CT32), GSKIT_ALLOC_USERBUFFER);
+
+			if(tex->VramClut == GSKIT_ALLOC_ERROR)
+			{
+				DPRINTF("%s: VRAM CLUT Allocation Failed. Will not upload texture.\n", __func__);
+				return NULL;
+			}
+		}
+
+		// Upload texture
+		gsKit_texture_upload(gsGlobal, tex);
+		// Free texture
+		free(tex->Mem);
+		tex->Mem = NULL;
+		// Free texture CLUT
+		if(tex->Clut != NULL)
+		{
+			free(tex->Clut);
+			tex->Clut = NULL;
+		}
+	}
+	else
+	{
+		gsKit_setup_tbw(tex);
+	}
+	
+	return tex;
 
 }

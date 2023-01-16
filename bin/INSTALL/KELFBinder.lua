@@ -26,23 +26,23 @@ System.closeFile(temporaryVar)
 KERNEL_PATCH_100 = "INSTALL/KELF/OSDSYS.KERNEL"
 KERNEL_PATCH_101 = "INSTALL/KELF/OSD110.KERNEL"
 
-local circle = Graphics.loadImage("common/circle.png")
-local cross = Graphics.loadImage("common/cross.png")
-local triangle = Graphics.loadImage("common/triangle.png")
-local square = Graphics.loadImage("common/square.png")
+local circle = Graphics.loadImageEmbedded(5)
+local cross = Graphics.loadImageEmbedded(6)
+local triangle = Graphics.loadImageEmbedded(15)
+-- local square = Graphics.loadImageEmbedded(14)
 
-local MC2         = Graphics.loadImage("common/mc_ps2.png")
-local MC1         = Graphics.loadImage("common/mc_ps1.png")
-local MCU         = Graphics.loadImage("common/mc_empty.png")
-local LOGO        = Graphics.loadImage("common/logo.png")
-local BG          = Graphics.loadImage("common/background.png")
-local BGERR       = Graphics.loadImage("common/background_error.png")
-local BGSCS       = Graphics.loadImage("common/background_success.png")
-local CURSOR      = Graphics.loadImage("common/firefly.png")
-local REDCURSOR   = Graphics.loadImage("common/firefly_error.png")
-local GREENCURSOR = Graphics.loadImage("common/firefly_success.png")
-local CHK_ = Graphics.loadImage("common/checkbox_empty.png")
-local CHKF = Graphics.loadImage("common/checkbox_filled.png")
+local MC2         = Graphics.loadImageEmbedded(13)
+local MC1         = Graphics.loadImageEmbedded(12)
+local MCU         = Graphics.loadImageEmbedded(11)
+local LOGO        = Graphics.loadImageEmbedded(10)
+local BG          = Graphics.loadImageEmbedded(0)
+local BGERR       = Graphics.loadImageEmbedded(1)
+local BGSCS       = Graphics.loadImageEmbedded(2)
+local CURSOR      = Graphics.loadImageEmbedded(7)
+local REDCURSOR   = Graphics.loadImageEmbedded(8)
+local GREENCURSOR = Graphics.loadImageEmbedded(9)
+local CHK_ = Graphics.loadImageEmbedded(3)
+local CHKF = Graphics.loadImageEmbedded(4)
 EXTRA_INST_COUNT  = 0
 EXTRA_INST_FOLDE  = 0
 
@@ -76,10 +76,13 @@ elseif Language == 6 then if System.doesFileExist("lang/dutch.lua") then dofile(
 elseif Language == 7 then if System.doesFileExist("lang/portuguese.lua") then dofile("lang/portuguese.lua") end
 else
 end
-
-Font.ftInit()
-font = Font.ftLoad(FONTPATH)
-Font.ftSetCharSize(font, 940, 940)
+if System.doesFileExist(FONTPATH) then
+  Font.ftInit()
+  font = Font.ftLoad(FONTPATH)
+  Font.ftSetCharSize(font, 940, 940)
+else
+  Screen.clear(Color.new(128, 128, 0)) Screen.flip() while true do end
+end
 
 function ORBMAN(Q)
   R = R+RINCREMENT
@@ -553,8 +556,7 @@ function NormalInstall(port, slot)
   Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
   Font.ftPrint(font, 320, 20, 8, 400, 64, LNG_INSTALLING)
   Font.ftPrint(font, 320, 45, 8, 600, 64, SYSUPDATEPATH)
-  Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, NEEDED_SPACE / 1024, AvailableSpace /
-    1024))
+  Font.ftPrint(font, 320, 100, 8, 630, 64, string.format(LNG_NOT_ENOUGH_SPACE1, NEEDED_SPACE / 1024, AvailableSpace / 1024))
   if MUST_INSTALL_EXTRA_FILES then Font.ftPrint(font, 320, 120, 8, 400, 64, LNG_INSTALLING_EXTRA) end
   Screen.flip()
   InstallExtraAssets(port)
