@@ -1348,7 +1348,7 @@ GSTEXTURE* luaP_loadHWCpng(int fotoID, bool delayed)
 
 	d.cur = 0;
 	//png_set_error_fn(png_ptr, &error_parameters, pngtest_error, pngtest_warning);
-	DPRINTF("%s: Info: %p %d %d\n", d.buf, d.size,__func__,  fotoID);
+	DPRINTF("%s: Info: %p %d %d\n", __func__,  d.buf, d.size, fotoID);
 	png_set_read_fn(png_ptr, (png_voidp)&d, (png_rw_ptr)PNG_read_data);
 	
 	//png_init_io(png_ptr, hwc_credits_png);
