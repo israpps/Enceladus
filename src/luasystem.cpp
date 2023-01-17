@@ -380,7 +380,7 @@ static int lua_copyfile(lua_State *L)
     const char *newfile = luaL_checkstring(L, 2);
     if (!ogfile || !newfile)
         return luaL_error(L, "Argument error: System.copyFile(source, destination) takes two filenames as strings as arguments.");
-    DPRINTF("%s: Copying [%s] to [%s]\n", __FUNC__, ogfile, newfile);
+    DPRINTF("%s: Copying [%s] to [%s]\n", __func__, ogfile, newfile);
     char buf[BUFSIZ];
     size_t size;
 

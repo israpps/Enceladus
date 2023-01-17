@@ -516,9 +516,9 @@ static int lua_getloaddata(lua_State *L){
 static int lua_loadHWCimg(lua_State *L) {
 	int argc = lua_gettop(L);
 	if (argc != 1 && argc != 2) return luaL_error(L, "wrong number of arguments");
-	DPRINTF("%s: resource ID %d requested!\n",__func__, numeroausar);
     lua_gc(L, LUA_GCCOLLECT, 0);
 	int numeroausar = luaL_checkinteger(L, 1);
+	DPRINTF("%s: resource ID %d requested!\n",__func__, numeroausar);
 	GSTEXTURE* image = NULL;
 	bool delayed = true;
 	image = luaP_loadHWCpng(numeroausar, delayed);

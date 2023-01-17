@@ -125,7 +125,7 @@ void initMC(void)
 
 void alternative_poweroff(void *arg)
 { // Power button was pressed. If no installation is in progress, begin shutdown of the PS2.
-    DPRINTF("%s: called\n", __FUNCTION);
+    DPRINTF("%s: called\n", __func__);
     if (AllowPoweroff == 1) {
         // If dev9.irx was loaded successfully, shut down DEV9.
         // As required by some (typically 2.5") HDDs, issue the SCSI STOP UNIT command to avoid causing an emergency park.

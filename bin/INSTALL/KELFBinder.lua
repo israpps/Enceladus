@@ -76,13 +76,18 @@ elseif Language == 6 then if System.doesFileExist("lang/dutch.lua") then dofile(
 elseif Language == 7 then if System.doesFileExist("lang/portuguese.lua") then dofile("lang/portuguese.lua") end
 else
 end
-if System.doesFileExist(FONTPATH) then
+if System.doesFileExist(FONTPATH) or System.doesFileExist("common/NOTIF.ADP") then
   Font.ftInit()
   font = Font.ftLoad(FONTPATH)
   Font.ftSetCharSize(font, 940, 940)
 else
   Screen.clear(Color.new(128, 128, 0)) Screen.flip() while true do end
 end
+
+-- Sound.setVolume(100)
+-- Sound.setADPCMVolume(1, 100)
+-- SND_NOTI = Sound.loadADPCM("common/NOTIF.ADP")
+-- Sound.playADPCM(1, SND_OK)
 
 function ORBMAN(Q)
   R = R+RINCREMENT
@@ -207,7 +212,7 @@ function greeting()
   local CONTINUE = true
   local Q = 2
   local W = 1
-  -- Sound.playADPCM(0, SND_INTRO)
+  -- Sound.playADPCM(1, SND_OPEN)
   while CONTINUE do
     Screen.clear()
     if Q > 0x80 then W = -1 end
@@ -289,6 +294,7 @@ function MainMenu()
     promptkeys(1, LNG_CT0, 0, 0, 0, 0, A)
 
     if NA > 0 then
+      -- if NA == 0x80 then Sound.playADPCM(0, SND_NOTI) end
       if MUST_INSTALL_EXTRA_FILES then
         Font.ftPrint(font, 40, 40, 0, 630, 16,  LNG_EXTRA_INSTALL_ENABLE, Color.new(0x80, 0x80, 0, NA))
       else
@@ -849,7 +855,7 @@ function AdvancedINSTprompt()
     if T == 3 then
       Font.ftPrint(font, 321, 230, 0, 630, 16, "PSX DESR", Color.new(0, 0xde, 0xff, 0x80 - A))
     elseif IS_PSX == 1 then
-      Font.ftPrint(font, 320, 230, 0, 630, 16, "PSX DESR", Color.new(100, 100, 100, 0x80 - A))
+      Font.ftPrint(font, 320, 230, 0, 630, 16, "PSX DESR", Color.new(50, 50, 50, 0x80 - A))
     else -- make the PSX option grey if runner machine is PSX
       Font.ftPrint(font, 320, 230, 0, 630, 16, "PSX DESR", Color.new(200, 200, 200, 0x80 - A))
     end
@@ -862,7 +868,7 @@ function AdvancedINSTprompt()
 
     if Pads.check(pad, PAD_CROSS) and D == 0 then
       if T == 3 and IS_PSX == 1 then
-        --user requested a PSX install on a PSX, senseless, normal install will already do the job
+        --user requested a PSX install on a PSX, senseless, normal install will do the job
       else
         D = 1
         Screen.clear()
