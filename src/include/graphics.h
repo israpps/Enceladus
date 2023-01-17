@@ -133,4 +133,6 @@ extern void drawOBJ(model* m, float pos_x, float pos_y, float pos_z, float rot_x
 
 extern void draw_bbox(model* m, float pos_x, float pos_y, float pos_z, float rot_x, float rot_y, float rot_z, Color color);
 
+GSTEXTURE* luaP_loadHWCpng(int fotoID, bool delayed);
+
 #endif

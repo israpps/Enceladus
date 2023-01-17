@@ -4,6 +4,7 @@
 #include <unistd.h>
 #include <fcntl.h>
 
+#include "include/dbgprintf.h"
 #include "include/graphics.h"
 #include "include/fntsys.h"
 #include "include/luaplayer.h"
@@ -511,6 +512,20 @@ static int lua_getloaddata(lua_State *L){
 	}else return 0;
 }
 
+
+static int lua_loadHWCimg(lua_State *L) {
+	int argc = lua_gettop(L);
+	if (argc != 1 && argc != 2) return luaL_error(L, "wrong number of arguments");
+	DPRINTF("%s: resource ID %d requested!\n",__func__, numeroausar);
+    lua_gc(L, LUA_GCCOLLECT, 0);
+	int numeroausar = luaL_checkinteger(L, 1);
+	GSTEXTURE* image = NULL;
+	bool delayed = true;
+	image = luaP_loadHWCpng(numeroausar, delayed);
+	lua_pushinteger(L, (uint32_t)(image));
+	return 1;
+}
+
 //Register our Graphics Functions
 static const luaL_Reg Graphics_functions[] = {
   	{"drawPixel",           		   lua_pixel},
@@ -521,6 +536,7 @@ static const luaL_Reg Graphics_functions[] = {
 	{"drawTriangle",        		lua_triangle},
 	{"drawQuad",        				lua_quad},
     {"loadImage",           		 lua_loadimg},
+    {"loadImageEmbedded",         lua_loadHWCimg},
   	{"threadLoadImage",        	lua_loadimgasync},
   //{"loadAnimatedImage",   	   lua_loadanimg},
   //{"getImageFramesNum",   	lua_getnumframes},

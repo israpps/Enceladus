@@ -72,7 +72,10 @@ IOP_MODULES = iomanx.o filexio.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o \
 			  secrsif.o IOPRP.o secrman.o poweroff.o
 
-EMBEDDED_RSC = boot.o
+EMBEDDED_RSC = boot.o \
+    background.o background_error.o background_success.o checkbox_empty.o \
+    checkbox_filled.o circle.o cross.o firefly.o firefly_error.o firefly_success.o \
+    logo.o mc_empty.o mc_ps1.o mc_ps2.o square.o triangle.o
 
 EE_OBJS = $(IOP_MODULES) $(EMBEDDED_RSC) $(APP_CORE) $(LUA_LIBS)
 
@@ -104,9 +107,8 @@ $(EE_ASM_DIR)boot.s: etc/boot.lua | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ bootString
 
 # Images
-EMBED/%.s: EMBED/%.png
+$(EE_ASM_DIR)%.s: EMBED/%.png
 	$(BIN2S) $< $@ $(shell basename $< .png)
-	echo "Embedding $< Image..."
 #------------------------------------------------------------------#
 
 
