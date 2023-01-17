@@ -12,7 +12,7 @@
 #include <smod.h>
 #include <usbhdfsd-common.h>
 #include <libpwroff.h>
-#include <audsrv.h>
+// #include <audsrv.h>
 #include <sys/stat.h>
 
 #include <dirent.h>
@@ -21,7 +21,7 @@
 #include <smem.h>
 
 #include "include/graphics.h"
-#include "include/sound.h"
+// #include "include/sound.h"
 #include "include/luaplayer.h"
 #include "include/pad.h"
 
@@ -57,7 +57,7 @@ IMPORT_BIN2C(usbd_irx);
 IMPORT_BIN2C(bdm_irx);
 IMPORT_BIN2C(bdmfs_vfat_irx);
 IMPORT_BIN2C(usbmass_bd_irx);
-IMPORT_BIN2C(audsrv_irx);
+// IMPORT_BIN2C(audsrv_irx);
 IMPORT_BIN2C(ds34usb_irx);
 IMPORT_BIN2C(ds34bt_irx);
 IMPORT_BIN2C(secrsif_irx);
@@ -212,8 +212,8 @@ int main(int argc, char *argv[])
     ret = SifExecModuleBuffer(&cdfs_irx, size_cdfs_irx, 0, NULL, &STAT);
     DPRINTF("[CDFS.IRX]: ret=%d, stat=%d\n", ret, STAT);
 
-    ret = SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, &STAT);
-    DPRINTF("[AUDSRV.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    // ret = SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, &STAT);
+    // DPRINTF("[AUDSRV.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ret = SifExecModuleBuffer(&poweroff_irx, size_poweroff_irx, 0, NULL, &STAT);
     DPRINTF("[POWEROFF.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ret = SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, &STAT);

@@ -32,8 +32,8 @@ const char * runScript(const char* script, bool isStringBuffer )
     DPRINTF("luaTimer_init done !\n");
     luaSystem_init(L);
     DPRINTF("luaSystem_init done !\n");
-    luaSound_init(L);
-    DPRINTF("luaSound_init done !\n");
+    //luaSound_init(L);
+    //DPRINTF("luaSound_init done !\n");
     luaRender_init(L);
     DPRINTF("luaRender_init done !\n");
     luaSecrMan_init(L);
