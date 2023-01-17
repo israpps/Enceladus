@@ -21,9 +21,6 @@ export HEADER
 RESET_IOP ?= 1
 #---------------------- enable DEBUGGING MODE ---------------------#
 DEBUG ?= 0
-EE_SIO ?= 0
-SCR_PRINTF ?= 0
-PRINTF ?= 0
 #----------------------- Set IP for PS2Client ---------------------#
 PS2LINK_IP ?= 192.168.1.10
 #------------------------------------------------------------------#
@@ -47,26 +44,10 @@ ifeq ($(RESET_IOP),1)
 EE_CXXFLAGS += -DRESET_IOP
 endif
 
-ifeq ($(EE_SIO), 1)
-  EE_CXXFLAGS += -DSIO_PRINTF
-  EE_CFLAGS += -DSIO_PRINTF
-  EE_LIBS += -lsiocookie
-endif
-
-ifeq ($(SCR_PRINTF), 1)
-  EE_CXXFLAGS += -DSCR_PRINTF
-  EE_CFLAGS += -DSCR_PRINTF
-endif
-
-ifeq ($(PRINTF), 1)
-  EE_CXXFLAGS += -DCOMMON_PRINTF
-  EE_CFLAGS += -DCOMMON_PRINTF
-endif
-
 ifeq ($(DEBUG),1)
-  EE_CXXFLAGS += -DDEBUG
-  EE_CFLAGS += -DDEBUG
-  EE_CFLAGS += -O0 -g
+EE_CXXFLAGS += -DDEBUG
+EE_CFLAGS += -DDEBUG -DCOMMON_PRINTF
+EE_CFLAGS += -O0 -g
 else
   EE_CFLAGS += -Os
   EE_LDFLAGS += -s

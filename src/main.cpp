@@ -125,7 +125,7 @@ void initMC(void)
 
 void alternative_poweroff(void *arg)
 { // Power button was pressed. If no installation is in progress, begin shutdown of the PS2.
-    DPRINTF("%s: called\n", __func__);
+    DPRINTF("%s: called\n", __FUNCTION);
     if (AllowPoweroff == 1) {
         // If dev9.irx was loaded successfully, shut down DEV9.
         // As required by some (typically 2.5") HDDs, issue the SCSI STOP UNIT command to avoid causing an emergency park.
@@ -154,14 +154,7 @@ int main(int argc, char *argv[])
     while (!SifIopSync()) {};
     SifInitRpc(0);
 #endif
-#ifdef EE_SIO
-extern "C" {
-#endif
-    DPRINTF_INIT();
-#ifdef EE_SIO
-}
-#endif
-    DPRINTF("\n\nWELCOME TO KELFBINDER LOG\n");
+
     // install sbv patch fix
     DPRINTF("Installing SBV Patches...\n");
     sbv_patch_enable_lmb();
@@ -172,12 +165,12 @@ extern "C" {
     directorytoverify = opendir("host:.");
     if (directorytoverify == NULL) {
         ret = SifExecModuleBuffer(&iomanX_irx, size_iomanX_irx, 0, NULL, &STAT);
-        DPRINTF("\t[IOMANX.IRX]: ret=%d, stat=%d\n", ret, STAT);
+        DPRINTF("[IOMANX.IRX]: ret=%d, stat=%d\n", ret, STAT);
         ret = SifExecModuleBuffer(&fileXio_irx, size_fileXio_irx, 0, NULL, &STAT);
-        DPRINTF("\t[FILEXIO.IRX]: ret=%d, stat=%d\n", ret, STAT);
+        DPRINTF("[FILEXIO.IRX]: ret=%d, stat=%d\n", ret, STAT);
     }
     ret = SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, NULL, &STAT);
-    DPRINTF("\t[SIO2MAN.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[SIO2MAN.IRX]: ret=%d, stat=%d\n", ret, STAT);
     if (directorytoverify == NULL) {
         fileXioInit();
         HaveFileXio = 1;
@@ -186,48 +179,48 @@ extern "C" {
         closedir(directorytoverify);
     }
     ret = SifExecModuleBuffer(&mcman_irx, size_mcman_irx, 0, NULL, &STAT);
-    DPRINTF("\t[MCMAN.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[MCMAN.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ret = SifExecModuleBuffer(&mcserv_irx, size_mcserv_irx, 0, NULL, &STAT);
-    DPRINTF("\t[MCSERV.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[MCSERV.IRX]: ret=%d, stat=%d\n", ret, STAT);
     initMC();
 
     ret = SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, NULL, &STAT);
-    DPRINTF("\t[PADMAN.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[PADMAN.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ret = SifExecModuleBuffer(&libsd_irx, size_libsd_irx, 0, NULL, &STAT);
-    DPRINTF("\t[LIBSD.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[LIBSD.IRX]: ret=%d, stat=%d\n", ret, STAT);
 
     // load USB modules
     ret = SifExecModuleBuffer(&usbd_irx, size_usbd_irx, 0, NULL, &STAT);
-    DPRINTF("\t[USBD.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[USBD.IRX]: ret=%d, stat=%d\n", ret, STAT);
 
 
     int ds3pads = 1;
     ret = SifExecModuleBuffer(&ds34usb_irx, size_ds34usb_irx, 4, (char *)&ds3pads, &STAT);
-    DPRINTF("\t[DS34USB.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[DS34USB.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ret = SifExecModuleBuffer(&ds34bt_irx, size_ds34bt_irx, 4, (char *)&ds3pads, &STAT);
-    DPRINTF("\t[DS34BT.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[DS34BT.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ds34usb_init();
     ds34bt_init();
 
     ret = SifExecModuleBuffer(&bdm_irx, size_bdm_irx, 0, NULL, &STAT);
-    DPRINTF("\t[BDM.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[BDM.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ret = SifExecModuleBuffer(&bdmfs_vfat_irx, size_bdmfs_vfat_irx, 0, NULL, &STAT);
-    DPRINTF("\t[BDMFS_VFAT.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[BDMFS_VFAT.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ret = SifExecModuleBuffer(&usbmass_bd_irx, size_usbmass_bd_irx, 0, NULL, &STAT);
-    DPRINTF("\t[USBMASS_BD.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[USBMASS_BD.IRX]: ret=%d, stat=%d\n", ret, STAT);
 
     ret = SifExecModuleBuffer(&cdfs_irx, size_cdfs_irx, 0, NULL, &STAT);
-    DPRINTF("\t[CDFS.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[CDFS.IRX]: ret=%d, stat=%d\n", ret, STAT);
 
     ret = SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, &STAT);
-    DPRINTF("\t[AUDSRV.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[AUDSRV.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ret = SifExecModuleBuffer(&poweroff_irx, size_poweroff_irx, 0, NULL, &STAT);
-    DPRINTF("\t[POWEROFF.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[POWEROFF.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ret = SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, &STAT);
-    DPRINTF("\t[SECRSIF.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[SECRSIF.IRX]: ret=%d, stat=%d\n", ret, STAT);
 #ifndef RESET_IOP
     ret = SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, &STAT);
-    DPRINTF("\t[SECRMAN_SPECIAL.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    DPRINTF("[SECRMAN_SPECIAL.IRX]: ret=%d, stat=%d\n", ret, STAT);
 #endif
     DPRINTF("\n\n\nFINISHED LOADING IRX FILES\n");
     // waitUntilDeviceIsReady by fjtrujy
@@ -303,10 +296,9 @@ extern "C" {
             init_scr();
 #endif
             scr_clear();
+            DPRINTF("\n\nerrMsg is not null and it's contents are:\n%s\n\n", errMsg);
 #ifndef SCR_PRINTF
-            DPRINTF("Enceladus ERROR!\n");
-            DPRINTF(errMsg);
-            DPRINTF("\n.\n");
+            scr_printf("\n\nerrMsg is not null and it's contents are:\n%s\n\n", errMsg);
 #endif
             scr_setXY(5, 2);
             scr_printf("Enceladus ERROR!\n");

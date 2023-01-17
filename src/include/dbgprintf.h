@@ -3,19 +3,7 @@
 
 
 #ifdef SIO_PRINTF
-
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-    #include <SIOCookie.h>
-    #define DPRINTF_INIT() ee_sio_start(38400, 0, 0, 0, 0)
-
-#ifdef __cplusplus
-}
-#endif
-    #define DPRINTF(x...) fprintf(EE_SIO, x)
+    #define DPRINTF(x...) sio_printf(x);
 #endif
 
 #ifdef SCR_PRINTF
@@ -29,10 +17,6 @@ extern "C" {
 
 #ifndef DPRINTF
     #define DPRINTF(x...) ;
-#endif
-
-#ifndef DPRINTF_INIT
-    #define DPRINTF_INIT();
 #endif
 
 #endif
