@@ -677,7 +677,7 @@ function expertINSTprompt()
     EUR_ROM_120, EUR_STANDARD,
     CHN_STANDARD,]]
   local UPDT = {}
-  UPDT["x"] = true
+  UPDT["x"] = false
   local UPDTT = {}
   UPDTT[0] = LNG_SUC0
   UPDTT[1] = LNG_SUC1
@@ -812,6 +812,10 @@ function expertINSTprompt()
     if T < JAP_ROM_100 then T = CHN_STANDARD end
     if T > CHN_STANDARD then T = JAP_ROM_100 end
 
+  end
+
+  for i = 0, 9 do
+    if UPDT[i] == 1 then UPDT["x"] = true break end
   end
   Screen.clear()
   return UPDT
@@ -1407,7 +1411,7 @@ while true do
         if UPDT["x"] == true then
           FadeWIthORBS()
           performExpertINST(port, 0, UPDT)
-        end
+        else WaitWithORBS(20) end
       end
     end
   elseif TT == 2 then -- DVDPLAYER
