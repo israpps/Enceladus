@@ -64,6 +64,7 @@ int SecrInit(void)
 
 void SecrDeinit(void)
 {
+		DPRINTF("%s: start\n", __func__);
 	memset(&SifRpcClient01, 0, sizeof(SifRpcClientData_t));
 	memset(&SifRpcClient02, 0, sizeof(SifRpcClientData_t));
 	memset(&SifRpcClient03, 0, sizeof(SifRpcClientData_t));
@@ -81,7 +82,7 @@ int SecrDownloadHeader(int port, int slot, void *buffer, SecrBitTable_t *BitTabl
 	memcpy(((struct SecrSifDownloadHeaderParams*)RpcBuffer)->buffer, buffer, sizeof(((struct SecrSifDownloadHeaderParams*)RpcBuffer)->buffer));
 
 	if(SifCallRpc(&SifRpcClient01, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL)<0){
-		//scr_printf("sceSecrDownloadHeader: rpc error\n");
+		DPRINTF("%s: rpc error\n", __func__);
 		result=0;
 	}
 	else{
@@ -101,7 +102,7 @@ int SecrDownloadBlock(void *src, unsigned int size){
 	((struct SecrSifDownloadBlockParams*)RpcBuffer)->size=size;
 
 	if(SifCallRpc(&SifRpcClient02, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL)<0){
-		//scr_printf("sceSecrDownloadBlock: rpc error\n");
+		DPRINTF("%s: rpc error\n", __func__);
 		result=0;
 	}
 	else{
@@ -118,7 +119,7 @@ int SecrDownloadGetKbit(int port, int slot, void *kbit){
 	((struct SecrSifDownloadGetKbitParams*)RpcBuffer)->slot=slot;
 
 	if(SifCallRpc(&SifRpcClient03, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL)<0){
-		//scr_printf("sceSecrDownloadGetKbit: rpc error\n");
+		DPRINTF("%s: rpc error\n", __func__);
 		result=0;
 	}
 	else{
@@ -136,7 +137,7 @@ int SecrDownloadGetKc(int port, int slot, void *kc){
 	((struct SecrSifDownloadGetKcParams*)RpcBuffer)->slot=slot;
 
 	if(SifCallRpc(&SifRpcClient04, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL)<0){
-		//scr_printf("sceSecrDownloadGetKc: rpc error\n");
+		DPRINTF("%s: rpc error\n", __func__);
 		result=0;
 	}
 	else{
@@ -151,7 +152,7 @@ int SecrDownloadGetICVPS2(void *icvps2){
 	int result;
 
 	if(SifCallRpc(&SifRpcClient05, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL)<0){
-		//scr_printf("sceSecrDownloadGetICVPS2: rpc error\n");
+		DPRINTF("%s: rpc error\n", __func__);
 		result=0;
 	}
 	else{
@@ -168,7 +169,7 @@ int SecrDiskBootHeader(void *buffer, SecrBitTable_t *BitTable, s32 *pSize){
 	memcpy(((struct SecrSifDiskBootHeaderParams*)RpcBuffer)->buffer, buffer, sizeof(((struct SecrSifDiskBootHeaderParams*)RpcBuffer)->buffer));
 
 	if(SifCallRpc(&SifRpcClient06, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL)<0){
-		//scr_printf("sceSecrDiskBootHeader: rpc error\n");
+		DPRINTF("%s: rpc error\n", __func__);
 		result=0;
 	}
 	else{
@@ -188,7 +189,7 @@ int SecrDiskBootBlock(void *src, void *dst, unsigned int size){
 	((struct SecrSifDiskBootBlockParams*)RpcBuffer)->size=size;
 
 	if(SifCallRpc(&SifRpcClient07, 1, 0, RpcBuffer, sizeof(RpcBuffer), RpcBuffer, sizeof(RpcBuffer), NULL, NULL)<0){
-		//scr_printf("sceSecrDiskBootBlock: rpc error\n");
+		DPRINTF("%s: rpc error\n", __func__);
 		result=0;
 	}
 	else{
@@ -213,7 +214,7 @@ static void store_kbit(void *buffer, const void *kbit){
 
 	kbit_offset=(unsigned int)buffer+offset;
 	memcpy((void*)kbit_offset, kbit, 16);
-	//scr_printf("kbit_offset: %d\n", kbit_offset);
+	DPRINTF("%s: kbit_offset: %d\n", __func__, kbit_offset);
 }
 
 static void store_kc(void *buffer, const void *kc){
@@ -226,7 +227,7 @@ static void store_kc(void *buffer, const void *kc){
 
 	kc_offset=(unsigned int)buffer+offset+0x10;	//Goes after Kbit.
 	memcpy((void*)kc_offset, kc, 16);
-	//scr_printf("kc_offset: %d\n", kc_offset);
+	DPRINTF("%s: kc_offset: %d\n", __func__, kc_offset);
 }
 
 static int Uses_ICVPS2(const void *buffer){
@@ -273,11 +274,11 @@ void *SecrDownloadFile(int port, int slot, void *buffer){
 		}
 
 		if(SecrDownloadGetKbit(port, slot, kbit)==0){
-			//scr_printf("SecrDownloadFile: Cannot get kbit\n");
+			DPRINTF("%s: Cannot get kbit\n", __func__);
 			return NULL;
 		}
 		if(SecrDownloadGetKc(port, slot, kcontent)==0){
-			//scr_printf("SecrDownloadFile: Cannot get kc\n");
+			DPRINTF("%s: Cannot get kc\n", __func__);
 			return NULL;
 		}
 
@@ -286,7 +287,7 @@ void *SecrDownloadFile(int port, int slot, void *buffer){
 
 		if(Uses_ICVPS2(buffer)==1){
 			if(SecrDownloadGetICVPS2(icvps2)==0) {
-				//scr_printf("SecrDownloadFile: Cannot get icvps2\n");
+				DPRINTF("%s: Cannot get icvps2\n", __func__);
 				return NULL;
 			}
 
@@ -296,11 +297,11 @@ void *SecrDownloadFile(int port, int slot, void *buffer){
 		result=buffer;
 	}
 	else{
-		//scr_printf("SecrDownloadFile: Cannot encrypt header\n");
+		DPRINTF("%s: Cannot encrypt header\n", __func__);
 		return NULL;
 	}
 
-	//scr_printf("SecrDownloadFile complete\n");
+	DPRINTF("%s complete\n", __func__);
 
 	return result;
 }
@@ -317,7 +318,7 @@ void *SecrDiskBootFile(void *buffer){
 			for(i=0; i<BitTableData->header.block_count; i++){
 				if(BitTableData->blocks[i].flags&3){
 					if(!SecrDiskBootBlock((void*)((unsigned int)buffer+offset), (void*)((unsigned int)buffer+offset), BitTableData->blocks[i].size)) {
-						//scr_printf("SecrDiskBootFile: failed\n");
+						DPRINTF("%s: failed\n", __func__);
 						return NULL;
 					}
 				}
@@ -328,7 +329,7 @@ void *SecrDiskBootFile(void *buffer){
 		result=(void*)((unsigned int)buffer+GetHeaderLength(buffer));
 	}
 	else{
-		//scr_printf("sceSecrDiskBootFile: Cannot decrypt header\n");
+		DPRINTF("%s: Cannot decrypt header\n", __func__);
 		result=NULL;
 	}
 
