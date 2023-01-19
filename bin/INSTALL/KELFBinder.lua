@@ -1,3 +1,4 @@
+System.printf("KELFBinder.lua starts")
 Screen.clear() Graphics.drawRect(300, 222, 40, 4, Color.new(255, 255, 255)) Screen.flip() System.sleep(1)
 FONTPATH = "common/font2.ttf"
 local temporaryVar = System.openFile("rom0:ROMVER", FREAD)
@@ -12,12 +13,13 @@ KELFBinder.InitConsoleModel()
 local console_model_sub = KELFBinder.getConsoleModel()
 console_model_sub = string.sub(console_model_sub, 0, 8)
 SUPPORTS_UPDATES = true
-if ROMVERN > 220 or console_model_sub == "DTL-H300" or console_model_sub == "DTL-H100" then SUPPORTS_UPDATES = false end
+if ROMVERN > 220 or console_model_sub == "DTL-H300" or console_model_sub == "DTL-H100" then SUPPORTS_UPDATES = false System.printf("console is incompatible ("..ROMVERN..") ["..console_model_sub.."]") end
 --- PSX
 IS_PSX = 0
 REAL_IS_PSX = 0
 MUST_INSTALL_EXTRA_FILES = true
 if System.doesFileExist("rom0:PSXVER") then
+  System.printf("rom0:PSXVER FOUND")
   IS_PSX = 1
   REAL_IS_PSX = 1
 else
@@ -84,6 +86,7 @@ elseif Language == 5 then if System.doesFileExist("lang/italian.lua") then dofil
 elseif Language == 6 then if System.doesFileExist("lang/dutch.lua") then dofile("lang/dutch.lua") end
 elseif Language == 7 then if System.doesFileExist("lang/portuguese.lua") then dofile("lang/portuguese.lua") end
 else
+  System.printf("unknown language ID ("..Language..")")
 end
 Screen.clear() Graphics.drawRect(220, 222, 200, 4, Color.new(255, 255, 255)) Screen.flip()
 if System.doesFileExist(FONTPATH) or System.doesFileExist("common/NOTIF.ADP") then
@@ -1390,7 +1393,7 @@ while NEIN > 0 do
   NEIN = NEIN-2 
 end
 greeting()
-if SUPPORTS_UPDATES then WarnIncompatibleMachine() end
+if SUPPORTS_UPDATES == false then WarnIncompatibleMachine() end
 OrbIntro(0)
 while true do
   local TT = MainMenu()

@@ -792,7 +792,14 @@ static int lua_getbootpath(lua_State *L)
     return 1;
 }
 
+static int lua_printf(lua_State *L)
+{
+    DPRINTF("%s\n", luaL_checkstring(L, 1));
+    return 0;
+}
+
 static const luaL_Reg System_functions[] = {
+    {"printf",          lua_printf},
     {"getbootpath", lua_getbootpath},
     {"AllowPowerOffButton", lua_AllowPowerOFF},
     {"openFile", lua_openfile},
