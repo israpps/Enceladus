@@ -89,7 +89,7 @@ else
   System.printf("unknown language ID ("..Language..")")
 end
 Screen.clear() Graphics.drawRect(220, 222, 200, 4, Color.new(255, 255, 255)) Screen.flip()
-if System.doesFileExist(FONTPATH) or System.doesFileExist("common/NOTIF.ADP") then
+if System.doesFileExist(FONTPATH) then
   Font.ftInit()
   font = Font.ftLoad(FONTPATH)
   Font.ftSetCharSize(font, 940, 940)
