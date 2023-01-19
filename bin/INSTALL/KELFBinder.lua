@@ -1,4 +1,4 @@
-Screen.clear()
+Screen.clear() Graphics.drawRect(300, 222, 40, 4, Color.new(255, 255, 255)) Screen.flip() System.sleep(1)
 FONTPATH = "common/font2.ttf"
 local temporaryVar = System.openFile("rom0:ROMVER", FREAD)
 local temporaryVar_size = System.sizeFile(temporaryVar)
@@ -9,13 +9,21 @@ KELFBinder.init(ROMVER)
 Secrman.init()
 ROMVERN = KELFBinder.getROMversion()
 KELFBinder.InitConsoleModel()
+local console_model_sub = KELFBinder.getConsoleModel()
+console_model_sub = string.sub(console_model_sub, 0, 8)
+SUPPORTS_UPDATES = true
+if ROMVERN > 220 or console_model_sub == "DTL-H300" or console_model_sub == "DTL-H100" then SUPPORTS_UPDATES = false end
+--- PSX
 IS_PSX = 0
+REAL_IS_PSX = 0
 MUST_INSTALL_EXTRA_FILES = true
 if System.doesFileExist("rom0:PSXVER") then
   IS_PSX = 1
+  REAL_IS_PSX = 1
 else
   IS_PSX = 0
 end
+---PSX
 DVDPLAYERUPDATE = "INSTALL/KELF/DVDPLAYER.XLF"
 SYSUPDATE_MAIN  = "INSTALL/KELF/SYSTEM.XLF"
 PSX_SYSUPDATE   = "INSTALL/KELF/XSYSTEM.XLF"
@@ -26,11 +34,11 @@ System.closeFile(temporaryVar)
 KERNEL_PATCH_100 = "INSTALL/KELF/OSDSYS.KERNEL"
 KERNEL_PATCH_101 = "INSTALL/KELF/OSD110.KERNEL"
 
+Screen.clear() Graphics.drawRect(280, 222, 80, 4, Color.new(255, 255, 255)) Screen.flip()
 local circle = Graphics.loadImageEmbedded(5)
 local cross = Graphics.loadImageEmbedded(6)
 local triangle = Graphics.loadImageEmbedded(15)
 -- local square = Graphics.loadImageEmbedded(14)
-
 local MC2         = Graphics.loadImageEmbedded(13)
 local MC1         = Graphics.loadImageEmbedded(12)
 local MCU         = Graphics.loadImageEmbedded(11)
@@ -46,6 +54,7 @@ local CHKF = Graphics.loadImageEmbedded(4)
 EXTRA_INST_COUNT  = 0
 EXTRA_INST_FOLDE  = 0
 
+Screen.clear() Graphics.drawRect(260, 222, 120, 4, Color.new(255, 255, 255)) Screen.flip() System.sleep(1)
 if System.doesFileExist("INSTALL/EXTINST.lua") then dofile("INSTALL/EXTINST.lua") else
   Screen.clear(Color.new(128, 0, 128))
   Screen.flip()
@@ -59,13 +68,13 @@ Graphics.setImageFilters(CURSOR, LINEAR)
 Graphics.setImageFilters(REDCURSOR, LINEAR)
 Graphics.setImageFilters(GREENCURSOR, LINEAR)
 
+Screen.clear() Graphics.drawRect(240, 222, 160, 4, Color.new(255, 255, 255)) Screen.flip()
 local REGION = KELFBinder.getsystemregion()
 --local REGIONSTR = KELFBinder.getsystemregionString(REGION)
 local R = 0.1
 local RINCREMENT = 0.00018
 
 Language = KELFBinder.getsystemLanguage()
--- Language = 3
 if System.doesFileExist("lang/global.lua") then dofile("lang/global.lua")
 elseif Language == 0 then if System.doesFileExist("lang/japanese.lua") then dofile("lang/japanese.lua") end
 elseif Language == 2 then if System.doesFileExist("lang/french.lua") then dofile("lang/french.lua") end
@@ -76,6 +85,7 @@ elseif Language == 6 then if System.doesFileExist("lang/dutch.lua") then dofile(
 elseif Language == 7 then if System.doesFileExist("lang/portuguese.lua") then dofile("lang/portuguese.lua") end
 else
 end
+Screen.clear() Graphics.drawRect(220, 222, 200, 4, Color.new(255, 255, 255)) Screen.flip()
 if System.doesFileExist(FONTPATH) or System.doesFileExist("common/NOTIF.ADP") then
   Font.ftInit()
   font = Font.ftLoad(FONTPATH)
@@ -707,7 +717,7 @@ function expertINSTprompt()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x70)
     Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_EXPERTINST_PROMPT, Color.new(0x80, 0x80, 0x80, 0x80 - A))
-    if ROMVERN < 230 then
+    if SUPPORTS_UPDATES then
       Font.ftPrint(font, 320, 50, 8, 630, 32, LNG_EXPERTINST_PROMPT1, Color.new(0x80, 0x80, 0, 0x80 - A))
       Font.ftPrint(font, 320, 65, 8, 630, 32, SYSUP, Color.new(0x70, 0x70, 0x70, 0x80 - A))
     end
@@ -1317,9 +1327,10 @@ end
 function SystemInfo()
   local D = 15
   local A = 0x50
-  local UPDTPATH = KELFBinder.calculateSysUpdatePath()
-  local COMPATIBLE_WITH_UPDATES = LNG_YES
-  if ROMVERN > 220 then COMPATIBLE_WITH_UPDATES = LNG_NO end
+  local UPDTPATH
+  if REAL_IS_PSX == 0 then UPDTPATH = KELFBinder.calculateSysUpdatePath() else UPDTPATH = "BIEXEC-SYSTEM/xosdmain.elf" end
+  local COMPATIBLE_WITH_UPDATES = LNG_NO
+  if SUPPORTS_UPDATES then COMPATIBLE_WITH_UPDATES = LNG_YES end
   while true do
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
@@ -1331,7 +1342,7 @@ function SystemInfo()
       Color.new(220, 220, 220, 0x80 - A))
     Font.ftPrint(font, 50, 100, 0, 630, 32, string.format(LNG_IS_COMPATIBLE, COMPATIBLE_WITH_UPDATES),
       Color.new(220, 220, 220, 0x80 - A))
-    if ROMVERN < 230 then
+    if SUPPORTS_UPDATES then
       Font.ftPrint(font, 50, 120, 0, 630, 32, string.format(LNG_SUPATH, UPDTPATH), Color.new(220, 220, 220, 0x80 - A))
     end
 
@@ -1373,9 +1384,13 @@ function Credits()
 end
 
 -- SCRIPT BEHAVIOUR BEGINS --
-
+local NEIN = 0x80
+while NEIN > 0 do 
+  Screen.clear() Graphics.drawRect(200, 222, 240, 4, Color.new(255, 255, 255, NEIN)) Screen.flip() 
+  NEIN = NEIN-2 
+end
 greeting()
-if ROMVERN > 220 then WarnIncompatibleMachine() end
+if SUPPORTS_UPDATES then WarnIncompatibleMachine() end
 OrbIntro(0)
 while true do
   local TT = MainMenu()

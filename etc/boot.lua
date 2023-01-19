@@ -1,4 +1,4 @@
-Screen.clear() Graphics.drawPixel(320, 224, 0x80808080) Screen.flip()
+Screen.clear() Graphics.drawRect(318, 222, 4, 4, Color.new(255, 255, 255)) Screen.flip()
 	LNG_CRDTS0 = "Coded by El_isra (aka: Matias Israelson)"
 	LNG_CRDTS1 = "Based on Enceladus by Daniel Santos"
 	LNG_CRDTS2 = "SECRMAN and SECRSIF taken from Free McBoot 1.9 series installer"
