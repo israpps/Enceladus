@@ -27,6 +27,10 @@ else
   IS_PSX = 0
 end
 ---PSX
+local SYSUPDATE_ICON_SYS = "PS2BBL.icn"
+local SYSUPDATE_ICON_SYS_RES = "INSTALL/ASSETS/"..SYSUPDATE_ICON_SYS
+
+---
 DVDPLAYERUPDATE = "INSTALL/KELF/DVDPLAYER.XLF"
 SYSUPDATE_MAIN  = "INSTALL/KELF/SYSTEM.XLF"
 PSX_SYSUPDATE   = "INSTALL/KELF/XSYSTEM.XLF"
@@ -519,7 +523,7 @@ function NormalInstall(port, slot)
   local FILECOUNT = 2 -- icons + whatever updates you push
   local NEEDED_SPACE = 1024 + 964 -- 1kb + icon.sys size to begin with
   local AvailableSpace = 0
-  NEEDED_SPACE = NEEDED_SPACE + GetFileSizeX("INSTALL/ASSETS/PS2BBL.icn")
+  NEEDED_SPACE = NEEDED_SPACE + GetFileSizeX(SYSUPDATE_ICON_SYS_RES)
 
   if IS_PSX == 1 then
     NEEDED_SPACE = NEEDED_SPACE + GetFileSizeX(PSX_SYSUPDATE)
@@ -544,7 +548,7 @@ function NormalInstall(port, slot)
   elseif REG == 4 then
     System.copyFile("INSTALL/ASSETS/CHN.sys", string.format("%s/icon.sys", TARGET_FOLD))
   end
-  System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("%s/PS2BBL.icn", TARGET_FOLD)) --icon is the same for all
+  System.copyFile(SYSUPDATE_ICON_SYS_RES, string.format("%s/%s", TARGET_FOLD, SYSUPDATE_ICON_SYS)) --icon is the same for all
   KELFBinder.setSysUpdateFoldProps(port, slot, KELFBinder.getsysupdatefolder())
   SYSUPDATEPATH = KELFBinder.calculateSysUpdatePath()
   if IS_PSX == 1 then SYSUPDATEPATH = "BIEXEC-SYSTEM/xosdmain.elf" end
@@ -1190,7 +1194,7 @@ function performExpertINST(port, slot, UPDT)
   local SIZE_NEED = 1024 -- FreeMcBoot installed automatically adds 1024 to the needed space counter
   local SIZE_NEED2 = 0
   local SYSUPDATE_MAIN_SIZE = GetFileSizeX(SYSUPDATE_MAIN)
-  local ICONSIZE = GetFileSizeX("INSTALL/ASSETS/PS2BBL.icn")
+  local ICONSIZE = GetFileSizeX(SYSUPDATE_ICON_SYS_RES)
   local NEEDS_JPN = false
   local NEEDS_USA = false
   local NEEDS_EUR = false
@@ -1284,22 +1288,22 @@ function performExpertINST(port, slot, UPDT)
   if NEEDS_JPN then
     KELFBinder.setSysUpdateFoldProps(port, slot, "BIEXEC-SYSTEM")
     System.copyFile("INSTALL/ASSETS/JPN.sys", string.format("mc%d:/%s/icon.sys", port, "BIEXEC-SYSTEM"))
-    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BIEXEC-SYSTEM"))
+    System.copyFile(SYSUPDATE_ICON_SYS_RES, string.format("mc%d:/%s/%s", port, "BIEXEC-SYSTEM", SYSUPDATE_ICON_SYS))
   end
   if NEEDS_USA then
     KELFBinder.setSysUpdateFoldProps(port, slot, "BAEXEC-SYSTEM")
     System.copyFile("INSTALL/ASSETS/USA.sys", string.format("mc%d:/%s/icon.sys", port, "BAEXEC-SYSTEM"))
-    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BAEXEC-SYSTEM"))
+    System.copyFile(SYSUPDATE_ICON_SYS_RES, string.format("mc%d:/%s/%s", port, "BAEXEC-SYSTEM", SYSUPDATE_ICON_SYS))
   end
   if NEEDS_EUR then
     KELFBinder.setSysUpdateFoldProps(port, slot, "BEEXEC-SYSTEM")
     System.copyFile("INSTALL/ASSETS/EUR.sys", string.format("mc%d:/%s/icon.sys", port, "BEEXEC-SYSTEM"))
-    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BEEXEC-SYSTEM"))
+    System.copyFile(SYSUPDATE_ICON_SYS_RES, string.format("mc%d:/%s/%s", port, "BEEXEC-SYSTEM", SYSUPDATE_ICON_SYS))
   end
   if NEEDS_CHN then
     KELFBinder.setSysUpdateFoldProps(port, slot, "BCEXEC-SYSTEM")
     System.copyFile("INSTALL/ASSETS/CHN.sys", string.format("mc%d:/%s/icon.sys", port, "BCEXEC-SYSTEM"))
-    System.copyFile("INSTALL/ASSETS/PS2BBL.icn", string.format("mc%d:/%s/PS2BBL.icn", port, "BCEXEC-SYSTEM"))
+    System.copyFile(SYSUPDATE_ICON_SYS_RES, string.format("mc%d:/%s/%s", port, "BCEXEC-SYSTEM", SYSUPDATE_ICON_SYS))
   end
 
   InstallExtraAssets(port)
