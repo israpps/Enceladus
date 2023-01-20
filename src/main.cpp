@@ -13,7 +13,7 @@
 #include <smod.h>
 #include <usbhdfsd-common.h>
 #include <libpwroff.h>
-// #include <audsrv.h>
+#include <audsrv.h>
 #include <sys/stat.h>
 
 #include <dirent.h>
@@ -33,6 +33,7 @@
 extern "C" {
 #include <libds34bt.h>
 #include <libds34usb.h>
+#include "vorbis.h"
 }
 
 #include "include/dbgprintf.h"
@@ -58,7 +59,7 @@ IMPORT_BIN2C(usbd_irx);
 IMPORT_BIN2C(bdm_irx);
 IMPORT_BIN2C(bdmfs_vfat_irx);
 IMPORT_BIN2C(usbmass_bd_irx);
-// IMPORT_BIN2C(audsrv_irx);
+IMPORT_BIN2C(audsrv_irx);
 IMPORT_BIN2C(ds34usb_irx);
 IMPORT_BIN2C(ds34bt_irx);
 IMPORT_BIN2C(secrsif_irx);
@@ -213,7 +214,7 @@ int main(int argc, char *argv[])
     SifInitRpc(0);
 #endif
 
-    DPRINTF_INIT();
+    //DPRINTF_INIT();
     // install sbv patch fix
     DPRINTF("Installing SBV Patches...\n");
     sbv_patch_enable_lmb();
@@ -271,8 +272,8 @@ int main(int argc, char *argv[])
     ret = SifExecModuleBuffer(&cdfs_irx, size_cdfs_irx, 0, NULL, &STAT);
     DPRINTF("[CDFS.IRX]: ret=%d, stat=%d\n", ret, STAT);
 
-    // ret = SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, &STAT);
-    // DPRINTF("[AUDSRV.IRX]: ret=%d, stat=%d\n", ret, STAT);
+    ret = SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, &STAT);
+    DPRINTF("[AUDSRV.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ret = SifExecModuleBuffer(&poweroff_irx, size_poweroff_irx, 0, NULL, &STAT);
     DPRINTF("[POWEROFF.IRX]: ret=%d, stat=%d\n", ret, STAT);
 #ifndef RESET_IOP
@@ -337,7 +338,6 @@ int main(int argc, char *argv[])
     chdir(boot_path);
 
     DPRINTF("boot path : %s\n", boot_path);
-
     while (1) {
 
         // if no parameters are specified, use the default boot

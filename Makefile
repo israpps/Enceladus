@@ -30,7 +30,7 @@ endif
 EE_BIN = KELFBinder.elf
 EE_BIN_PKD = KELFBinder_pkd.elf
 
-EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Lmodules/ds34bt/ee/ -Lmodules/ds34usb/ee/ -lpatches -lfileXio -lpad -ldebug -llua -lmath3d -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit -lpng -lz -lmc -lelf-loader -lds34bt -lds34usb
+EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Lmodules/ds34bt/ee/ -Lmodules/ds34usb/ee/ -lpatches -lfileXio -lpad -ldebug -llua -lmath3d -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit -lpng -lz -lmc -lelf-loader -lds34bt -lds34usb -laudsrv -lvorbisfile -lvorbis -logg 
 EE_LIBS += -liopreboot -lpoweroff
 
 EE_INCS += -Isrc/include -I$(PS2DEV)/gsKit/include -I$(PS2SDK)/ports/include -I$(PS2SDK)/ports/include/freetype2 -I$(PS2SDK)/ports/include/zlib
@@ -67,14 +67,14 @@ EXT_LIBS = modules/ds34usb/ee/libds34usb.a modules/ds34bt/ee/libds34bt.a
 
 APP_CORE = main.o libcdvd_add.o modelname.o system.o pad.o graphics.o render.o \
 		   calc_3d.o gsKit3d_sup.o atlas.o fntsys.o md5.o \
-		   libsecr.o baexec-system_paths.o # sound.o 
+		   libsecr.o baexec-system_paths.o sound.o vorbis.o
 
 LUA_LIBS =	luaplayer.o luacontrols.o \
 			luatimer.o luaScreen.o luagraphics.o \
-			luasystem.o luaRender.o luasecrman.o luaKELFBinder.o # luasound.o
+			luasystem.o luaRender.o luasecrman.o luaKELFBinder.o luasound.o
 
 IOP_MODULES = iomanx.o filexio.o \
-			  sio2man.o mcman.o mcserv.o padman.o libsd.o \
+			  sio2man.o mcman.o mcserv.o padman.o audsrv.o libsd.o \
 			  usbd.o bdm.o bdmfs_vfat.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o \
 			  secrsif.o IOPRP.o secrman.o poweroff.o

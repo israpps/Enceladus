@@ -98,9 +98,9 @@ else
   Screen.clear(Color.new(128, 128, 0)) Screen.flip() while true do end
 end
 
--- Sound.setVolume(100)
--- Sound.setADPCMVolume(1, 100)
--- SND_NOTI = Sound.loadADPCM("common/NOTIF.ADP")
+Sound.setVolume(100)
+Sound.setADPCMVolume(1, 100)
+-- SND_OK = Sound.loadADPCM("common/OP.ADP")
 -- Sound.playADPCM(1, SND_OK)
 
 function ORBMAN(Q)
@@ -226,7 +226,7 @@ function greeting()
   local CONTINUE = true
   local Q = 2
   local W = 1
-  -- Sound.playADPCM(1, SND_OPEN)
+  BGM.Start(System.getbootpath().."common/bgm.ogg")
   while CONTINUE do
     Screen.clear()
     if Q > 0x80 then W = -1 end
