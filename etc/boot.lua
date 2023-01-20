@@ -22,9 +22,8 @@ Sound.setADPCMVolume(1, 100)
 local T = Sound.loadADPCM("snd.adp")
 Sound.playADPCM(1, T)
 print("T")
-if doesFileExist(GMIDZ_PATH) then GMIDZ = Sound.loadADPCM(GMIDZ_PATH) end
+if doesFileExist(GMIDZ_PATH) then BGM.Start(GMIDZ_PATH) else AERR(GMIDZ_PATH) end
 if doesFileExist(TRLL_PATH) then TRLL_PNG = Graphics.loadImage(TRLL_PATH) end
-if GMIDZ== nil then AERR(GMIDZ_PATH) end
 if TRLL_PNG== nil then AERR(TRLL_PATH) end
 -- dbgscr.write("\t\taaa")
 Sound.playADPCM(1, GMIDZ)

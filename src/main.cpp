@@ -29,6 +29,7 @@
 extern "C"{
 #include <libds34bt.h>
 #include <libds34usb.h>
+#include "vorbis.h"
 }
 
 extern char bootString[];

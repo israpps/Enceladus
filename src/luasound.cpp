@@ -2,6 +2,9 @@
 #include "include/luaplayer.h"
 #include "include/sound.h"
 #include <stdlib.h>
+extern "C" {
+#include "vorbis.h"
+}
 
 static int lua_setformat(lua_State *L) {
 	int argc = lua_gettop(L);
@@ -41,6 +44,33 @@ static int lua_playadpcm(lua_State *L) {
 	sound_playadpcm(luaL_checkinteger(L, 1), (audsrv_adpcm_t *)luaL_checkinteger(L, 2));
 	return 0;
 }
+// ------------------ BGM ------------------ //
+static int lua_bgmUnMute(lua_State *L) {
+	int argc = lua_gettop(L);
+	if (argc != 1) return luaL_error(L, "lua_bgmUnMute takes only 1 argument");
+    setVol(luaL_checkinteger(L, 1));
+    return 0;
+}
+static int lua_bgmMute(lua_State *L) {
+    bgmMute();
+    return 0;
+}
+static int lua_isBgmPlaying(lua_State *L) {
+    int playing = isBgmPlaying();
+    lua_pushinteger(L, playing);
+    return 1;
+}
+static int lua_bgmStop(lua_State *L) {
+    bgmStop();
+    return 0;
+}
+static int lua_bgmStart(lua_State *L) {
+
+	int argc = lua_gettop(L);
+	if (argc != 1) return luaL_error(L, "lua_bgmStart takes only 1 argument");
+    bgmStart(luaL_checkstring(L, 1));
+    return 0;
+}
 
 static int lua_freeadpcm(lua_State *L) {
 	int argc = lua_gettop(L);
@@ -62,9 +92,21 @@ static const luaL_Reg Sound_functions[] = {
 	{"freeADPCM",      							 lua_freeadpcm},
 	{0, 0}
 };
+static const luaL_Reg BGM_functions[] = {
+	{"SetVolume",      							 lua_bgmUnMute},
+	{"Mute",      				   			 lua_bgmMute},
+	{"IsPlayIng",      				lua_isBgmPlaying},
+	{"Stop",      							 lua_bgmStop},
+	{"Start",      							 lua_bgmStart},
+	{0, 0}
+};
 
 void luaSound_init(lua_State *L) {
 	lua_newtable(L);
 	luaL_setfuncs(L, Sound_functions, 0);
 	lua_setglobal(L, "Sound");
+
+	lua_newtable(L);
+	luaL_setfuncs(L, BGM_functions, 0);
+	lua_setglobal(L, "BGM");
 }

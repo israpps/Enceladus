@@ -102,7 +102,7 @@ void sound_setadpcmvolume(int slot, int volume) {
 
 	audsrv_adpcm_set_volume(slot, volume);
 }
-#define RPRINT() printf("%s %d", __FUNCTION__, __LINE__)
+#define RPRINT() //printf("%s %d", __FUNCTION__, __LINE__)
 audsrv_adpcm_t* sound_loadadpcm(const char* path){
 	RPRINT();
     if(!adpcm_started) {
