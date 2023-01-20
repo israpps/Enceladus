@@ -162,12 +162,13 @@ int ee_sio_start(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umo
     COOKIE_FNCTS.close = NULL;
     COOKIE_FNCTS.seek = NULL;
     COOKIE_FNCTS.write = cookie_sio_write;
-    //EE_SIO = fopencookie(NULL, "w+", COOKIE_FNCTS);
+    EE_SIO = fopencookie(NULL, "w+", COOKIE_FNCTS);
     stdout = fopencookie(NULL, "w+", COOKIE_FNCTS); // fprintf does not replace format specifiers on C++. hook into stdout instead
     if (stdout == NULL) {
         printf("stdout stream is NULL\n");
         return EESIO_COOKIE_OPEN_IS_NULL;
     }
+    setvbuf(EE_SIO, NULL, _IONBF, 0); // no buffering for this bad boy
     printf("%s: finished\n", __func__);
     return EESIO_SUCESS;
 }
