@@ -39,18 +39,25 @@ EE_INCS += -Imodules/ds34bt/ee -Imodules/ds34usb/ee
 
 EE_CFLAGS   += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
 EE_CXXFLAGS += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
-
 ifeq ($(RESET_IOP),1)
 EE_CXXFLAGS += -DRESET_IOP
 endif
 
+EE_SIO ?= 0
+
 ifeq ($(DEBUG),1)
 EE_CXXFLAGS += -DDEBUG
-EE_CFLAGS += -DDEBUG -DCOMMON_PRINTF
+EE_CFLAGS += -DDEBUG
 EE_CFLAGS += -O0 -g
 else
   EE_CFLAGS += -Os
   EE_LDFLAGS += -s
+endif
+
+ifeq ($(EE_SIO),1)
+  EE_CXXFLAGS += -DSIO_PRINTF
+  EE_CFLAGS += -DSIO_PRINTF
+#  EE_OBJS += SIOCookie.o
 endif
 
 BIN2S = $(PS2SDK)/bin/bin2s
@@ -86,6 +93,7 @@ EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%) # remap all EE_OBJ to obj subdir
 
 #------------------------------------------------------------------#
 all: $(EXT_LIBS) $(EE_BIN)
+	@echo EE_SIO=$(EE_SIO)
 	@echo "$$HEADER"
 
 	echo "Building $(EE_BIN)..."

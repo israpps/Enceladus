@@ -1,4 +1,5 @@
 
+#define _GNU_SOURCE
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
@@ -137,6 +138,63 @@ void alternative_poweroff(void *arg)
     }
 }
 
+#include "SIOCookie.h"
+#include <sys/types.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <string.h>
+#include <sio.h>
+
+// GLOBAL
+FILE *EE_SIO;
+cookie_io_functions_t COOKIE_FNCTS;
+
+ssize_t cookie_sio_write(void *c, const char *buf, size_t size);
+ssize_t cookie_sio_read(void *c, char *buf, size_t size);
+// int cookie_sio_seek(void *c, _off64_t *offset, int whence);
+// int cookie_sio_close(void *c);
+
+int ee_sio_start(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umode)
+{
+    sio_init(baudrate, lcr_ueps, lcr_upen, lcr_usbl, lcr_umode);
+
+    COOKIE_FNCTS.read = cookie_sio_read;
+    COOKIE_FNCTS.close = NULL;
+    COOKIE_FNCTS.seek = NULL;
+    COOKIE_FNCTS.write = cookie_sio_write;
+    //EE_SIO = fopencookie(NULL, "w+", COOKIE_FNCTS);
+    stdout = fopencookie(NULL, "w+", COOKIE_FNCTS); // fprintf does not replace format specifiers on C++. hook into stdout instead
+    if (stdout == NULL) {
+        printf("stdout stream is NULL\n");
+        return EESIO_COOKIE_OPEN_IS_NULL;
+    }
+    printf("%s: finished\n", __func__);
+    return EESIO_SUCESS;
+}
+
+
+ssize_t cookie_sio_write(void *c, const char *buf, size_t size)
+{
+    return sio_putsn(buf);
+}
+
+ssize_t cookie_sio_read(void *c, char *buf, size_t size)
+{
+    return sio_read(buf, size);
+}
+/*
+int cookie_sio_seek(void *c, _off64_t *offset, int whence)
+{
+    DPRINTF("%s: start", __func__);
+    return 0;
+}
+
+int cookie_sio_close(void *c)
+{
+    DPRINTF("%s: start", __func__);
+    return 0;
+} */
+
 int main(int argc, char *argv[])
 {
     int fd;
@@ -155,6 +213,7 @@ int main(int argc, char *argv[])
     SifInitRpc(0);
 #endif
 
+    DPRINTF_INIT();
     // install sbv patch fix
     DPRINTF("Installing SBV Patches...\n");
     sbv_patch_enable_lmb();
@@ -216,12 +275,12 @@ int main(int argc, char *argv[])
     // DPRINTF("[AUDSRV.IRX]: ret=%d, stat=%d\n", ret, STAT);
     ret = SifExecModuleBuffer(&poweroff_irx, size_poweroff_irx, 0, NULL, &STAT);
     DPRINTF("[POWEROFF.IRX]: ret=%d, stat=%d\n", ret, STAT);
-    ret = SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, &STAT);
-    DPRINTF("[SECRSIF.IRX]: ret=%d, stat=%d\n", ret, STAT);
 #ifndef RESET_IOP
-    ret = SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, &STAT);
+    ret = SifExecModuleBuffer(&secrman_irx, size_secrman_irx, 0, NULL, &STAT);
     DPRINTF("[SECRMAN_SPECIAL.IRX]: ret=%d, stat=%d\n", ret, STAT);
 #endif
+    ret = SifExecModuleBuffer(&secrsif_irx, size_secrsif_irx, 0, NULL, &STAT);
+    DPRINTF("[SECRSIF.IRX]: ret=%d, stat=%d\n", ret, STAT);
     DPRINTF("\n\n\nFINISHED LOADING IRX FILES\n");
     // waitUntilDeviceIsReady by fjtrujy
 
