@@ -169,7 +169,7 @@ int ee_sio_start(u32 baudrate, u8 lcr_ueps, u8 lcr_upen, u8 lcr_usbl, u8 lcr_umo
         return EESIO_COOKIE_OPEN_IS_NULL;
     }
     setvbuf(EE_SIO, NULL, _IONBF, 0); // no buffering for this bad boy
-    printf("%s: finished\n", __func__);
+    fprintf(EE_SIO, "%s: finished\n", __func__);
     return EESIO_SUCESS;
 }
 
@@ -340,16 +340,8 @@ int main(int argc, char *argv[])
     DPRINTF("boot path : %s\n", boot_path);
 
     while (1) {
-
-        // if no parameters are specified, use the default boot
-        if (argc < 2) {
-            DPRINTF("running bootstring\n");
-            errMsg = runScript(bootString, true);
-        } else {
-            DPRINTF("running argv[1] =%s\n", argv[1]);
-            errMsg = runScript(argv[1], false);
-        }
-
+        DPRINTF("running bootstring\n");
+        errMsg = runScript(bootString, true);
 
         if (errMsg != NULL) {
 #ifndef SCR_PRINTF
