@@ -38,23 +38,24 @@ typedef struct
 } rm_quad_t;
 
 
-typedef struct 
+typedef struct
 {
-	texel_t* 	stqr;
-	color_t* 	rgba;
-    vertex_f_t* xyzw;
-    VECTOR*     test;
+    texel_t *stqr;
+    color_t *rgba;
+    vertex_f_t *xyzw;
+    VECTOR *test;
 } vData;
 
-struct model{
-	uint32_t facesCount;
-    uint16_t* idxList;
-    VECTOR* positions;
-	VECTOR* texcoords;
-	VECTOR* normals;
-    VECTOR* colours;
-    VECTOR* bounding_box;
-    GSTEXTURE* texture;
+struct model
+{
+    uint32_t facesCount;
+    uint16_t *idxList;
+    VECTOR *positions;
+    VECTOR *texcoords;
+    VECTOR *normals;
+    VECTOR *colours;
+    VECTOR *bounding_box;
+    GSTEXTURE *texture;
 };
 
 typedef u32 Color;
@@ -85,10 +86,10 @@ extern float FPSCounter(int interval);
 
 extern void setVideoMode(s16 mode, int width, int height, int psm, s16 interlace, s16 field, bool zbuffering, int psmz);
 
-extern GSTEXTURE* load_image(const char* path, bool delayed);
+extern GSTEXTURE *load_image(const char *path, bool delayed);
 
-extern void drawImage(GSTEXTURE* source, float x, float y, float width, float height, float startx, float starty, float endx, float endy, Color color);
-extern void drawImageRotate(GSTEXTURE* source, float x, float y, float width, float height, float startx, float starty, float endx, float endy, float angle, Color color);
+extern void drawImage(GSTEXTURE *source, float x, float y, float width, float height, float startx, float starty, float endx, float endy, Color color);
+extern void drawImageRotate(GSTEXTURE *source, float x, float y, float width, float height, float startx, float starty, float endx, float endy, float angle, Color color);
 
 extern void drawPixel(float x, float y, Color color);
 extern void drawLine(float x, float y, float x2, float y2, Color color);
@@ -105,15 +106,15 @@ extern void UnloadTexture(GSTEXTURE *txt);
 
 extern void fntDrawQuad(rm_quad_t *q);
 
-extern GSFONT* loadFont(const char* path);
+extern GSFONT *loadFont(const char *path);
 
-extern void printFontText(GSFONT* font, const char* text, float x, float y, float scale, Color color);
+extern void printFontText(GSFONT *font, const char *text, float x, float y, float scale, Color color);
 
-extern void unloadFont(GSFONT* font);
+extern void unloadFont(GSFONT *font);
 
 extern void loadFontM();
 
-extern void printFontMText(const char* text, float x, float y, float scale, Color color);
+extern void printFontMText(const char *text, float x, float y, float scale, Color color);
 
 extern void unloadFontM();
 
@@ -127,12 +128,12 @@ extern void setLightQuantity(int quantity);
 
 extern void createLight(int lightid, float dir_x, float dir_y, float dir_z, int type, float r, float g, float b);
 
-extern model* loadOBJ(const char* path, GSTEXTURE* text);
+extern model *loadOBJ(const char *path, GSTEXTURE *text);
 
-extern void drawOBJ(model* m, float pos_x, float pos_y, float pos_z, float rot_x, float rot_y, float rot_z);
+extern void drawOBJ(model *m, float pos_x, float pos_y, float pos_z, float rot_x, float rot_y, float rot_z);
 
-extern void draw_bbox(model* m, float pos_x, float pos_y, float pos_z, float rot_x, float rot_y, float rot_z, Color color);
+extern void draw_bbox(model *m, float pos_x, float pos_y, float pos_z, float rot_x, float rot_y, float rot_z, Color color);
 
-GSTEXTURE* luaP_loadHWCpng(int fotoID, bool delayed);
+GSTEXTURE *luaP_loadHWCpng(int fotoID, bool delayed);
 
 #endif

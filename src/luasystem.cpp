@@ -59,7 +59,7 @@ static int lua_setCurrentDirectory(lua_State *L)
         }
     }
 
-    DPRINTF("changing directory to %s\n", __ps2_normalize_path(temp_path));
+    DPRINTF("changing directory to %s\n", __ps2_normalize_path(temp_path)); 
     chdir(__ps2_normalize_path(temp_path));
 
     return 1;
@@ -113,7 +113,7 @@ static int lua_dir(lua_State *L)
     char path[255];
 
     getcwd((char *)path, 256);
-    DPRINTF("current dir %s\n", (char *)path);
+    DPRINTF("current dir %s\n", (char *)path); 
 
     if (argc != 0) {
         temp_path = luaL_checkstring(L, 1);
@@ -130,7 +130,7 @@ static int lua_dir(lua_State *L)
     }
 
     strcpy(path, __ps2_normalize_path(path));
-    DPRINTF("\nchecking path : %s\n", path);
+    DPRINTF("\nchecking path : %s\n", path); 
 
 
 
@@ -202,7 +202,7 @@ static int lua_dir(lua_State *L)
     if (d) {
         while ((dir = readdir(d)) != NULL) {
             lua_pushnumber(L, i++); // push key for file entry
-            DPRINTF("%s\n", dir->d_name);
+            DPRINTF("%s\n", dir->d_name); 
             lua_newtable(L);
             lua_pushstring(L, "name");
             lua_pushstring(L, dir->d_name);
@@ -227,7 +227,7 @@ static int lua_dir(lua_State *L)
 
 static int lua_createDir(lua_State *L)
 {
-    DPRINTF("%s: start\n", __FUNCTION__);
+    DPRINTF("%s: start\n", __FUNCTION__); 
     const char *path = luaL_checkstring(L, 1);
     if (!path)
         return luaL_error(L, "Argument error: System.createDirectory(directory) takes a directory name as string as argument.");
@@ -250,14 +250,14 @@ static int lua_removeDir(lua_State *L)
 //thanks to SP193 for all his work
 static int DeleteFolder(const char *folder)
 {
-    DPRINTF("\n\n\n\n%s: START!\n", __FUNCTION__);
+    DPRINTF("\n%s: START!\n", __FUNCTION__); 
 	DIR *d = opendir(folder);
 	size_t path_len = strlen(folder);
 	int r = -1;
 
 	if (d)
 	{
-		DPRINTF("Detected [%s], deleting...\n",folder);
+		DPRINTF("Detected [%s], deleting...\n",folder); 
 		struct dirent *p;
 
 		r = 0;
@@ -380,7 +380,7 @@ static int lua_copyfile(lua_State *L)
     const char *newfile = luaL_checkstring(L, 2);
     if (!ogfile || !newfile)
         return luaL_error(L, "Argument error: System.copyFile(source, destination) takes two filenames as strings as arguments.");
-    DPRINTF("%s: Copying [%s] to [%s]\n", __func__, ogfile, newfile);
+    DPRINTF("%s: Copying [%s] to [%s]\n", __func__, ogfile, newfile); 
     char buf[BUFSIZ];
     size_t size;
 
@@ -489,9 +489,9 @@ static int lua_getmcinfo(lua_State *L)
     syncret = mcSync(0, NULL, &result);
 
     DPRINTF("\nSLOT=%d\ttype=%d, freespace=%d, format=%d, inforet=%d\n"
-            "mcSync.result=%d mcSync.syncret=%d\n",
+            "\tmcSync.result=%d mcSync.syncret=%d\n",
             mcslot, type, freespace, format, inforet,
-            result, syncret);
+            result, syncret); 
 
     lua_newtable(L);
 
@@ -665,7 +665,7 @@ static int lua_checkValidDisc(lua_State *L)
         case SCECdIllegalMedia:
             result = 0;
     }
-    DPRINTF("Valid Disc: %d\n", result);
+    DPRINTF("Valid Disc: %d\n", result); 
     lua_pushinteger(L, result); // return the value itself to Lua stack
     return 1;                   // return value quantity on stack
 }
@@ -693,7 +693,7 @@ static int lua_getDiscType(lua_State *L)
     for (iz = 0; DiscTypes[iz].name[0]; iz++)
         if (DiscTypes[iz].type == discType)
             DiscType_ix = iz;
-    DPRINTF("getDiscType: %d\n", DiscTypes[DiscType_ix].value);
+    DPRINTF("getDiscType: %d\n", DiscTypes[DiscType_ix].value); 
     lua_pushinteger(L, DiscTypes[DiscType_ix].value); // return the value itself to Lua stack
     return 1;                                         // return value quantity on stack
 }
@@ -794,7 +794,7 @@ static int lua_getbootpath(lua_State *L)
 
 static int lua_printf(lua_State *L)
 {
-    DPRINTF("%s\n", luaL_checkstring(L, 1));
+    DPRINTF("%s\n", luaL_checkstring(L, 1)); 
     return 0;
 }
 

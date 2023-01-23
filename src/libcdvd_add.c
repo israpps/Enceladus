@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <libcdvd.h>
 
+#include "dbgprintf.h"
 #include "libcdvd_add.h"
 
 static unsigned char MECHACON_CMD_S36_supported = 0, MECHACON_CMD_S27_supported = 0, MECHACON_CMD_S24_supported = 0;
@@ -27,7 +28,7 @@ int cdInitAdd(void)
         }
     }
 
-    // printf("Failed to get MECHACON version: %d 0x%x\n", result, status);
+    DPRINTF("Failed to get MECHACON version: %d 0x%x\n", result, status); 
 
     return -1;
 }

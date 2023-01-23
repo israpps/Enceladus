@@ -43,8 +43,8 @@ static int lua_deinitsecrman(lua_State *L)
 
 static int SignKELF(void *buffer, int size, unsigned char port, unsigned char slot)
 {
-    DPRINTF("%s: start\n", __func__);
-    int result;//, InitSemaID, mcInitRes;
+    DPRINTF("%s: start\n\tbuffer_size=%d, port=%d, slot=%d\n", __func__, size, port, slot); 
+    int result; //, InitSemaID, mcInitRes;
 
     /*	An IOP reboot would be done by the Utility Disc,
             to allow the SecrDownloadFile function of secrman_special to work on a
@@ -61,152 +61,114 @@ static int SignKELF(void *buffer, int size, unsigned char port, unsigned char sl
     // DEBUG_PRINTF("Entering again SecrDownloadFile %d %d
     // %x.\n",port,slot,buffer);
     if (SecrDownloadFile(2 + port, slot, buffer) == NULL) {
-        // DEBUG_PRINTF("Error signing file.\n");
+        DPRINTF("%s: Error signing file.\n", __func__); 
         result = -EINVAL;
     }
-    
+
     return result;
 }
 
-/* int installKELF(const char* filepath, const char* installpath)
+static int lua_secrdownloadfile(lua_State *L)
 {
-    int fd, result;
-    ssize_t READED;
-    unsigned char* PTR;
-    fd = open(filepath, O_RDONLY);
-    if (fd < 0)
-        return -EIO;
-	lseek(fd, 0, SEEK_CUR); // make sure we seek from start
-	uint32_t size = lseek(fd, 0, SEEK_END);
-	lseek(fd, 0, SEEK_CUR); // go back to start so read() gets the job done
-
-    PTR = (unsigned char *)malloc(size);
-    if (PTR != NULL)
-    {
-        READED = read(fd, PTR, size);
-        if (READED != size)
-        {
-            result = -EIO;
-            DPRINTF("%s: ERROR reading KELF, expected to read %d bytes, but %d bytes were readed", __func__, size, READED);
-        } else
-        {
-            result = SignKELF(PTR, size, installpath[2] - '0', 0);
-        }
-    } else {
-        result = -2;
-    }
-    close(fd);
-    return result;
-} */
-
-static int lua_secrdownloadfile(lua_State *L) {
-	int argc = lua_gettop(L);
+    int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
-	if ((argc != 4) && (argc != 5)) return luaL_error(L, "wrong number of arguments");
+    if ((argc != 4) && (argc != 5))
+        return luaL_error(L, "wrong number of arguments");
 #endif
     int port = luaL_checkinteger(L, 1);
     int slot = luaL_checkinteger(L, 2);
-    const char* file_tbo = luaL_checkstring(L, 3);
-    const char* dest = luaL_checkstring(L, 4);
+    const char *file_tbo = luaL_checkstring(L, 3);
+    const char *dest = luaL_checkstring(L, 4);
     int flags = 0;
 
-    if (argc == 5)
-    {
+    if (argc == 5) {
         flags = luaL_checkinteger(L, 5);
-        DPRINTF("%s: Flags are %%d=%d or %%x=%x\n", __FUNCTION__, flags, flags);
+        DPRINTF("%s: Flags are %%d=%d or %%x=%x\n", __FUNCTION__, flags, flags); 
     }
 
     DPRINTF("--------------------\n%s: Starting with %d argumments:\n"
-           "[Port]: %d\n"
-           "[Slot]: %d\n"
-           "[input KELF]: %s\n"
-           "[output KELF]: %s\n"
-           "[flags]: %x\n"
-           , __func__, argc,
-           port, slot, file_tbo, dest, flags);
-	void* buf;
-	int result = 0;
+            "[Port]: %d\n"
+            "[Slot]: %d\n"
+            "[input KELF]: %s\n"
+            "[output KELF]: %s\n"
+            "[flags]: %x\n",
+            __func__, argc,
+            port, slot, file_tbo, dest, flags); 
+    void *buf;
+    int result = 0;
 
-	int fd = open(file_tbo, O_RDONLY);
-    DPRINTF("luasecrdownloadfile: input fd is %d\n", fd);
-	if(fd<0){
+    int fd = open(file_tbo, O_RDONLY);
+    DPRINTF("%s: input fd is %d\n", __func__, fd); 
+    if (fd < 0) {
         lua_pushinteger(L, -201);
         return 1;
-	}
-	int size=lseek(fd, 0, SEEK_END);
-    DPRINTF("luasecrdownloadfile: KELF size is %d\n", size);
-	if(size<0){
+    }
+    int size = lseek(fd, 0, SEEK_END);
+    DPRINTF("%s: KELF size is %d\n", __func__, size); 
+    if (size < 0) {
         close(fd);
         lua_pushinteger(L, -201);
         return -EIO;
     }
-	lseek(fd, 0, SEEK_SET);
-	if((buf = memalign(64, size))!=NULL) 
-    {
-		if ((read(fd, buf, size)) != size) 
-        {
-			close(fd);
+    lseek(fd, 0, SEEK_SET);
+    if ((buf = memalign(64, size)) != NULL) {
+        if ((read(fd, buf, size)) != size) {
+            close(fd);
             result = -EIO;
-    	} 
-        else
-        {
-			close(fd);
-			if((result=SignKELF(buf, size, port, slot))<0){
-				free(buf);
-			} 
-            else 
-            {
-                DPRINTF("luasecrdownloadfile: SignKELF returns %d\n", result);
-                if (flags == 0)
-                {
-                    DPRINTF("flags was empty, performing normal install!\n");
-			        int McFileFD = open(dest, O_WRONLY|O_CREAT|O_TRUNC);
-                    DPRINTF("luasecrdownloadfile: %s fd is (%d)\n",dest, McFileFD);
-			        int written = write(McFileFD, buf, size);
-                    if (written != size)
-                    {
+        } else {
+            close(fd);
+            if ((result = SignKELF(buf, size, port, slot)) < 0) {
+                free(buf);
+                DPRINTF("%s: SignKELF failed with value %d\n", __func__, result); 
+            } else {
+                DPRINTF("%s: SignKELF returns %d\n", __func__, result); 
+                if (flags == 0) {
+                    DPRINTF("flags was empty, performing normal install!\n"); 
+                    int McFileFD = open(dest, O_WRONLY | O_CREAT | O_TRUNC);
+                    DPRINTF("%s: [%s] fd is (%d)\n", __func__, dest, McFileFD); 
+                    int written = write(McFileFD, buf, size);
+                    if (written != size) {
                         result = -EIO;
                     }
-                    DPRINTF("luasecrdownloadfile: written %d\n", written);
-			        close(McFileFD);
-                }
-                else
-                {
-                    DPRINTF("flags was not empty, performing multiple installation\n");
+                    DPRINTF("%s: written %d\n", __func__, written); 
+                    close(McFileFD);
+                } else {
+                    DPRINTF("%s:flags was not empty, performing multiple installation\n", __func__); 
                     int x = 0, TF = 0;
                     char output[64];
-                    for (x=2; x<SYSTEM_UPDATE_COUNT; x++) // start from index 2, since 0 and 1 are kernel patches, wich require different value for file_tbo
+                    for (x = 2; x < SYSTEM_UPDATE_COUNT; x++) // start from index 2, since 0 and 1 are kernel patches, wich require different value for file_tbo
                     {
-                        TF = (1 << (x+1));
-                        DPRINTF("trying with %s ", sysupdate_paths[BSM2AI(TF)]);
-                        if (flags & TF)
-                        {
+                        TF = (1 << (x + 1));
+                        DPRINTF("%s: trying with %s ", __func__, sysupdate_paths[BSM2AI(TF)]); 
+                        if (flags & TF) {
                             sprintf(output, "mc%d:/%s", port, sysupdate_paths[BSM2AI(TF)]);
-                            DPRINTF("IT IS FLAGGED\n");
-                            int McFileFD = open(output, O_WRONLY|O_CREAT|O_TRUNC);
-                            DPRINTF("luasecrdownloadfile: %s fd is (%d)\n",sysupdate_paths[BSM2AI(TF)], McFileFD);
+                            DPRINTF("\tIT IS FLAGGED\n"); 
+                            int McFileFD = open(output, O_WRONLY | O_CREAT | O_TRUNC);
+                            DPRINTF("%s: [%s] fd is (%d)\n", __func__, sysupdate_paths[BSM2AI(TF)], McFileFD); 
                             int written = write(McFileFD, buf, size);
-                            DPRINTF("luasecrdownloadfile: written %d\n", written);
+                            DPRINTF("%s: written %d\n", __func__, written); 
                             close(McFileFD);
-                            if (written != size)
-                            {
+                            if (written != size) {
                                 result = -EIO;
                                 break;
                             }
                         } else
-                            DPRINTF("NOT FLAGGED\n");
+                            {
+                                DPRINTF("NOT FLAGGED\n"); 
+                            }
                     }
                 }
             }
-		}
-	} else {
-		result = -ENOMEM;
+        }
+    } else {
+        DPRINTF("%s: memory allocation of %d bytesfailed\n", __func__, size); 
+        result = -ENOMEM;
         close(fd);
-	}
+    }
     if (buf != NULL)
-	    free(buf);
+        free(buf);
     lua_pushinteger(L, result);
-	return 1;
+    return 1;
 }
 
 static const luaL_Reg Secrman_functions[] = {
@@ -223,38 +185,36 @@ void luaSecrMan_init(lua_State *L)
     luaL_setfuncs(L, Secrman_functions, 0);
     lua_setglobal(L, "Secrman");
 
-	lua_pushinteger(L, JAP_ROM_100);
-	lua_setglobal (L, "JAP_ROM_100");
+    lua_pushinteger(L, JAP_ROM_100);
+    lua_setglobal(L, "JAP_ROM_100");
 
-	lua_pushinteger(L, JAP_ROM_101);
-	lua_setglobal (L, "JAP_ROM_101");
+    lua_pushinteger(L, JAP_ROM_101);
+    lua_setglobal(L, "JAP_ROM_101");
 
-	lua_pushinteger(L, JAP_ROM_120);
-	lua_setglobal (L, "JAP_ROM_120");
+    lua_pushinteger(L, JAP_ROM_120);
+    lua_setglobal(L, "JAP_ROM_120");
 
-	lua_pushinteger(L, JAP_STANDARD);
-	lua_setglobal (L, "JAP_STANDARD");
+    lua_pushinteger(L, JAP_STANDARD);
+    lua_setglobal(L, "JAP_STANDARD");
 
-	lua_pushinteger(L, USA_ROM_110);
-	lua_setglobal (L, "USA_ROM_110");
+    lua_pushinteger(L, USA_ROM_110);
+    lua_setglobal(L, "USA_ROM_110");
 
-	lua_pushinteger(L, USA_ROM_120);
-	lua_setglobal (L, "USA_ROM_120");
+    lua_pushinteger(L, USA_ROM_120);
+    lua_setglobal(L, "USA_ROM_120");
 
-	lua_pushinteger(L, USA_STANDARD);
-	lua_setglobal (L, "USA_STANDARD");
+    lua_pushinteger(L, USA_STANDARD);
+    lua_setglobal(L, "USA_STANDARD");
 
-	lua_pushinteger(L, EUR_ROM_120);
-	lua_setglobal (L, "EUR_ROM_120");
-    
-	lua_pushinteger(L, EUR_STANDARD);
-	lua_setglobal (L, "EUR_STANDARD");
+    lua_pushinteger(L, EUR_ROM_120);
+    lua_setglobal(L, "EUR_ROM_120");
 
-	lua_pushinteger(L, CHN_STANDARD);
-	lua_setglobal (L, "CHN_STANDARD");
+    lua_pushinteger(L, EUR_STANDARD);
+    lua_setglobal(L, "EUR_STANDARD");
 
-	lua_pushinteger(L, SYSTEM_UPDATE_COUNT);
-	lua_setglobal (L, "SYSTEM_UPDATE_COUNT");
+    lua_pushinteger(L, CHN_STANDARD);
+    lua_setglobal(L, "CHN_STANDARD");
 
+    lua_pushinteger(L, SYSTEM_UPDATE_COUNT);
+    lua_setglobal(L, "SYSTEM_UPDATE_COUNT");
 }
-

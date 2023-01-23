@@ -1,3 +1,10 @@
+--[[
+  KELFBINDER MAIN SCRIPT.
+  MODIFY AT YOUR OWN RISK.
+  MODIFICATION OF THIS FILE IS DISCOURAGED UNLESS YOU KNOW WHAT YOU'RE DOING
+  ISSUE REPORTS WICH CAN'T BE REPLICATED WITH THE ORIGINAL VERSION OF THIS FILE WILL NOT BE ACCEPTED
+--]]
+
 System.printf("KELFBinder.lua starts")
 Screen.clear() Graphics.drawRect(300, 222, 40, 4, Color.new(255, 255, 255)) Screen.flip() System.sleep(1)
 FONTPATH = "common/font2.ttf"
@@ -83,6 +90,7 @@ local RINCREMENT = 0.00018
 
 Language = KELFBinder.getsystemLanguage()
 if System.doesFileExist("lang/global.lua") then dofile("lang/global.lua")
+elseif Language == 1 then -- intended to stop searching lang files if language is english
 elseif Language == 0 then if System.doesFileExist("lang/japanese.lua") then dofile("lang/japanese.lua") end
 elseif Language == 2 then if System.doesFileExist("lang/french.lua") then dofile("lang/french.lua") end
 elseif Language == 3 then if System.doesFileExist("lang/spanish.lua") then dofile("lang/spanish.lua") end
@@ -176,7 +184,7 @@ function PreExtraAssetsInstall(FILECOUNT, FOLDERCOUNT, SIZECOUNT)
         SIZECOUNT = SIZECOUNT + GetFileSizeX(EXTRA_INST_SRC[i])
         FILECOUNT = FILECOUNT + 1 -- only add the confirmed files
       end
-    end --]]
+    end
   end
 
   return FILECOUNT, FOLDERCOUNT, SIZECOUNT
@@ -312,7 +320,6 @@ function MainMenu()
     promptkeys(1, LNG_CT0, 0, 0, 0, 0, A)
 
     if NA > 0 then
-      -- if NA == 0x80 then Sound.playADPCM(0, SND_NOTI) end
       if MUST_INSTALL_EXTRA_FILES then
         Font.ftPrint(font, 40, 40, 0, 630, 16,  LNG_EXTRA_INSTALL_ENABLE, Color.new(0x80, 0x80, 0, NA))
       else
@@ -368,8 +375,6 @@ function Installmodepicker()
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
-    --Font.ftPrint(font, 150, 20,  0, 630, 32, LNG_IMPMP0, Color.new(220, 220, 220, 0x80-A))
-
     if T == 1 then
       Font.ftPrint(font, 321, 150, 0, 630, 16, LNG_IMPMP1, Color.new(0, 0xde, 0xff, 0x80 - A))
     else
@@ -614,7 +619,6 @@ function MemcardPickup()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
     Font.ftPrint(font, 320, 20, 8, 630, 32, LNG_MEMCARD0, Color.new(0x80, 0x80, 0x80, 0x80 - A))
-    
     Font.ftPrint(font, 160, 270, 8, 630, 32, string.format(LNG_MEMCARD1, 1), Color.new(0x80, 0x80, 0x80, 0x80 - A))
     if mcinfo0.type == 2 then
       if mcinfo0.format == 1 then
@@ -858,8 +862,6 @@ function AdvancedINSTprompt()
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, 640.0, 448.0)
     ORBMAN(0x80)
-    --Font.ftPrint(font, 150, 20,  0, 630, 32, LNG_IMPMP0, Color.new(220, 220, 220, 0x80-A))
-
     if T == 1 then
       Font.ftPrint(font, 321, 150, 0, 630, 16, LNG_AI_CROSS_MODEL, Color.new(0, 0xde, 0xff, 0x80 - A))
     else
@@ -1408,14 +1410,14 @@ while true do
   if (TT == 1) then -- SYSTEM UPDATE
     local TTT = Installmodepicker()
     WaitWithORBS(50)
-    if TTT == 1 then
+    if TTT == 1 then -- NORMAL INST
       local port = MemcardPickup()
       if port ~= -1 then
         FadeWIthORBS()
         NormalInstall(port, 0)
         WaitWithORBS(50)
       end
-    elseif TTT == 2 then
+    elseif TTT == 2 then -- ADVANCED INST
       local port = 0
       local LOL = AdvancedINSTprompt()
       local UPDT = {}
@@ -1434,7 +1436,7 @@ while true do
           end
         end
       end
-    elseif TTT == 3 then
+    elseif TTT == 3 then -- EXPERT INST
       local port = MemcardPickup()
       if port ~= -1 then
         WaitWithORBS(30)
