@@ -3,10 +3,11 @@
 
 #define UNKNOWN -1
 
-enum CONSOLE_REGIONS {
+enum CONSOLE_REGIONS
+{
     JAPAN = 0,
     USA,
-    ASIA, //ASIA USES THE SAME SYSTEM PATHS THAN USA!!!
+    ASIA, // ASIA USES THE SAME SYSTEM PATHS THAN USA!!!
     EUROPE,
     CHINA,
 
@@ -14,10 +15,11 @@ enum CONSOLE_REGIONS {
 
 };
 
-enum MACHINETYPE {
-    CEX, // SCPH and DESR models
-    DEX, // DTL-H models
-    COH, // COH arcade namco machines
+enum MACHINETYPE
+{
+    CEX,  // SCPH and DESR models
+    DEX,  // DTL-H models
+    COH,  // COH arcade namco machines
     TOOL, // DTL-T
 
     MACHINETYPE_COUNT,

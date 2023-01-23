@@ -31,7 +31,8 @@ typedef struct _usb_ds34
     u8 type;
 } ds34usb_device;
 
-enum eDS34USBStatus {
+enum eDS34USBStatus
+{
     DS34USB_STATE_DISCONNECTED = 0x00,
     DS34USB_STATE_AUTHORIZED = 0x01,
     DS34USB_STATE_CONFIGURED = 0x02,
@@ -39,7 +40,8 @@ enum eDS34USBStatus {
     DS34USB_STATE_RUNNING = 0x08,
 };
 
-enum eHID {
+enum eHID
+{
     // {{{
     /* HID event flag */
     HID_FLAG_STATUS_REPORTED = 0x01,

@@ -20,7 +20,8 @@ IMPORT_BIN2C(mc_ps2);
 IMPORT_BIN2C(square);
 IMPORT_BIN2C(triangle);
 
-enum IMAGES {
+enum IMAGES
+{
     BACKGROUND = 0,
     BACKGROUND_ERROR,
     BACKGROUND_SUCCESS,

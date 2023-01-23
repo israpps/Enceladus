@@ -50,7 +50,8 @@ typedef struct
     u8 btn_delay;
 } ds34bt_pad_t;
 
-enum eDS34BTStatus {
+enum eDS34BTStatus
+{
     DS34BT_STATE_USB_DISCONNECTED = 0x00,
     DS34BT_STATE_USB_AUTHORIZED = 0x01,
     DS34BT_STATE_USB_CONFIGURED = 0x02,
@@ -68,7 +69,8 @@ enum eDS34BTStatus {
 #define hci_event_flag_set(flag)   hci_event_flag |= flag
 #define hci_event_flag_check(flag) (hci_event_flag & flag)
 
-enum eHCI {
+enum eHCI
+{
     // {{{
     /* Bluetooth HCI states for HCI_task() */
     HCI_INIT_STATE = 0,
@@ -136,7 +138,8 @@ enum eHCI {
     // }}}
 };
 
-enum eL2CAP {
+enum eL2CAP
+{
     // {{{
     /* Bluetooth L2CAP PSM */
     L2CAP_PSM_SDP = 0x01,
@@ -205,7 +208,8 @@ enum eL2CAP {
 #define l2cap_interrupt_channel ((l2cap_buf[6] | (l2cap_buf[7] << 8)) == interrupt_dcid)
 #define l2cap_command_channel   ((l2cap_buf[6] | (l2cap_buf[7] << 8)) == control_dcid)
 
-enum eHID {
+enum eHID
+{
     // {{{
     /* HID event flag */
     HID_FLAG_STATUS_REPORTED = 0x01,
