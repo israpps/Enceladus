@@ -10,67 +10,6 @@
 static bool adpcm_started = false;
 static bool audsrv_started = false;
 
-/*static int fillbuffer(void *arg)
-{
-	iSignalSema((int)arg);
-	return 0;
-}*/
-
-/*int main(int argc, char **argv)
-{
-	int ret;
-	int played;
-	int err;
-	int bytes;
-	char chunk[2048];
-	FILE *wav;
-	ee_sema_t sema;
-	int fillbuffer_sema;
-
-	sema.init_count = 0;
-	sema.max_count = 1;
-	sema.option = 0;
-	fillbuffer_sema = CreateSema(&sema);
-
-	audsrv_on_fillbuf(sizeof(chunk), fillbuffer, (void *)fillbuffer_sema);
-
-	wav = fopen("host:song_22k.wav", "rb");
-
-	fseek(wav, 0x30, SEEK_SET);
-
-	DPRINTF("starting play loop\n");
-	played = 0;
-	bytes = 0;
-	while (1)
-	{
-		ret = fread(chunk, 1, sizeof(chunk), wav);
-		if (ret > 0)
-		{
-			WaitSema(fillbuffer_sema);
-			audsrv_play_audio(chunk, ret);
-		}
-
-		if (ret < sizeof(chunk))
-		{
-			break;
-		}
-
-		played++;
-		bytes = bytes + ret;
-
-		if (played % 8 == 0)
-		{
-			DPRINTF("\r%d bytes sent..", bytes);
-		}
-
-		if (played == 512) break;
-	}
-
-	fclose(wav);
-
-}*/
-
-
 void sound_setvolume(int volume) {
     if(!audsrv_started) {
         audsrv_init();
@@ -128,9 +67,16 @@ audsrv_adpcm_t* sound_loadadpcm(const char* path){
 
 	audsrv_load_adpcm(sample, buffer, size);
 
-	free(buffer);
+	//free(buffer); this fucks ADPCM files larger than 180kb. as an alternative, use sound_freeadpcm() directly on lua code
 
 	return sample;
+}
+
+void sound_freeadpcm(audsrv_adpcm_t *sample) {
+	free(sample->buffer);
+	sample->buffer = NULL;
+	free(sample);
+	sample = NULL;
 }
 
 void sound_playadpcm(int slot, audsrv_adpcm_t *sample) {

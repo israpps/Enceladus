@@ -42,12 +42,21 @@ static int lua_playadpcm(lua_State *L) {
 	return 0;
 }
 
+static int lua_freeadpcm(lua_State *L) {
+    DPRINTF("%s: start\n", __FUNCTION__);
+	int argc = lua_gettop(L);
+	if (argc != 1) return luaL_error(L, "lua_freeadpcm takes only 1 argument");
+	sound_freeadpcm((audsrv_adpcm_t *)luaL_checkstring(L, 1));
+	return 1;
+}
+
 static const luaL_Reg Sound_functions[] = {
 	{"setFormat",      							 lua_setformat},
 	{"setVolume",      				   			 lua_setvolume},
 	{"setADPCMVolume",      				lua_setadpcmvolume},
 	{"loadADPCM",      							 lua_loadadpcm},
 	{"playADPCM",      							 lua_playadpcm},
+	{"freeADPCM",      							 lua_freeadpcm},
 	{0, 0}
 };
 
