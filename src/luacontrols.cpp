@@ -1,5 +1,6 @@
 #include "include/luaplayer.h"
 #include "include/pad.h"
+#include "include/dbgprintf.h"
 
 extern "C"{
 #include <libds34bt.h>
@@ -22,6 +23,7 @@ static int lua_gettype(lua_State *L) {
 }
 
 static int lua_getpad(lua_State *L) {
+    //DPRINTF("%s: start\n", __func__);
 	int argc = lua_gettop(L);
 	if (argc != 0 && argc != 1) return luaL_error(L, "wrong number of arguments(%s:%d)", __FILE__, __LINE__);
 	int port = 0;
@@ -197,6 +199,7 @@ static int lua_rumble(lua_State *L){
 }
 
 static int lua_check(lua_State *L){
+    //DPRINTF("%s: start\n", __func__);
 	int argc = lua_gettop(L);
 	if (argc != 2) return luaL_error(L, "wrong number of arguments.(%s:%d)", __FILE__, __LINE__);
 	int pad = luaL_checkinteger(L, 1);

@@ -59,13 +59,12 @@ ifeq ($(EE_SIO),1)
   EE_CFLAGS += -DSIO_PRINTF
 #  EE_OBJS += SIOCookie.o
 endif
-
 BIN2S = $(PS2SDK)/bin/bin2s
 
 #-------------------------- App Content ---------------------------#
 EXT_LIBS = modules/ds34usb/ee/libds34usb.a modules/ds34bt/ee/libds34bt.a
 
-APP_CORE = main.o libcdvd_add.o modelname.o system.o pad.o graphics.o render.o \
+APP_CORE = main.o sioprintf.o libcdvd_add.o modelname.o system.o pad.o graphics.o render.o \
 		   calc_3d.o gsKit3d_sup.o atlas.o fntsys.o md5.o \
 		   libsecr.o baexec-system_paths.o # sound.o 
 
