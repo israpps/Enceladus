@@ -36,9 +36,10 @@ extern "C"{
 #include <hdd-ioctl.h>
 #include <io_common.h>
 
-extern 
-int mnt(const char* path, int index, int openmod); //to mount partition if argv[0] needs it
-
+extern int mnt(const char* path, int index, int openmod); //to mount partition if argv[0] needs it
+#ifdef RESERVE_PFS0
+int bootpath_is_on_HDD = 0;
+#endif
 #define IMPORT_BIN2C(_n)       \
     extern unsigned char _n[]; \
     extern unsigned int size_##_n
@@ -113,6 +114,9 @@ void setLuaBootPath(int argc, char ** argv, int idx)
             if (mnt(MountPoint, 0, FIO_MT_RDWR)==0) //mount the partition
             {
                 strcpy(boot_path, newCWD); // replace boot path with mounted pfs path
+#ifdef RESERVE_PFS0
+                bootpath_is_on_HDD = 1;
+#endif
             }
 
         }

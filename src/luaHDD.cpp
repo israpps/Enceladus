@@ -1,4 +1,3 @@
-
 #include <stdio.h>
 #include <string.h>
 #include <fcntl.h>
@@ -15,13 +14,20 @@
 
 #include "include/dbgprintf.h"
 #include "include/luaplayer.h"
-
+#ifdef RESERVE_PFS0
+extern int bootpath_is_on_HDD;
+#endif
 
 int mnt(const char* path, int index, int openmod);
 
 static int MountPart(lua_State *L)
 {
-    int indx = 0, openmod = FIO_MT_RDWR;
+#ifdef RESERVE_PFS0
+    int indx = 1;
+#else
+    int indx = 0;
+#endif
+    int openmod = FIO_MT_RDWR;
     const char* mount;
     int argc = lua_gettop(L);
 	if (argc > 1 && argc < 4) return luaL_error(L, "%s: wrong number of arguments, expected 1 or 2", __func__); 
@@ -29,7 +35,9 @@ static int MountPart(lua_State *L)
     mount = luaL_checkstring(L, 1);
     if (argc >= 2) indx = luaL_checkinteger(L, 2);
     if (argc == 3) openmod = luaL_checkinteger(L, 3);
-
+#ifdef RESERVE_PFS0
+    if (indx == 0 && bootpath_is_on_HDD) luaL_error(L, "%s: pfs0:/ is reserved\n", __func__);
+#endif
     lua_pushinteger(L, mnt(mount, indx, openmod));
     return 1;
 
