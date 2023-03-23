@@ -81,7 +81,7 @@ static int lua_CheckDamagedPartitions(lua_State *L)
 }
 
 //this function comes from softdev2, alexparrado based this on FreeMcBoot installer.
-int EnableHDDBooting(void)
+static int EnableHDDBooting(lua_State *L)
 {
 	unsigned int OpResult;
     int result;
