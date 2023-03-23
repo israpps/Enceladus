@@ -43,6 +43,56 @@ static int UmountPart(lua_State *L)
     return 1;
 }
 
+static int lua_GetHDDStatus(lua_State *L)
+{
+    lua_pushinteger(L, fileXioDevctl("hdd0:", HDIOC_STATUS, NULL, 0, NULL, 0));
+    return 1;
+}
+
+static int lua_GetHDDSMARTStatus(lua_State *L)
+{
+    lua_pushinteger(L, fileXioDevctl("hdd0:", HDIOC_SMARTSTAT, NULL, 0, NULL, 0));
+    return 1;
+}
+
+static int lua_CheckHDDSectorError(lua_State *L)
+{
+    lua_pushinteger(L, fileXioDevctl("hdd0:", HDIOC_GETSECTORERROR, NULL, 0, NULL, 0));
+    return 1;
+}
+
+static int lua_CheckDamagedPartitions(lua_State *L)
+{
+    char ErrorPartName[64] = "";
+    int ret = fileXioDevctl("hdd0:", HDIOC_GETERRORPARTNAME, NULL, 0, ErrorPartName, sizeof(ErrorPartName));
+    lua_pushinteger(L, ret);
+    lua_pushstring(L, ErrorPartName);
+    return 2;
+}
+
+static const luaL_Reg HDD_functions[] = {
+  	{"MountPartition",    MountPart},
+  	{"UMountPartition",    UmountPart},
+  	{"GetStatus",    lua_GetHDDStatus},
+  	{"GetSMARTStatus",    lua_GetHDDSMARTStatus},
+  	{"CheckSectorError",    lua_CheckHDDSectorError},
+  	{"CheckDamagedPartition",    lua_CheckDamagedPartitions},
+    {0, 0}
+};
+
+void luaHDD_init(lua_State *L) 
+{
+    lua_newtable(L);
+	luaL_setfuncs(L, HDD_functions, 0);
+	lua_setglobal(L, "HDD");
+
+	lua_pushinteger(L, FIO_MT_RDWR);
+	lua_setglobal (L, "FIO_MT_RDWR");
+
+	lua_pushinteger(L, FIO_MT_RDONLY);
+	lua_setglobal (L, "FIO_MT_RDONLY");
+}
+
 int mnt(const char* path, int index, int openmod)
 {
     char PFS[5+1] = "pfs0:";
@@ -66,24 +116,4 @@ int mnt(const char* path, int index, int openmod)
         }
     } else DPRINTF("mount successfull on first attemp\n");
     return 0;
-}
-
-static const luaL_Reg HDD_functions[] = {
-  	{"MountPartition",    MountPart},
-  	{"UMountPartition",    UmountPart},
-    {0, 0}
-};
-
-void luaHDD_init(lua_State *L) 
-{
-
-    lua_newtable(L);
-	luaL_setfuncs(L, HDD_functions, 0);
-	lua_setglobal(L, "HDD");
-
-	lua_pushinteger(L, FIO_MT_RDWR);
-	lua_setglobal (L, "FIO_MT_RDWR");
-
-	lua_pushinteger(L, FIO_MT_RDONLY);
-	lua_setglobal (L, "FIO_MT_RDONLY");
 }
