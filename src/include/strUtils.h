@@ -1,6 +1,9 @@
 #ifndef STRUTILS_H
 #define STRUTILS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 char** str_split(char* a_str, const char a_delim);
 
 
@@ -12,9 +15,13 @@ char** str_split(char* a_str, const char a_delim);
  * @param path input parameter with full hdd path (`hdd0:__common:pfs:/retroarch/`)
  * @param mountString pointer to char* wich will contain pfs mountpoint (`pfs:`)
  * @param mountPoint returns the path of mounted partition (`hdd0:__common`)
- * @param newCWD returns the path to the file as pfs mount point string
+ * @param newCWD returns the path to the file as pfs mount point string (`pfs:/retroarch/`)
  * @return true on success
 */
 int getMountInfo(char *path, char *mountString, char *mountPoint, char *newCWD);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

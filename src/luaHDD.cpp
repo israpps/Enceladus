@@ -60,7 +60,7 @@ int mnt(const char* path, int index, int openmod)
         if (fileXioMount(PFS, path, openmod) < 0)
         {
             DPRINTF("mount failed again!\n");
-            return -4;
+            return -1;
         } else {
             DPRINTF("Second mount succed!\n");
         }

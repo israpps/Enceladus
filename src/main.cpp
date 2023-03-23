@@ -22,6 +22,7 @@
 #include "include/luaplayer.h"
 #include "include/pad.h"
 #include "include/dbgprintf.h"
+#include "include/strUtils.h"
 
 #define NEWLIB_PORT_AWARE
 #include <fileXio_rpc.h>
@@ -35,6 +36,8 @@ extern "C"{
 #include <hdd-ioctl.h>
 #include <io_common.h>
 
+extern 
+int mnt(const char* path, int index, int openmod); //to mount partition if argv[0] needs it
 
 #define IMPORT_BIN2C(_n)       \
     extern unsigned char _n[]; \
@@ -73,6 +76,8 @@ int LoadHDDIRX(void);
 
 void setLuaBootPath(int argc, char ** argv, int idx)
 {
+    char MountPoint[32+6+1]; // max partition name + 'hdd0:/' = '\0' 
+    char newCWD[255];
     if (argc>=(idx+1))
     {
 
@@ -101,8 +106,17 @@ void setLuaBootPath(int argc, char ** argv, int idx)
     {
         strcpy((char *)&boot_path[5],(const char *)&boot_path[6]);
     }
-      
-    
+    if ((strstr(boot_path, "hdd0:") != NULL) && (strstr(boot_path, ":pfs:") != NULL)) // hdd path found
+    {
+        if (getMountInfo(boot_path, NULL, MountPoint, newCWD)) // see if we can parse it
+        {
+            if (mnt(MountPoint, 0, FIO_MT_RDWR)==0) //mount the partition
+            {
+                strcpy(boot_path, newCWD); // replace boot path with mounted pfs path
+            }
+
+        }
+    }
 }
 
 
