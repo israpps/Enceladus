@@ -101,7 +101,7 @@ void setLuaBootPath(int argc, char ** argv, int idx)
 	}
 
     }
-    
+
     // check if path needs patching
     if( !strncmp( boot_path, "mass:/", 6) && (strlen (boot_path)>6))
     {
@@ -131,14 +131,14 @@ void initMC(void)
    int mc_Type, mc_Free, mc_Format;
 
    
-   printf("initMC: Initializing Memory Card\n");
+   DPRINTF("initMC: Initializing Memory Card\n");
 
    ret = mcInit(MC_TYPE_XMC);
    
    if( ret < 0 ) {
-	printf("initMC: failed to initialize memcard server.\n");
+	DPRINTF("initMC: failed to initialize memcard server.\n");
    } else {
-       printf("initMC: memcard server started successfully.\n");
+       DPRINTF("initMC: memcard server started successfully.\n");
    }
    
    // Since this is the first call, -1 should be returned.
@@ -159,7 +159,7 @@ int main(int argc, char * argv[])
     
     DPRINTF_INIT();
     // install sbv patch fix
-    printf("Installing SBV Patches...\n");
+    DPRINTF("Installing SBV Patches...\n");
     sbv_patch_enable_lmb();
     sbv_patch_disable_prefix_check(); 
     sbv_patch_fileio();
@@ -185,7 +185,7 @@ int main(int argc, char * argv[])
     SifExecModuleBuffer(&libsd_irx, size_libsd_irx, 0, NULL, NULL);
 
     // load pad & mc modules 
-    printf("Installing Pad & MC modules...\n");
+    DPRINTF("Installing Pad & MC modules...\n");
 
     // load USB modules    
     SifExecModuleBuffer(&usbd_irx, size_usbd_irx, 0, NULL, NULL);
@@ -247,8 +247,7 @@ int main(int argc, char * argv[])
     // set base path luaplayer
     chdir(boot_path); 
 
-    printf("boot path : %s\n", boot_path);
-	dbgprintf("boot path : %s\n", boot_path);
+    DPRINTF("boot path : %s\n", boot_path);
     
     while (1)
     {

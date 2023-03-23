@@ -1,7 +1,7 @@
 #ifndef DPRINTF_H
 #define DPRINTF_H
 
-#define COMMON_PRINTF
+// #define COMMON_PRINTF
 
 #ifdef __cplusplus
 extern "C" {

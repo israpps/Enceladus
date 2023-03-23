@@ -5,6 +5,7 @@
 #include <stdio.h>
 
 #include "include/sound.h"
+#include "include/dbgprintf.h"
 
 static bool adpcm_started = false;
 static bool audsrv_started = false;
@@ -37,7 +38,7 @@ static bool audsrv_started = false;
 
 	fseek(wav, 0x30, SEEK_SET);
 
-	printf("starting play loop\n");
+	DPRINTF("starting play loop\n");
 	played = 0;
 	bytes = 0;
 	while (1)
@@ -59,7 +60,7 @@ static bool audsrv_started = false;
 
 		if (played % 8 == 0)
 		{
-			printf("\r%d bytes sent..", bytes);
+			DPRINTF("\r%d bytes sent..", bytes);
 		}
 
 		if (played == 512) break;
