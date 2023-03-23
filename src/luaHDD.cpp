@@ -7,6 +7,8 @@
 #include <loadfile.h>
 #include <malloc.h>
 #include <assert.h>
+#include <libcdvd-common.h>
+#include <hdd-ioctl.h>
 #define NEWLIB_PORT_AWARE
 #include <fileXio_rpc.h>
 #include <fileio.h>
@@ -70,6 +72,56 @@ static int lua_CheckDamagedPartitions(lua_State *L)
     return 2;
 }
 
+//this function comes from softdev2, alexparrado based this on FreeMcBoot installer.
+int EnableHDDBooting(void)
+{
+	unsigned int OpResult;
+    int result;
+	unsigned char OSDConfigBuffer[15];
+
+	do
+	{
+		sceCdOpenConfig(0, 0, 1, &OpResult);
+	} while (OpResult & 9);
+
+	do
+	{
+		result = sceCdReadConfig(OSDConfigBuffer, &OpResult);
+	} while (OpResult & 9 || result == 0);
+
+	do
+	{
+		result = sceCdCloseConfig(&OpResult);
+	} while (OpResult & 9 || result == 0);
+
+	if ((OSDConfigBuffer[0] & 3) != 2)
+	{ //If ATAD support and HDD booting are not already activated.
+        DPRINTF("HDDBooting: HDD Boot is disabled, activating...\n");
+		OSDConfigBuffer[0] = (OSDConfigBuffer[0] & ~3) | 2;
+
+		do
+		{
+			sceCdOpenConfig(0, 1, 1, &OpResult);
+		} while (OpResult & 9);
+
+		do
+		{
+			result = sceCdWriteConfig(OSDConfigBuffer, &OpResult);
+		} while (OpResult & 9 || result == 0);
+
+		do
+		{
+			result = sceCdCloseConfig(&OpResult);
+		} while (OpResult & 9 || result == 0);
+
+		result = 0;
+	}
+	else
+		result = 1;
+
+	return result;
+}
+
 static const luaL_Reg HDD_functions[] = {
   	{"MountPartition",    MountPart},
   	{"UMountPartition",    UmountPart},
@@ -77,6 +129,7 @@ static const luaL_Reg HDD_functions[] = {
   	{"GetSMARTStatus",    lua_GetHDDSMARTStatus},
   	{"CheckSectorError",    lua_CheckHDDSectorError},
   	{"CheckDamagedPartition",    lua_CheckDamagedPartitions},
+  	{"EnableHDDBoot",    EnableHDDBooting},
     {0, 0}
 };
 
