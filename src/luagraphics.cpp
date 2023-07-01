@@ -95,7 +95,6 @@ static int lua_ftSetPixelSize(lua_State *L) {
 	return 0;
 }
 
-
 static int lua_ftSetCharSize(lua_State *L) {
 	if (lua_gettop(L) != 3) return luaL_error(L, "wrong number of arguments"); 
 	int fontid = luaL_checkinteger(L, 1);
@@ -128,7 +127,6 @@ static int lua_ftunload(lua_State *L){
 	fntRelease(fontid);
 	return 0;
 }
-
 
 static int lua_ftend(lua_State *L) {
 	int argc = lua_gettop(L);
@@ -211,7 +209,6 @@ static int lua_loadimgasync(lua_State *L){
 	return 0;
 }
 
-
 static int lua_loadimg(lua_State *L) {
 	int argc = lua_gettop(L);
 	if (argc != 1 && argc != 2) return luaL_error(L, "wrong number of arguments");
@@ -285,7 +282,6 @@ static int lua_drawimg_scale(lua_State *L) {
 	return 0;
 }
 
-
 static int lua_drawimg_part(lua_State *L) {
 	int argc = lua_gettop(L);
 	if (argc != 7 && argc != 8) return luaL_error(L, "wrong number of arguments");
@@ -335,7 +331,6 @@ static int lua_width(lua_State *L) {
 	return 1;
 }
 
-
 static int lua_height(lua_State *L) {
 	int argc = lua_gettop(L);
 	if (argc != 1) return luaL_error(L, "wrong number of arguments");
@@ -352,7 +347,6 @@ static int lua_filters(lua_State *L) {
 	return 0;
 }
 
-
 static int lua_rect(lua_State *L) {
 	int argc = lua_gettop(L);
 	if (argc != 5) return luaL_error(L, "wrong number of arguments");
@@ -366,7 +360,6 @@ static int lua_rect(lua_State *L) {
 
 	return 0;
 }
-
 
 static int lua_line(lua_State *L) {
 	int argc = lua_gettop(L);
@@ -460,7 +453,6 @@ static int lua_circle(lua_State *L) {
 	return 0;
 }
 
-
 static int lua_free(lua_State *L) {
 	int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
@@ -488,7 +480,6 @@ static int lua_free(lua_State *L) {
 	return 0;
 }
 
-
 static int lua_getloadstate(lua_State *L){
 	int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
@@ -511,8 +502,20 @@ static int lua_getloaddata(lua_State *L){
 	}else return 0;
 }
 
+static int lua_load_embedded_png(lua_State *L) {
+	int argc = lua_gettop(L);
+	if (argc != 2) return luaL_error(L, "wrong number of arguments");
+    lua_gc(L, LUA_GCCOLLECT, 0);
+	uint8_t* ptr = (uint8_t *)luaL_checkstring(L, 1);
+	size_t siz = luaL_checkinteger(L, 2);
+	GSTEXTURE* image = NULL;
+	image = loadEmbeddedPNG(ptr, siz, true);
+	lua_pushinteger(L, (uint32_t)(image));
+	return 1;
+}
 //Register our Graphics Functions
 static const luaL_Reg Graphics_functions[] = {
+    {"loadImageEmbedded",         lua_load_embedded_png},
   	{"drawPixel",           		   lua_pixel},
   //{"getPixel",            		  lua_gpixel},
   	{"drawRect",           				lua_rect},
