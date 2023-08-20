@@ -107,7 +107,6 @@ static FT_Vector delta;
 #define ALIGN_NONE    (ALIGN_TOP | ALIGN_LEFT)
 #define ALIGN_CENTER  (ALIGN_VCENTER | ALIGN_HCENTER)
 
-
 // a simple maximum of two
 int max(int a, int b)
 {

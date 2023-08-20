@@ -658,6 +658,25 @@ static int lua_getfileprogress(lua_State *L) {
 	return 1;
 }
 
+static int lua_direxists(lua_State *L)
+{
+    int argc = lua_gettop(L);
+    if (argc != 1)
+        return luaL_error(L, "Argument error: lua_direxists takes one argument.");
+    const char *folder = luaL_checkstring(L, 1);
+    DIR *d = opendir(folder);
+    bool ret = false;
+	if (d) 
+    {
+        ret = true;
+        closedir(d);
+    } else {
+        ret = false;
+    }
+    lua_pushboolean(L, ret);
+    return 1;
+}
+
 static const luaL_Reg System_functions[] = {
 	{"openFile",                   lua_openfile},
 	{"readFile",                   lua_readfile},
@@ -666,6 +685,7 @@ static const luaL_Reg System_functions[] = {
 	{"seekFile",                   lua_seekfile},  
 	{"sizeFile",                   lua_sizefile},
 	//{"doesFileExist",            lua_checkexist}, BREAKS ERROR HANDLING IF DECLARED INSIDE TABLE. DONT ASK ME WHY
+    {"doesDirectoryExist",        lua_direxists},
 	{"currentDirectory",             lua_curdir},
 	{"listDirectory",           	    lua_dir},
 	{"createDirectory",           lua_createDir},

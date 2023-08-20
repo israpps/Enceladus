@@ -38,8 +38,8 @@ DEBUG = 0
 PS2LINK_IP = 192.168.1.10
 #------------------------------------------------------------------#
 
-EE_BIN = enceladus.elf
-EE_BIN_PKD = enceladus_pkd.elf
+EE_BIN = bin/enceladus.elf
+EE_BIN_PKD = bin/enceladus_pkd.elf
 
 EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Lmodules/ds34bt/ee/ -Lmodules/ds34usb/ee/ -lpatches -lfileXio -lpad -ldebug -llua -lmath3d -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit -lpng -lz -lmc -laudsrv -lelf-loader -lds34bt -lds34usb
 
@@ -76,7 +76,7 @@ IOP_MODULES = iomanx.o filexio.o \
 			  usbd.o audsrv.o bdm.o bdmfs_fatfs.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o
 
-EMBEDDED_RSC = boot.o
+EMBEDDED_RSC = boot.o builtin_font.o
 
 EE_OBJS = $(IOP_MODULES) $(EMBEDDED_RSC) $(APP_CORE) $(LUA_LIBS)
 
@@ -94,9 +94,7 @@ all: $(EXT_LIBS) $(EE_BIN)
 
 	echo "Compressing $(EE_BIN_PKD)...\n"
 	ps2-packer $(EE_BIN) $(EE_BIN_PKD) > /dev/null
-	
-	mv $(EE_BIN) bin/
-	mv $(EE_BIN_PKD) bin/
+
 #--------------------- Embedded ressources ------------------------#
 
 $(EE_ASM_DIR)boot.s: etc/boot.lua | $(EE_ASM_DIR)
@@ -104,9 +102,13 @@ $(EE_ASM_DIR)boot.s: etc/boot.lua | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ bootString
 
 # Images
-EMBED/%.s: EMBED/%.png
+$(EE_ASM_DIR)%.s: EMBED/%.png
 	$(BIN2S) $< $@ $(shell basename $< .png)
 	echo "Embedding $< Image..."
+
+$(EE_ASM_DIR)%.s: EMBED/%.ttf
+	$(BIN2S) $< $@ $(shell basename $< .ttf)
+	echo "Embedding $< Font..."
 #------------------------------------------------------------------#
 
 
@@ -194,10 +196,10 @@ debug: $(EE_BIN)
 clean:
 
 	@echo "\nCleaning $(EE_BIN)..."
-	rm -f bin/$(EE_BIN)
+	rm -f $(EE_BIN)
 
 	@echo "\nCleaning $(EE_BIN_PKD)..."
-	rm -f bin/$(EE_BIN_PKD)
+	rm -f $(EE_BIN_PKD)
 
 	@echo "Cleaning obj dir"
 	@rm -rf $(EE_OBJS_DIR)
@@ -213,8 +215,11 @@ clean:
 
 rebuild: clean all
 
+pcsx2: all
+	cmd.exe /c pcsx2.bat $(shell wslpath -m $(PWD)/$(EE_BIN))
+
 run:
-	cd bin; ps2client -h $(PS2LINK_IP) execee host:$(EE_BIN)
+	ps2client -h $(PS2LINK_IP) execee host:$(EE_BIN)
        
 reset:
 	ps2client -h $(PS2LINK_IP) reset   

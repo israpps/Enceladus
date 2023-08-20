@@ -1,251 +1,3 @@
---if doesFileExist("lip.lua") then dofile("lip.lua") end
-
-SCR_X = 704
-SCR_Y = 480
-Screen.setMode(_480p, SCR_X, SCR_Y, CT24, INTERLACED, FIELD)
-local BG = Graphics.loadImage("pads/BG.png")
-Graphics.setImageFilters(BG, LINEAR)
-Font.ftInit()
-X_MID = SCR_X/2
-Y_MID = SCR_Y/2
-print("LIP (Lua Ini Parser)\tCopyright (c) 2012 Carreras Nicolas");
-LIP = {};
-
---- Returns a table containing all the data from the INI file.
---@param fileName The name of the INI file to parse. [string]
---@return The table containing all data from the INI file. [table]
-function LIP.load(fileName)
-	local FD = System.openFile(fileName, FREAD);
-    local file = System.readFile(FD, System.sizeFile(FD));
-	local data = {};
-	local section;
-	for line in file:gmatch('[^\n]+') do
-		print(line)
-		local param, value = line:match('^([%w|_]+)%s-=[ ]?%s-(.+)[\r]?$');
-		print(string.format("%s|%s", param, value))
-		if(param ~= nil and value ~= nil)then
-			if(tonumber(value))then
-				value = tonumber(value);
-			elseif(value == 'true')then
-				value = true;
-			elseif(value == 'false')then
-				value = false;
-			end
-			if(tonumber(param))then
-				param = tonumber(param);
-			end
-			data[param] = value;
-		end
-	end
-	System.closeFile(FD)
-	return data;
-end
-
---- Saves all the data from a table to an INI file.
---@param fileName The name of the INI file to fill. [string]
---@param data The table containing all the data to store. [table]
-function LIP.save(fileName, data)
-	local FD = System.openFile(fileName, FCREATE);
-	local contents = '';
-
-	for key, value in pairs(data) do
-		if not key:find('^LK') then contents = contents .. ('%s = %s\n'):format(key, tostring(value)); end
-	end --we iterate this crap twice: first, leave launch keys for the bottom
-	for key, value in pairs(data) do
-		if key:find('^LK') then contents = contents .. ('%s = %s\n'):format(key, tostring(value)); end
-	end
-    System.writeFile(FD, contents, string.len(contents));
-    System.closeFile(FD);
-end
-
-
---local DATA = LIP.load("pads/LOL.ini")
---LIP.save("LOL2.ini", DATA)
-
-_FNT_ = Font.ftLoad("pads/font.ttf")
-_FNT2_ = Font.ftLoad("pads/font.ttf")
-Font.ftSetCharSize(_FNT_, 940, 940)
-Font.ftSetCharSize(_FNT2_, 740, 740)
-fontSmall = _FNT2_
-fontBig = _FNT_
-
-local MAIN_MENU = {
-	item = {
-		"Load Config",
-		"Save Config",
-		"Load defaults",
-		"Configure"
-	},
-	desc = {
-		"Read config from a device",
-		"Save config into a device",
-		"Load the stock config",
-		"Browse the configuration values"
-	},
-}
-local LOAD_CONF = {
-	item = {
-		"mc0:/PS2BBL/CONFIG.INI",
-		"mc0:/PS2BBL/CONFIG.INI",
-		"mass:/PS2BBL/CONFIG.INI",
-		"hdd0:__sysconf/PS2BBL/CONFIG.INI",
-	},
-	desc = {
-		"Read config from Memory Card on slot 1",
-		"Read config from Memory Card on slot 2",
-		"Read config from USB Mass storage",
-		"Read config from Internal HDD",
-	},
-}
-local SAVE_CONF = {
-	item = {
-		"mc0:/PS2BBL/CONFIG.INI",
-		"mc0:/PS2BBL/CONFIG.INI",
-		"mass:/PS2BBL/CONFIG.INI",
-		"hdd0:__sysconf/PS2BBL/CONFIG.INI",
-	},
-	desc = {
-		"Save config into Memory Card on slot 1",
-		"Save config into Memory Card on slot 2",
-		"Save config into USB Mass storage",
-		"Save config into Internal HDD",
-	},
-}
-
-local PS2BBL_CMDS = {
-	item = {
-		"$CDVD",
-		"$CDVD_NO_PS2LOGO",
-		"$CREDITS",
-		"$OSDSYS",
-    "$HDDCHECKER",
-	},
-	desc = {
-		"Makes PS2BBL run a disc",
-		"Makes PS2BBL run a disc. but skipping usage of PS2LOGO (useful for Mechapwn)",
-		"displays credits (duh). and shows compilation date and associated git commit hash",
-		"Executes OSDSYS program (Console main menu).\nbut passing args to avoid booting MC or HDD Updates",
-    "Runs HDD diagnosis tests (only works if PS2BBL has HDD support enabled)"
-	},
-}
-function Drawbar(x, y, prog, col)
-	Graphics.drawRect(x-(prog*2), y, prog*4, 5, col)
-end
---0, 0xde, 0xf
-function DisplayGenerictMOptPrompt(options_t, heading)
-  local T = 1
-  local D = 15
-  local A = 0x80
-  local TSIZE = #options_t.item
-  while true do
-    Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y)
-
-    Font.ftPrint(_FNT_, 40, 40, 0, 630, 32, heading, Color.new(220, 220, 220, 0x80 - A))
-    Graphics.drawRect(0, 60, SCR_X, 1, Color.new(255, 255, 255, 0x70-A))
-    for i = 1, #options_t.item do
-      if i == T then
-        Font.ftPrint(_FNT_, 60+1, 80+(i*20), 0, 630, 16, options_t.item[T], Color.new(0xff, 0xff, 0xff, 0x80 - A))
-      else
-        Font.ftPrint(_FNT_, 60, 80+(i*20), 0, 630, 16, options_t.item[i], Color.new(0xff, 0xff, 0xff, 0x70 - A))
-      end
-    end
-    Graphics.drawRect(0, 330, SCR_X, 1, Color.new(0xff, 0xff, 0xff, 0x80-A))
-    Font.ftPrint(_FNT_, 80, 350, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
-    if A > 0 then A = A - 1 end
-    Screen.flip()
-    local pad = Pads.get()
-
-    if Pads.check(pad, PAD_CROSS) and D == 0 then
-      D = 1
-      Screen.clear()
-      break
-    end
-
-    if Pads.check(pad, PAD_CIRCLE) and D == 0 then
-      T = 0
-      break
-    end
-
-    if Pads.check(pad, PAD_UP) and D == 0 then
-      T = T - 1
-      D = 1
-    elseif Pads.check(pad, PAD_DOWN) and D == 0 then
-      T = T + 1
-      D = 1
-    end
-    if D > 0 then D = D + 1 end
-    if D > 10 then D = 0 end
-    if T < 1 then T = TSIZE end
-    if T > TSIZE then T = 1 end
-  end
-  return T
-end
-function DisplayGenerictMOptPromptDiag(options_t, heading)
-  local T = 1
-  local D = 15
-  local A = 0x80
-  local TSIZE = #options_t.item
-  while true do
-    Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y)
-
-    Graphics.drawRect(0, 81, SCR_X, 349-81, Color.new(0, 0, 0, 20-A))
-    Font.ftPrint(_FNT_, 40, 60, 0, 630, 32, heading, Color.new(220, 220, 220, 0x80 - A))
-    Graphics.drawRect(0, 80, SCR_X, 1, Color.new(255, 255, 255, 0x80-A))
-    Graphics.drawRect(0, 350, SCR_X, 1, Color.new(0xff, 0xff, 0xff, 0x80-A))
-    for i = 1, #options_t.item do
-      if i == T then
-        Font.ftPrint(_FNT_, 60+1, 100+(i*20), 0, 630, 16, options_t.item[T], Color.new(0xff, 0xff, 0xff, 0x80 - A))
-      else
-        Font.ftPrint(_FNT_, 60, 100+(i*20), 0, 630, 16, options_t.item[i], Color.new(0xff, 0xff, 0xff, 0x70 - A))
-      end
-    end
-    Font.ftPrint(_FNT2_, 80, 370, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
-    if A > 0 then A = A - 1 end
-    Screen.flip()
-    local pad = Pads.get()
-
-    if Pads.check(pad, PAD_CROSS) and D == 0 then
-      D = 1
-      Screen.clear()
-      break
-    end
-
-    if Pads.check(pad, PAD_CIRCLE) and D == 0 then
-      T = 0
-      break
-    end
-
-    if Pads.check(pad, PAD_UP) and D == 0 then
-      T = T - 1
-      D = 1
-    elseif Pads.check(pad, PAD_DOWN) and D == 0 then
-      T = T + 1
-      D = 1
-    end
-    if D > 0 then D = D + 1 end
-    if D > 10 then D = 0 end
-    if T < 1 then T = TSIZE end
-    if T > TSIZE then T = 1 end
-  end
-  return T
-end
-DisplayGenerictMOptPromptDiag(PS2BBL_CMDS, "PS2BBL Internal Commands")
-function GenericBGFade(fadein)
-	local A = 0x79
-	if fadein then A = 1 end
-	while A < 0x80 and A > 0 do
-	  Screen.clear()
-	  Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, A))
-	  Screen.flip()
-	  if fadein then A = A+1 else A = A-1 end
-	end
-end
-
-local CURRITEM = 0
-local ret = 0
---
 -- round file size
 function ofmRoundSize(inputValue)
 	roundValue=inputValue*10
@@ -298,8 +50,8 @@ function checkPadUpDown()
 	end
 end
 
--- refresh files list -- directory to list / list files in directory (true) or mount paths (false)
-function refreshFileList(directory, tempmode)
+-- refresh files list
+function refreshFileList(directory, tempmode) -- directory to list / list files in directory (true) or mount paths (false)
 	if tempmode == false then
 		ofmItemTotal = 0
 		ofmSelectedItem = 1
@@ -308,7 +60,7 @@ function refreshFileList(directory, tempmode)
 
 		-- MEMORY CARD 1
 		mctypea = System.getMCInfo(0)
-		if mctypea.type == 2 then
+		if mctypea ~= 0 then
 			ofmItemTotal=ofmItemTotal+1
 			ofmItem[ofmItemTotal] = {};
 			ofmItem[ofmItemTotal].Name = "Memory Card 1" -- displayed name
@@ -319,7 +71,7 @@ function refreshFileList(directory, tempmode)
 
 		-- MEMORY CARD 2
 		mctypeb = System.getMCInfo(1)
-		if mctypeb.type == 2 then
+		if mctypeb ~= 0 then
 			ofmItemTotal=ofmItemTotal+1
 			ofmItem[ofmItemTotal] = {};
 			ofmItem[ofmItemTotal].Name = "Memory Card 2"
@@ -390,7 +142,7 @@ function refreshFileList(directory, tempmode)
 					ofmItem[nr].Dir = ofmItem[nr].Name.."/"
 					ofmItem[nr].Name = ofmItem[nr].Dir
 				else
-					if doesFileExist(directory..ofmItem[nr].Name) then
+					if System.doesFileExist(directory..ofmItem[nr].Name) then
 						ofmItem[nr].Type = "file"
 						ofmItem[nr].Size = listdir[nr].size
 						if ofmItem[nr].Size <= 4096 then
@@ -488,15 +240,15 @@ function listFiles()
 	end
 	for nr = TempC, ofmItemTotalB do
 		TempY=AdjustY+60+nr*25
-		local TMPCOL
-		if nr ~= ofmSelectedItem then TMPCOL = OFM_COLOR_SELECTIONBAR else TMPCOL = OFM_COLOR_LIST end
-		Font.ftPrint(fontBig, 16, TempY, 0, 500, 64, ofmItem[nr].Name, TMPCOL)
-		Font.ftPrint(fontBig, 548, TempY, 0, 500, 64, ofmItem[nr].Size, TMPCOL)
+		Font.ftPrint(fontBig, 16, plusYValue+TempY, 0, 500, 64, ofmItem[nr].Name, OFM_COLOR_LIST)
+		Font.ftPrint(fontBig, 548, plusYValue+TempY, 0, 500, 64, ofmItem[nr].Size, OFM_COLOR_LIST)
 	end
 end
 
 -- drawing selection bar
 function drawSelectionBar()
+	TempYb=AdjustY+68+ofmSelectedItem*25
+	Graphics.drawRect(352, TempYb, 704, 25, OFM_COLOR_SELECTIONBAR)
 end
 
 -- entering selected directory
@@ -539,8 +291,9 @@ end
 
 -- draw overlay
 function drawOFMoverlay()
+	Graphics.drawRect(352, 46, 704, 4, Color.new(255,255,255,128))
+	Graphics.drawRect(352, 74, 704, 4, Color.new(255,255,255,128))
 	Font.ftPrint(fontSmall, 16, plusYValue+51, 0, 704, 64, ofmCurrentPath, OFM_COLOR_LIST)
-    Graphics.drawRect(0, 71, SCR_X, 1, Color.new(255, 255, 255, 0x80))
 end
 
 
@@ -571,7 +324,6 @@ keepInOFMApp=true
 while keepInOFMApp do
     pad = Pads.get()
     Screen.clear()
-	Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, 0x80))
     drawOFMoverlay() -- draws overlay
     if ofmItemTotal >= 1 then
         drawSelectionBar() -- draw selection bar
@@ -602,23 +354,3 @@ end
 ofmFolder=nil
 ofmCurrentPath = ""
 ofmItem=nil
---
-
-
-
-GenericBGFade(true)
-
-while true do
-
-  ret = DisplayGenerictMOptPrompt(MAIN_MENU, "PS2BBL Configurator")
-  if ret == 1 then
-	DisplayGenerictMOptPrompt(LOAD_CONF, MAIN_MENU.item[ret])
-  elseif ret == 2 then
-	DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[ret])
-  elseif ret == 4 then
-	DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[ret])
-  end
-end
-if doesFileExist("pads/pads.lua") then
-	dofile("pads/pads.lua");
-end
