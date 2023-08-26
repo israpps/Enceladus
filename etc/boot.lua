@@ -1,9 +1,8 @@
 --if doesFileExist("lip.lua") then dofile("lip.lua") end
-
 SCR_X = 704
 SCR_Y = 480
 Screen.setMode(_480p, SCR_X, SCR_Y, CT24, INTERLACED, FIELD)
-local BG = Graphics.loadImage("pads/BG.png")
+BG = Graphics.loadImage("pads/BG.png")
 Graphics.setImageFilters(BG, LINEAR)
 Font.ftInit()
 X_MID = SCR_X/2
@@ -142,16 +141,18 @@ function DisplayGenerictMOptPrompt(options_t, heading)
     Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y)
 
     Font.ftPrint(_FNT_, 40, 40, 0, 630, 32, heading, Color.new(220, 220, 220, 0x80 - A))
-    Graphics.drawRect(0, 60, SCR_X, 1, Color.new(255, 255, 255, 0x70-A))
+    Graphics.drawRect(0, 60, SCR_X, 1, Color.new(255, 255, 255, 0x80-A))
     for i = 1, #options_t.item do
       if i == T then
-        Font.ftPrint(_FNT_, 60+1, 80+(i*20), 0, 630, 16, options_t.item[T], Color.new(0xff, 0xff, 0xff, 0x80 - A))
+        Font.ftPrint(_FNT2_, 60+1, 60+(i*20), 0, 630, 16, options_t.item[T], Color.new(0xff, 0xff, 0xff, 0x80 - A))
       else
-        Font.ftPrint(_FNT_, 60, 80+(i*20), 0, 630, 16, options_t.item[i], Color.new(0xff, 0xff, 0xff, 0x70 - A))
+        Font.ftPrint(_FNT2_, 60, 60+(i*20), 0, 630, 16, options_t.item[i], Color.new(0xff, 0xff, 0xff, 0x70 - A))
       end
     end
     Graphics.drawRect(0, 330, SCR_X, 1, Color.new(0xff, 0xff, 0xff, 0x80-A))
-    Font.ftPrint(_FNT_, 80, 350, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
+    if options_t.desc ~= nil then
+      Font.ftPrint(_FNT2_, 80, 350, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
+    end
     if A > 0 then A = A - 1 end
     Screen.flip()
     local pad = Pads.get()
@@ -196,12 +197,14 @@ function DisplayGenerictMOptPromptDiag(options_t, heading)
     Graphics.drawRect(0, 350, SCR_X, 1, Color.new(0xff, 0xff, 0xff, 0x80-A))
     for i = 1, #options_t.item do
       if i == T then
-        Font.ftPrint(_FNT_, 60+1, 100+(i*20), 0, 630, 16, options_t.item[T], Color.new(0xff, 0xff, 0xff, 0x80 - A))
+        Font.ftPrint(_FNT2_, 60+1, 70+(i*20), 0, 630, 16, options_t.item[i], Color.new(0xff, 0xff, 0xff, 0x80 - A))
       else
-        Font.ftPrint(_FNT_, 60, 100+(i*20), 0, 630, 16, options_t.item[i], Color.new(0xff, 0xff, 0xff, 0x70 - A))
+        Font.ftPrint(_FNT2_, 60, 70+(i*20), 0, 630, 16, options_t.item[i], Color.new(0xff, 0xff, 0xff, 0x70 - A))
       end
     end
-    Font.ftPrint(_FNT2_, 80, 370, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
+    if options_t.desc ~= nil then
+      Font.ftPrint(_FNT2_, 80, 370, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
+    end
     if A > 0 then A = A - 1 end
     Screen.flip()
     local pad = Pads.get()
@@ -231,7 +234,7 @@ function DisplayGenerictMOptPromptDiag(options_t, heading)
   end
   return T
 end
-DisplayGenerictMOptPromptDiag(PS2BBL_CMDS, "PS2BBL Internal Commands")
+
 function GenericBGFade(fadein)
 	local A = 0x79
 	if fadein then A = 1 end
@@ -242,12 +245,39 @@ function GenericBGFade(fadein)
 	  if fadein then A = A+1 else A = A-1 end
 	end
 end
-
 local CURRITEM = 0
 local ret = 0
+PADBUTTONS = {"L1", "L2", "R1", "R2", "UP", "TRIANGLE", "LEFT", "RIGHT", "SELECT", "START", "SQUARE", "CIRCLE", "DOWN", "CROSS", "L3", "AUTO", "R3"}
+PADATTEMPT = {1, 2, 3}
+
+PS2BBL_MAIN_CONFIG = {
+  SKIP_PS2LOGO = true,
+  KEY_READ_WAIT_TIME = 4000,
+  OSDHISTORY_READ = true,
+  EJECT_TRAY = true,
+  keys = {}
+}
+PS2BBL_MAIN_CONFIG.keys[1] = {}
+PS2BBL_MAIN_CONFIG.keys[2] = {}
+PS2BBL_MAIN_CONFIG.keys[3] = {}
+for i = 1, #PADBUTTONS do
+  for x = 1, 3, 1 do
+    local T = string.format("LK_%s_E%d\n", PADBUTTONS[i], PADATTEMPT[x])
+    table.insert(PS2BBL_MAIN_CONFIG.keys[i], T)
+  end
+end
+
+dofile("pads/pads.lua");
+cfgt = {}
+cfgt.item = {}
+cfgt.item = PADBUTTONS
+
+DisplayGenerictMOptPrompt(cfgt, "Launch Keys")
+
 --
 -- round file size
-function ofmRoundSize(inputValue)
+local OFM = {}
+function OFM.ofmRoundSize(inputValue)
 	roundValue=inputValue*10
 	roundTempValueA,roundTempValueB = math.modf(roundValue/1)
 	roundValue= 1 * (roundTempValueA + (roundTempValueB > 0.5 and 1 or 0))
@@ -255,10 +285,8 @@ function ofmRoundSize(inputValue)
 	return roundValue
 end
 
-ofmScrollDelay=4
-ofmWaitBeforeScroll=14
 -- check pad up/down
-function checkPadUpDown()
+function OFM.checkPadUpDown()
 	if Pads.check(pad, PAD_UP) then
 		PadUpHolding=PadUpHolding+1
 	else
@@ -270,39 +298,39 @@ function checkPadUpDown()
 		PadDownHolding=0
 	end
 	if PadUpHolding == 1 then
-		ofmSelectedItem = ofmSelectedItem - 1
-	elseif PadUpHolding >= ofmWaitBeforeScroll then
+		OFM.ofmSelectedItem = OFM.ofmSelectedItem - 1
+	elseif PadUpHolding >= OFM.ofmWaitBeforeScroll then
 		for nr = 2, 512 do
-			nra = nr*ofmScrollDelay
+			nra = nr*OFM.ofmScrollDelay
 			if PadUpHolding == nra then
-				ofmSelectedItem = ofmSelectedItem - 1
+				OFM.ofmSelectedItem = OFM.ofmSelectedItem - 1
 			end
 		end
 	end
 	if PadDownHolding == 1 then
-		ofmSelectedItem = ofmSelectedItem + 1
-	elseif PadDownHolding >= ofmWaitBeforeScroll then
+		OFM.ofmSelectedItem = OFM.ofmSelectedItem + 1
+	elseif PadDownHolding >= OFM.ofmWaitBeforeScroll then
 		for nr = 2, 512 do
-			nra = nr*ofmScrollDelay
+			nra = nr*OFM.ofmScrollDelay
 			if PadDownHolding == nra then
-				ofmSelectedItem = ofmSelectedItem + 1
+				OFM.ofmSelectedItem = OFM.ofmSelectedItem + 1
 			end
 		end
 	end
 
-	if ofmSelectedItem <= 0 then
-		ofmSelectedItem = 1
+	if OFM.ofmSelectedItem <= 0 then
+		OFM.ofmSelectedItem = 1
 	end
-	if ofmSelectedItem > ofmItemTotal then
-		ofmSelectedItem = ofmItemTotal
+	if OFM.ofmSelectedItem > ofmItemTotal then
+		OFM.ofmSelectedItem = ofmItemTotal
 	end
 end
 
 -- refresh files list -- directory to list / list files in directory (true) or mount paths (false)
-function refreshFileList(directory, tempmode)
+function OFM.refreshFileList(directory, tempmode)
 	if tempmode == false then
 		ofmItemTotal = 0
-		ofmSelectedItem = 1
+		OFM.ofmSelectedItem = 1
 		ofmItem = nil;
 		ofmItem = {};
 
@@ -369,7 +397,7 @@ function refreshFileList(directory, tempmode)
 		end
 	else
 		ofmItemTotal=1
-		ofmSelectedItem=1
+		OFM.ofmSelectedItem=1
 		listdir = nil
 		listdir = System.listDirectory(directory)
 		ofmItemTotal = #listdir
@@ -394,15 +422,15 @@ function refreshFileList(directory, tempmode)
 						ofmItem[nr].Type = "file"
 						ofmItem[nr].Size = listdir[nr].size
 						if ofmItem[nr].Size <= 4096 then
-							ofmItem[nr].Size = ofmRoundSize(ofmItem[nr].Size)
+							ofmItem[nr].Size = OFM.ofmRoundSize(ofmItem[nr].Size)
 							ofmItem[nr].Size = ofmItem[nr].Size.." B"
 						elseif ofmItem[nr].Size >= 4096 and ofmItem[nr].Size <= 1048576 then
 							ofmItem[nr].Size = ofmItem[nr].Size / 1024
-							ofmItem[nr].Size = ofmRoundSize(ofmItem[nr].Size)
+							ofmItem[nr].Size = OFM.ofmRoundSize(ofmItem[nr].Size)
 							ofmItem[nr].Size = ofmItem[nr].Size.." KB"
 						elseif ofmItem[nr].Size >= 1048576 then
 							ofmItem[nr].Size = ofmItem[nr].Size / 1048576
-							ofmItem[nr].Size = ofmRoundSize(ofmItem[nr].Size)
+							ofmItem[nr].Size = OFM.ofmRoundSize(ofmItem[nr].Size)
 							ofmItem[nr].Size = ofmItem[nr].Size.." MB"
 						end
 					else
@@ -453,158 +481,146 @@ function refreshFileList(directory, tempmode)
 end
 
 -- displaying list of files
-function listFiles()
-	AdjustY = 0
-	if ofmSelectedItem < 15 then
-		ofmItemTotalB=ofmSelectedItem+24
+function OFM.listFiles()
+	OFM.AdjustY = 0
+	if OFM.ofmSelectedItem < 15 then
+		ofmItemTotalB=OFM.ofmSelectedItem+24
 		if ofmItemTotalB > ofmItemTotal then
 			ofmItemTotalB = ofmItemTotal
 		end
 	else
-		ofmItemTotalB=ofmSelectedItem+6
+		ofmItemTotalB=OFM.ofmSelectedItem+6
 		if ofmItemTotalB > ofmItemTotal then
 			ofmItemTotalB = ofmItemTotal
 		end
 	end
 	if ofmItemTotal > 15 then
-		if ofmSelectedItem >= 14 then
-			TempA = ofmSelectedItem - 14
+		if OFM.ofmSelectedItem >= 14 then
+			TempA = OFM.ofmSelectedItem - 14
 			TempB = -25
-			AdjustY = TempA*TempB
+			OFM.AdjustY = TempA*TempB
 		end
-		if ofmSelectedItem >= 14 and ofmSelectedItem == ofmItemTotal then
-			TempA = ofmSelectedItem - 15
+		if OFM.ofmSelectedItem >= 14 and OFM.ofmSelectedItem == ofmItemTotal then
+			TempA = OFM.ofmSelectedItem - 15
 			TempB = -25
-			AdjustY = TempA*TempB
+			OFM.AdjustY = TempA*TempB
 		end
 	end
 	TempC = 1
 	if ofmItemTotal > 15 then
-		if ofmSelectedItem == ofmItemTotal and ofmSelectedItem > 14 then
-			TempC = ofmSelectedItem-14
-		elseif ofmSelectedItem > 13 then
-			TempC = ofmSelectedItem-13
+		if OFM.ofmSelectedItem == ofmItemTotal and OFM.ofmSelectedItem > 14 then
+			TempC = OFM.ofmSelectedItem-14
+		elseif OFM.ofmSelectedItem > 13 then
+			TempC = OFM.ofmSelectedItem-13
 		end
 	end
 	for nr = TempC, ofmItemTotalB do
-		TempY=AdjustY+60+nr*25
+		TempY=OFM.AdjustY+60+nr*25
 		local TMPCOL
-		if nr ~= ofmSelectedItem then TMPCOL = OFM_COLOR_SELECTIONBAR else TMPCOL = OFM_COLOR_LIST end
+		if nr ~= OFM.ofmSelectedItem then TMPCOL = OFM.COLOR_SELECTIONBAR else TMPCOL = OFM.COLOR_LIST end
 		Font.ftPrint(fontBig, 16, TempY, 0, 500, 64, ofmItem[nr].Name, TMPCOL)
 		Font.ftPrint(fontBig, 548, TempY, 0, 500, 64, ofmItem[nr].Size, TMPCOL)
 	end
 end
 
--- drawing selection bar
-function drawSelectionBar()
-end
-
 -- entering selected directory
-function enterSelectedDirectory()
-	if ofmItem[ofmSelectedItem].Name ~= "." and ofmItem[ofmSelectedItem].Name ~= ".." then
-		if System.doesDirectoryExist(ofmCurrentPath..ofmItem[ofmSelectedItem].Dir) then
-			ofmFolder[0] = ofmFolder[0]+1
-			ofmFolder[ofmFolder[0]] = ofmItem[ofmSelectedItem].Dir
-			ofmCurrentPath = ""
-			for i = 1, ofmFolder[0] do
-				ofmCurrentPath=ofmCurrentPath..ofmFolder[i]
+function OFM.enterSelectedDirectory()
+	if ofmItem[OFM.ofmSelectedItem].Name ~= "." and ofmItem[OFM.ofmSelectedItem].Name ~= ".." then
+		if System.doesDirectoryExist(OFM.ofmCurrentPath..ofmItem[OFM.ofmSelectedItem].Dir) then
+			OFM.ofmFolder[0] = OFM.ofmFolder[0]+1
+			OFM.ofmFolder[OFM.ofmFolder[0]] = ofmItem[OFM.ofmSelectedItem].Dir
+			OFM.ofmCurrentPath = ""
+			for i = 1, OFM.ofmFolder[0] do
+				OFM.ofmCurrentPath=OFM.ofmCurrentPath..OFM.ofmFolder[i]
 			end
-			refreshFileList(ofmCurrentPath, true)
+			OFM.refreshFileList(OFM.ofmCurrentPath, true)
 		end
 	end
 end
 
 -- go back from selected directory
-function goBackFromDirectory()
-	if ofmFolder[0] == 1 then
-		ofmFolder[0] = 0
-		ofmFolder[1] = ""
-		ofmCurrentPath=""
-		refreshFileList(ofmCurrentPath, false)
+function OFM.goBackFromDirectory()
+	if OFM.ofmFolder[0] == 1 then
+		OFM.ofmFolder[0] = 0
+		OFM.ofmFolder[1] = ""
+		OFM.ofmCurrentPath=""
+		OFM.refreshFileList(OFM.ofmCurrentPath, false)
 	else
-		ofmFolder[ofmFolder[0]] = ""
-		ofmFolder[0] = ofmFolder[0]-1
-		ofmCurrentPath = ""
-        for i = 1, ofmFolder[0] do
-            ofmCurrentPath=ofmCurrentPath..ofmFolder[i]
+		OFM.ofmFolder[OFM.ofmFolder[0]] = ""
+		OFM.ofmFolder[0] = OFM.ofmFolder[0]-1
+		OFM.ofmCurrentPath = ""
+        for i = 1, OFM.ofmFolder[0] do
+            OFM.ofmCurrentPath=OFM.ofmCurrentPath..OFM.ofmFolder[i]
         end
-		refreshFileList(ofmCurrentPath, true)
+		OFM.refreshFileList(OFM.ofmCurrentPath, true)
 		for i = 1, #ofmItem do
-			if ofmItem[i].Dir == ofmFolder[ofmFolder[0]] then
-				ofmSelectedItem = i
+			if ofmItem[i].Dir == OFM.ofmFolder[OFM.ofmFolder[0]] then
+				OFM.ofmSelectedItem = i
 			end
 		end
     end
 end
 
 -- draw overlay
-function drawOFMoverlay()
-	Font.ftPrint(fontSmall, 16, plusYValue+51, 0, 704, 64, ofmCurrentPath, OFM_COLOR_LIST)
+function OFM.drawOFMoverlay()
+	Font.ftPrint(fontSmall, 16, plusYValue+51, 0, 704, 64, OFM.ofmCurrentPath, OFM.COLOR_LIST)
     Graphics.drawRect(0, 71, SCR_X, 1, Color.new(255, 255, 255, 0x80))
 end
 
-
-OFM_COLOR_LIST=Color.new(255,255,255,128)
-OFM_COLOR_SELECTIONBAR=Color.new(255,255,255,40)
-
-
-if plusYValue == nil then
-	plusYValue=0
+function OFM.setup()
+  OFM.ofmScrollDelay=4
+  OFM.ofmWaitBeforeScroll=14
+  OFM.COLOR_LIST=Color.new(255,255,255,128)
+  OFM.COLOR_SELECTIONBAR=Color.new(255,255,255,40)
+  OFM.ofmCurrentPath = ""
+  OFM.refreshFileList("", false)
+  OFM.ofmSelectedItem=1
+  OFM.ofmFolder={}
+  OFM.ofmFolder[0]=0
+  OFM.AdjustY=0
+  OFM.keepInOFMApp=true
+  if plusYValue == nil then plusYValue=0 end
 end
 
-ofmCurrentPath = ""
-refreshFileList("", false)
-ofmSelectedItem=1
+function OFM._start()
+  OFM.keepInOFMApp=true
+  while OFM.keepInOFMApp do
+      pad = Pads.get()
+      Screen.clear()
+  	Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, 0x80))
+      OFM.drawOFMoverlay() -- draws overlay
+      if ofmItemTotal >= 1 then
+  		  OFM.checkPadUpDown() -- check up/down buttons
+      end
+  	OFM.listFiles() -- print list of items
+      if Pads.check(pad, PAD_CROSS) and not Pads.check(oldpad, PAD_CROSS) then
+          -- enter directory
+          if ofmItem[OFM.ofmSelectedItem].Type == "folder" then
+              OFM.enterSelectedDirectory()
+          end
+      end
+      if Pads.check(pad, PAD_CIRCLE) and not Pads.check(oldpad, PAD_CIRCLE) then
+          if OFM.ofmFolder[0] >= 1 then
+              OFM.goBackFromDirectory()
+          else
+              OFM.keepInOFMApp=false
+          end
+      end
+      if Pads.check(pad, PAD_TRIANGLE) and not Pads.check(oldpad, PAD_TRIANGLE) then
+          OFM.keepInOFMApp=false
+      end
+      Screen.waitVblankStart()
+      oldpad = pad;
+      Screen.flip()
+  end
 
-ofmFolder={}
-ofmFolder[0]=0
-
-AdjustY=0
-
-keepInOFMApp=true
-
-
----------------------------------------------------------
---------- FILE MANAGER ----------------------------------
----------------------------------------------------------
-
-while keepInOFMApp do
-    pad = Pads.get()
-    Screen.clear()
-	Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, 0x80))
-    drawOFMoverlay() -- draws overlay
-    if ofmItemTotal >= 1 then
-        drawSelectionBar() -- draw selection bar
-		checkPadUpDown() -- check up/down buttons
-    end
-	listFiles() -- print list of items
-    if Pads.check(pad, PAD_CROSS) and not Pads.check(oldpad, PAD_CROSS) then
-        -- enter directory
-        if ofmItem[ofmSelectedItem].Type == "folder" then
-            enterSelectedDirectory()
-        end
-    end
-    if Pads.check(pad, PAD_CIRCLE) and not Pads.check(oldpad, PAD_CIRCLE) then
-        if ofmFolder[0] >= 1 then
-            goBackFromDirectory()
-        else
-            keepInOFMApp=false
-        end
-    end
-    if Pads.check(pad, PAD_TRIANGLE) and not Pads.check(oldpad, PAD_TRIANGLE) then
-        keepInOFMApp=false
-    end
-    Screen.waitVblankStart()
-    oldpad = pad;
-    Screen.flip()
+  OFM.ofmFolder=nil
+  OFM.ofmCurrentPath = ""
+  ofmItem=nil
 end
-
-ofmFolder=nil
-ofmCurrentPath = ""
-ofmItem=nil
 --
-
-
+OFM.setup()
+OFM._start()
 
 GenericBGFade(true)
 
