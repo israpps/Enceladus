@@ -1,12 +1,32 @@
 --if doesFileExist("lip.lua") then dofile("lip.lua") end
 SCR_X = 704
 SCR_Y = 480
+X_MID = SCR_X/2
+Y_MID = SCR_Y/2
 Screen.setMode(_480p, SCR_X, SCR_Y, CT24, INTERLACED, FIELD)
 BG = Graphics.loadImage("pads/BG.png")
 Graphics.setImageFilters(BG, LINEAR)
 Font.ftInit()
-X_MID = SCR_X/2
-Y_MID = SCR_Y/2
+pad = 0
+PADBUTTONS = {"L1", "L2", "R1", "R2", "UP", "TRIANGLE", "LEFT", "RIGHT", "SELECT", "START", "SQUARE", "CIRCLE", "DOWN", "CROSS", "L3", "AUTO", "R3"}
+PADATTEMPT = {1, 2, 3}
+
+PS2BBL_MAIN_CONFIG = {
+  SKIP_PS2LOGO = true,
+  KEY_READ_WAIT_TIME = 4000,
+  OSDHISTORY_READ = true,
+  EJECT_TRAY = true,
+  keys = {}
+}
+for i = 1, #PADBUTTONS do
+  PS2BBL_MAIN_CONFIG.keys[i] = {}
+  for x = 1, 3, 1 do
+    local T = string.format("LK_%s_E%d\n", PADBUTTONS[i], PADATTEMPT[x])
+    PS2BBL_MAIN_CONFIG.keys[i][x] = T
+  end
+end
+
+
 print("LIP (Lua Ini Parser)\tCopyright (c) 2012 Carreras Nicolas");
 LIP = {};
 
@@ -15,25 +35,36 @@ LIP = {};
 --@return The table containing all data from the INI file. [table]
 function LIP.load(fileName)
 	local FD = System.openFile(fileName, FREAD);
-    local file = System.readFile(FD, System.sizeFile(FD));
+  local file = System.readFile(FD, System.sizeFile(FD));
 	local data = {};
-	local section;
 	for line in file:gmatch('[^\n]+') do
-		print(line)
 		local param, value = line:match('^([%w|_]+)%s-=[ ]?%s-(.+)[\r]?$');
-		print(string.format("%s|%s", param, value))
 		if(param ~= nil and value ~= nil)then
-			if(tonumber(value))then
-				value = tonumber(value);
-			elseif(value == 'true')then
-				value = true;
-			elseif(value == 'false')then
-				value = false;
+			if param:find("^LK_.*_E[123]")then
+        for i = 1, #PADBUTTONS do
+          local tmp = "^LK_"..PADBUTTONS[i]
+          if param:find(tmp) then
+            for x = 1, 3, 1 do
+              if param ==  string.format("LK_%s_E%d\n", PADBUTTONS[i], PADATTEMPT[x]) then
+                PS2BBL_MAIN_CONFIG.keys[i][x] = value
+                goto BRK
+              else
+                print(string.format("Unknown Launch KEY (%s = %s)\n", param, value))
+              end
+            end
+          end
+        end
+        ::BRK::
+      else
+			  if(tonumber(value))then
+			  	value = tonumber(value);
+			  elseif(value == 'true')then
+			  	value = true;
+			  elseif(value == 'false')then
+			  	value = false;
+			  end
+        data[param] = value;
 			end
-			if(tonumber(param))then
-				param = tonumber(param);
-			end
-			data[param] = value;
 		end
 	end
 	System.closeFile(FD)
@@ -110,7 +141,6 @@ local SAVE_CONF = {
 		"Save config into Internal HDD",
 	},
 }
-
 local PS2BBL_CMDS = {
 	item = {
 		"$CDVD",
@@ -155,7 +185,7 @@ function DisplayGenerictMOptPrompt(options_t, heading)
     end
     if A > 0 then A = A - 1 end
     Screen.flip()
-    local pad = Pads.get()
+    pad = Pads.get()
 
     if Pads.check(pad, PAD_CROSS) and D == 0 then
       D = 1
@@ -182,19 +212,20 @@ function DisplayGenerictMOptPrompt(options_t, heading)
   end
   return T
 end
-function DisplayGenerictMOptPromptDiag(options_t, heading)
+function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback)
   local T = 1
   local D = 15
   local A = 0x80
+  pad = 0
   local TSIZE = #options_t.item
   while true do
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y)
-
-    Graphics.drawRect(0, 81, SCR_X, 349-81, Color.new(0, 0, 0, 20-A))
+	  if draw_callback ~= nil then draw_callback(0) end
+    Graphics.drawRect(0, 81, SCR_X, 379-81, Color.new(0, 0, 0, 20-A))
     Font.ftPrint(_FNT_, 40, 60, 0, 630, 32, heading, Color.new(220, 220, 220, 0x80 - A))
     Graphics.drawRect(0, 80, SCR_X, 1, Color.new(255, 255, 255, 0x80-A))
-    Graphics.drawRect(0, 350, SCR_X, 1, Color.new(0xff, 0xff, 0xff, 0x80-A))
+    Graphics.drawRect(0, 380, SCR_X, 1, Color.new(0xff, 0xff, 0xff, 0x80-A))
     for i = 1, #options_t.item do
       if i == T then
         Font.ftPrint(_FNT2_, 60+1, 70+(i*20), 0, 630, 16, options_t.item[i], Color.new(0xff, 0xff, 0xff, 0x80 - A))
@@ -205,9 +236,12 @@ function DisplayGenerictMOptPromptDiag(options_t, heading)
     if options_t.desc ~= nil then
       Font.ftPrint(_FNT2_, 80, 370, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
     end
-    if A > 0 then A = A - 1 end
+    if A > 0 then
+		A = A - 1
+	else
+		pad = Pads.get()
+	end
     Screen.flip()
-    local pad = Pads.get()
 
     if Pads.check(pad, PAD_CROSS) and D == 0 then
       D = 1
@@ -247,36 +281,16 @@ function GenericBGFade(fadein)
 end
 local CURRITEM = 0
 local ret = 0
-PADBUTTONS = {"L1", "L2", "R1", "R2", "UP", "TRIANGLE", "LEFT", "RIGHT", "SELECT", "START", "SQUARE", "CIRCLE", "DOWN", "CROSS", "L3", "AUTO", "R3"}
-PADATTEMPT = {1, 2, 3}
 
-PS2BBL_MAIN_CONFIG = {
-  SKIP_PS2LOGO = true,
-  KEY_READ_WAIT_TIME = 4000,
-  OSDHISTORY_READ = true,
-  EJECT_TRAY = true,
-  keys = {}
-}
-PS2BBL_MAIN_CONFIG.keys[1] = {}
-PS2BBL_MAIN_CONFIG.keys[2] = {}
-PS2BBL_MAIN_CONFIG.keys[3] = {}
-for i = 1, #PADBUTTONS do
-  for x = 1, 3, 1 do
-    local T = string.format("LK_%s_E%d\n", PADBUTTONS[i], PADATTEMPT[x])
-    table.insert(PS2BBL_MAIN_CONFIG.keys[i], T)
-  end
-end
 
-dofile("pads/pads.lua");
 cfgt = {}
 cfgt.item = {}
 cfgt.item = PADBUTTONS
 
-DisplayGenerictMOptPrompt(cfgt, "Launch Keys")
 
 --
 -- round file size
-local OFM = {}
+OFM = {}
 function OFM.ofmRoundSize(inputValue)
 	roundValue=inputValue*10
 	roundTempValueA,roundTempValueB = math.modf(roundValue/1)
@@ -583,12 +597,13 @@ function OFM.setup()
 end
 
 function OFM._start()
+  local ret = nil
   OFM.keepInOFMApp=true
   while OFM.keepInOFMApp do
-      pad = Pads.get()
-      Screen.clear()
+    pad = Pads.get()
+    Screen.clear()
   	Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, 0x80))
-      OFM.drawOFMoverlay() -- draws overlay
+    OFM.drawOFMoverlay() -- draws overlay
       if ofmItemTotal >= 1 then
   		  OFM.checkPadUpDown() -- check up/down buttons
       end
@@ -597,6 +612,9 @@ function OFM._start()
           -- enter directory
           if ofmItem[OFM.ofmSelectedItem].Type == "folder" then
               OFM.enterSelectedDirectory()
+          else
+            ret = OFM.ofmCurrentPath..ofmItem[OFM.ofmSelectedItem].Name
+            goto GETLOST
           end
       end
       if Pads.check(pad, PAD_CIRCLE) and not Pads.check(oldpad, PAD_CIRCLE) then
@@ -613,15 +631,17 @@ function OFM._start()
       oldpad = pad;
       Screen.flip()
   end
-
+  ::GETLOST::
   OFM.ofmFolder=nil
   OFM.ofmCurrentPath = ""
   ofmItem=nil
+  return ret
 end
 --
 OFM.setup()
 OFM._start()
 
+dofile("pads/pads.lua");
 GenericBGFade(true)
 
 while true do
