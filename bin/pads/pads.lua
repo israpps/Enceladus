@@ -128,10 +128,16 @@ function DrawOnScreenDualshock(P)
     Graphics.drawScaleImage(l3, X_MID-112, Y_MID+60, 64, 64, Color.new(128, 128, 128, 60))
   end
 
-  if P == 17 then
-    Graphics.drawScaleImage(r3, X_MID+16+32, Y_MID+60, 64, 64)
+  if P == 16 then
+    Font.ftPrint(fontSmall, X_MID, Y_MID+82, 8, 500, 64, "AUTO")
   else
-    Graphics.drawScaleImage(r3, X_MID+16+32, Y_MID+60, 64, 64, Color.new(128, 128, 128, 60))
+    Font.ftPrint(fontSmall, X_MID, Y_MID+82, 8, 500, 64, "AUTO", Color.new(128, 128, 128, 60))
+  end
+
+  if P == 17 then
+    Graphics.drawScaleImage(r3, X_MID+48, Y_MID+60, 64, 64)
+  else
+    Graphics.drawScaleImage(r3, X_MID+48, Y_MID+60, 64, 64, Color.new(128, 128, 128, 60))
   end
 end
 

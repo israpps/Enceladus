@@ -642,13 +642,10 @@ function OFM._start()
   ofmItem=nil
   return ret
 end
---
-OFM._start()
+
 GenericBGFade(true)
 
---dofile("pads/pads.lua");
-GenericBGFade(true)
-
+dofile("pads/pads.lua");
 while true do
   ret = DisplayGenerictMOptPrompt(MAIN_MENU, "PS2BBL Configurator")
   if ret == 1 then
