@@ -21,7 +21,7 @@ PS2BBL_MAIN_CONFIG = {
 for i = 1, #PADBUTTONS do
   PS2BBL_MAIN_CONFIG.keys[i] = {}
   for x = 1, 3, 1 do
-    local T = string.format("LK_%s_E%d\n", PADBUTTONS[i], PADATTEMPT[x])
+    local T = string.format("sample LK_%s_E%d\n", PADBUTTONS[i], PADATTEMPT[x])
     PS2BBL_MAIN_CONFIG.keys[i][x] = T
   end
 end
@@ -237,10 +237,10 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback)
       Font.ftPrint(_FNT2_, 80, 370, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
     end
     if A > 0 then
-		A = A - 1
-	else
-		pad = Pads.get()
-	end
+		  A = A - 1
+	  else
+		  pad = Pads.get()
+	  end
     Screen.flip()
 
     if Pads.check(pad, PAD_CROSS) and D == 0 then
@@ -581,7 +581,7 @@ function OFM.drawOFMoverlay()
     Graphics.drawRect(0, 71, SCR_X, 1, Color.new(255, 255, 255, 0x80))
 end
 
-function OFM.setup()
+function OFM._start()
   OFM.ofmScrollDelay=4
   OFM.ofmWaitBeforeScroll=14
   OFM.COLOR_LIST=Color.new(255,255,255,128)
@@ -594,9 +594,6 @@ function OFM.setup()
   OFM.AdjustY=0
   OFM.keepInOFMApp=true
   if plusYValue == nil then plusYValue=0 end
-end
-
-function OFM._start()
   local ret = nil
   OFM.keepInOFMApp=true
   while OFM.keepInOFMApp do
@@ -638,8 +635,7 @@ function OFM._start()
   return ret
 end
 --
-OFM.setup()
-OFM._start()
+GenericBGFade(true)
 
 dofile("pads/pads.lua");
 GenericBGFade(true)
