@@ -11,23 +11,25 @@ pad = 0
 PADBUTTONS = {"L1", "L2", "R1", "R2", "UP", "TRIANGLE", "LEFT", "RIGHT", "SELECT", "START", "SQUARE", "CIRCLE", "DOWN", "CROSS", "L3", "AUTO", "R3"}
 PADATTEMPT = {1, 2, 3}
 
-PS2BBL_MAIN_CONFIG = {
-  SKIP_PS2LOGO = true,
-  KEY_READ_WAIT_TIME = 4000,
-  OSDHISTORY_READ = true,
-  EJECT_TRAY = true,
-  keys = {}
-}
-for i = 1, #PADBUTTONS do
-  PS2BBL_MAIN_CONFIG.keys[i] = {}
-  for x = 1, 3, 1 do
-    local T = string.format("sample LK_%s_E%d\n", PADBUTTONS[i], PADATTEMPT[x])
-    PS2BBL_MAIN_CONFIG.keys[i][x] = T
+
+function new_config_struct()
+  local T = {
+    keys = {},
+    config = {},
+  }
+  for i = 1, #PADBUTTONS do
+    T.keys[i] = {}
+    for x = 1, 3, 1 do
+      T.keys[i][x] = nil
+    end
   end
+  return T
 end
 
+PS2BBL_MAIN_CONFIG = new_config_struct()
 
-print("LIP (Lua Ini Parser)\tCopyright (c) 2012 Carreras Nicolas");
+
+print("LIP (Lua Ini Parser)\tCopyright (c) 2012 Carreras Nicolas. modified by El_isra for PS2BBL Usage");
 LIP = {};
 
 --- Returns a table containing all the data from the INI file.
@@ -36,24 +38,23 @@ LIP = {};
 function LIP.load(fileName)
 	local FD = System.openFile(fileName, FREAD);
   local file = System.readFile(FD, System.sizeFile(FD));
-	local data = {};
+	local data = new_config_struct()
 	for line in file:gmatch('[^\n]+') do
-		local param, value = line:match('^([%w|_]+)%s-=[ ]?%s-(.+)[\r]?$');
+		local param, value = line:match('^([%w|_]+)%s-=[ ]?%s-(.+)[\r\n]');
+    -- TODO: CLEANUP --print(string.format("- '%s' = '%s'", param, value))
 		if(param ~= nil and value ~= nil)then
-			if param:find("^LK_.*_E[123]")then
+			if param:find("^LK_.*_E[123]")then --Launch keys are special case. handle them as a structure, not as data pairs....
         for i = 1, #PADBUTTONS do
-          local tmp = "^LK_"..PADBUTTONS[i]
-          if param:find(tmp) then
+          if param:find("^LK_"..PADBUTTONS[i]) then
             for x = 1, 3, 1 do
-              if param ==  string.format("LK_%s_E%d\n", PADBUTTONS[i], PADATTEMPT[x]) then
-                PS2BBL_MAIN_CONFIG.keys[i][x] = value
+              if param == string.format("LK_%s_E%d", PADBUTTONS[i], PADATTEMPT[x]) then
+                data.keys[i][x] = value
                 goto BRK
-              else
-                print(string.format("Unknown Launch KEY (%s = %s)\n", param, value))
               end
             end
           end
         end
+        print(string.format("Unknown Launch KEY ('%s' = '%s')", param, value))
         ::BRK::
       else
 			  if(tonumber(value))then
@@ -63,7 +64,7 @@ function LIP.load(fileName)
 			  elseif(value == 'false')then
 			  	value = false;
 			  end
-        data[param] = value;
+        data.config[param] = value;
 			end
 		end
 	end
@@ -76,21 +77,26 @@ end
 --@param data The table containing all the data to store. [table]
 function LIP.save(fileName, data)
 	local FD = System.openFile(fileName, FCREATE);
-	local contents = '';
+	local contents = "";
 
-	for key, value in pairs(data) do
-		if not key:find('^LK') then contents = contents .. ('%s = %s\n'):format(key, tostring(value)); end
+	for key, value in pairs(data.config) do
+		contents = contents .. ('%s = %s\n'):format(key, tostring(value))
 	end --we iterate this crap twice: first, leave launch keys for the bottom
-	for key, value in pairs(data) do
-		if key:find('^LK') then contents = contents .. ('%s = %s\n'):format(key, tostring(value)); end
-	end
+  contents = contents.."\n"
+  for i = 1, #PADBUTTONS do
+    for x = 1, 3, 1 do
+      if data.keys[i][x] ~= nil then
+        contents = contents .. ('LK_%s_E%d = %s\n'):format(PADBUTTONS[i], x, data.keys[i][x])
+      end
+    end
+  end
     System.writeFile(FD, contents, string.len(contents));
     System.closeFile(FD);
 end
 
 
---local DATA = LIP.load("pads/LOL.ini")
---LIP.save("LOL2.ini", DATA)
+PS2BBL_MAIN_CONFIG = LIP.load("pads/LOL.ini")
+--LIP.save("LOL2.ini", PS2BBL_MAIN_CONFIG)
 
 _FNT_ = Font.ftLoad("pads/font.ttf")
 _FNT2_ = Font.ftLoad("pads/font.ttf")
@@ -619,10 +625,12 @@ function OFM._start()
               OFM.goBackFromDirectory()
           else
               OFM.keepInOFMApp=false
+              ret = nil
           end
       end
       if Pads.check(pad, PAD_TRIANGLE) and not Pads.check(oldpad, PAD_TRIANGLE) then
           OFM.keepInOFMApp=false
+          ret = nil
       end
       Screen.waitVblankStart()
       oldpad = pad;
@@ -635,13 +643,13 @@ function OFM._start()
   return ret
 end
 --
+OFM._start()
 GenericBGFade(true)
 
-dofile("pads/pads.lua");
+--dofile("pads/pads.lua");
 GenericBGFade(true)
 
 while true do
-
   ret = DisplayGenerictMOptPrompt(MAIN_MENU, "PS2BBL Configurator")
   if ret == 1 then
 	DisplayGenerictMOptPrompt(LOAD_CONF, MAIN_MENU.item[ret])

@@ -178,11 +178,16 @@ function KeyConfigDialog()
           item = {}
         }
         for x = 1, 3, 1 do
-          DLG.item[x] = PS2BBL_MAIN_CONFIG.keys[P][x]
+          if PS2BBL_MAIN_CONFIG.keys[P][x] == nil or PS2BBL_MAIN_CONFIG.keys[P][x] == "" then
+            DLG.item[x] = "<not set>"
+          else
+            DLG.item[x] = PS2BBL_MAIN_CONFIG.keys[P][x]
+          end
         end
         local A = DisplayGenerictMOptPromptDiag(DLG, PADBUTTONS[P], DrawOnScreenDualshock)
         if A > 0 then
-          print(OFM._start())
+          local VAL = OFM._start()
+          if VAL == nil or VAL == "" then else PS2BBL_MAIN_CONFIG.keys[P][A] = VAL end
         end
         D = 1
         pad = 0
