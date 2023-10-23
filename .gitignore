@@ -1,6 +1,7 @@
 
 .vscode/launch.json
 *.ttf
+!bin/*.ttf
 *.bak
 *.otf
 bin/img/bg0.png

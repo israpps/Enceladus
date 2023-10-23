@@ -645,7 +645,6 @@ end
 
 GenericBGFade(true)
 
-dofile("pads/pads.lua");
 while true do
   ret = DisplayGenerictMOptPrompt(MAIN_MENU, "PS2BBL Configurator")
   if ret == 1 then
@@ -653,7 +652,7 @@ while true do
   elseif ret == 2 then
 	DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[ret])
   elseif ret == 4 then
-	DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[ret])
+    dofile("pads/pads.lua");
   end
 end
 if doesFileExist("pads/pads.lua") then
