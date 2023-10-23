@@ -265,6 +265,11 @@ Enceladus uses the latest version of Lua language (currently 5.4.3), which means
 * `audio = Sound.loadADPCM(path)`
 * `Sound.playADPCM(channel, audio)`
 
+#### **BDM Management functions:**
+
+* `mass_index = BDM.GetDeviceByType(BD, iter_start, iter_end)`: search a block device by type. `BD`: device ID, `start`/`end`: mass index iteration range. negative return value means error. else, it returned the mass index of the first block device of the specified type.
+* `bd_type = BDM.GetDeviceType(mass_index)`: returns the block device type for the specified mass index
+
 ## Contributing
 
 Contributions are what make the open source community such an amazing place to be learn, inspire, and create. Any contributions you make are **greatly appreciated**.

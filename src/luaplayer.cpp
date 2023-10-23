@@ -83,6 +83,7 @@ const char * runScript(const char* script, bool isStringBuffer )
 #ifdef F_Render
     luaRender_init(L);
 #endif
+	luaBDMUtils_init(L);
     	
     printf("done !\n");
 

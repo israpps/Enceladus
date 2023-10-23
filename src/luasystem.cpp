@@ -672,6 +672,7 @@ static int lua_direxists(lua_State *L)
     return 1;
 }
 
+
 static const luaL_Reg System_functions[] = {
 	{"openFile",                   lua_openfile},
 	{"readFile",                   lua_readfile},
@@ -793,9 +794,5 @@ void luaSystem_init(lua_State *L) {
 
 	lua_pushinteger(L, 2);
 	lua_setglobal(L, "READ_WRITE");
-
-
-
-	
 }
 

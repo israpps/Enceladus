@@ -59,6 +59,10 @@ ifeq ($(RESET_IOP),1)
 GLOBAL_CFLAGS += -DRESET_IOP
 endif
 
+ifeq ($(FORCE_FILEXIO_LOAD),1)
+EE_CXXFLAGS += -DFORCE_FILEXIO_LOAD
+endif
+
 ifeq ($(DEBUG),1)
  $(info --- debugging enabled)
  GLOBAL_CFLAGS += -DDEBUG -O0 -g
@@ -76,7 +80,7 @@ APP_CORE = main.o system.o pad.o graphics.o \
 		   atlas.o fntsys.o
 
 LUA_LIBS =	luaplayer.o luasystem.o luacontrols.o \
-			luatimer.o luaScreen.o luagraphics.o
+			luatimer.o luaScreen.o luagraphics.o luaBDM.o
 
 IOP_MODULES = iomanx.o filexio.o \
 			  sio2man.o mcman.o mcserv.o padman.o \

@@ -160,17 +160,16 @@ int main(int argc, char * argv[])
 
 	DIR *directorytoverify;
 	directorytoverify = opendir("host:.");
-	if(directorytoverify==NULL){
+#ifndef FORCE_FILEXIO_LOAD
+    if(directorytoverify==NULL){
+#endif
 		SifExecModuleBuffer(&iomanX_irx, size_iomanX_irx, 0, NULL, NULL);
 		SifExecModuleBuffer(&fileXio_irx, size_fileXio_irx, 0, NULL, NULL);
-	}
-	SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, NULL, NULL);
-	if(directorytoverify==NULL){
-		fileXioInit();
-	}
-	if(directorytoverify!=NULL){
 		closedir(directorytoverify);
+#ifndef FORCE_FILEXIO_LOAD
 	}
+#endif
+	SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, NULL, NULL);
     SifExecModuleBuffer(&mcman_irx, size_mcman_irx, 0, NULL, NULL);
     SifExecModuleBuffer(&mcserv_irx, size_mcserv_irx, 0, NULL, NULL);
     initMC();
