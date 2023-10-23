@@ -54,6 +54,10 @@ ifeq ($(RESET_IOP),1)
 EE_CXXFLAGS += -DRESET_IOP
 endif
 
+ifeq ($(FORCE_FILEXIO_LOAD),1)
+EE_CXXFLAGS += -DFORCE_FILEXIO_LOAD
+endif
+
 ifeq ($(DEBUG),1)
 EE_CXXFLAGS += -DDEBUG
 endif
@@ -69,7 +73,7 @@ APP_CORE = main.o system.o pad.o graphics.o render.o \
 
 LUA_LIBS =	luaplayer.o luasound.o luacontrols.o \
 			luatimer.o luaScreen.o luagraphics.o \
-			luasystem.o luaRender.o
+			luasystem.o luaRender.o luaBDM.o
 
 IOP_MODULES = iomanx.o filexio.o \
 			  sio2man.o mcman.o mcserv.o padman.o libsd.o \
