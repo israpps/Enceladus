@@ -11,6 +11,24 @@ pad = 0
 PADBUTTONS = {"L1", "L2", "R1", "R2", "UP", "TRIANGLE", "LEFT", "RIGHT", "SELECT", "START", "SQUARE", "CIRCLE", "DOWN", "CROSS", "L3", "AUTO", "R3"}
 PADATTEMPT = {1, 2, 3}
 
+function Font.ftPrintMultiLineAligned(font, x, y, spacing, width, height, text, color)
+	local internal_y = y
+	for line in text:gmatch("([^\n]*)\n?") do
+	  Font.ftPrint(font, x, internal_y, 8, width, height, line, color)
+	  internal_y = internal_y+spacing
+	end
+end
+
+function OnScreenError(STR)
+  print(STR)
+  Screen.clear()
+  Font.ftPrint(_FNT_, X_MID, 40, 8, 630, 32, "ERROR", Color.new(220, 220, 220, 0x80))
+  Graphics.drawRect(0, 60, SCR_X, 1, Color.new(255, 0, 0, 0x80))
+  Font.ftPrintMultiLineAligned(_FNT_, X_MID, 90, 8, 630, 32, STR,  Color.new(220, 0, 0, 0x80))
+  Graphics.drawRect(0, 330, SCR_X, 1, Color.new(0xff, 0, 0, 0x80))
+  Screen.flip()
+  while true do end
+end
 
 function new_config_struct()
   local T = {
@@ -73,8 +91,8 @@ function LIP.load(fileName)
 end
 
 --- Saves all the data from a table to an INI file.
---@param fileName The name of the INI file to fill. [string]
---@param data The table containing all the data to store. [table]
+---@param fileName string The name of the INI file to fill. [string]
+---@param data table The table containing all the data to store. [table]
 function LIP.save(fileName, data)
 	local FD = System.openFile(fileName, FCREATE);
 	local contents = "";
@@ -147,7 +165,7 @@ local SAVE_CONF = {
 		"Save config into Internal HDD",
 	},
 }
-local PS2BBL_CMDS = {
+PS2BBL_CMDS = {
 	item = {
 		"$CDVD",
 		"$CDVD_NO_PS2LOGO",
@@ -228,7 +246,7 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback)
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y)
 	  if draw_callback ~= nil then draw_callback(0) end
-    Graphics.drawRect(0, 81, SCR_X, 379-81, Color.new(0, 0, 0, 20-A))
+    Graphics.drawRect(0, 81, SCR_X, 379-81, Color.new(0, 0, 0, 50-A))
     Font.ftPrint(_FNT_, 40, 60, 0, 630, 32, heading, Color.new(220, 220, 220, 0x80 - A))
     Graphics.drawRect(0, 80, SCR_X, 1, Color.new(255, 255, 255, 0x80-A))
     Graphics.drawRect(0, 380, SCR_X, 1, Color.new(0xff, 0xff, 0xff, 0x80-A))
@@ -249,7 +267,7 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback)
 	  end
     Screen.flip()
 
-    if Pads.check(pad, PAD_CROSS) and D == 0 then
+    if (Pads.check(pad, PAD_CROSS) or Pads.check(pad, PAD_TRIANGLE) or Pads.check(pad, PAD_SQUARE)) and D == 0 then
       D = 1
       Screen.clear()
       break
@@ -272,7 +290,7 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback)
     if T < 1 then T = TSIZE end
     if T > TSIZE then T = 1 end
   end
-  return T
+  return T, pad
 end
 
 function GenericBGFade(fadein)
@@ -652,9 +670,8 @@ while true do
   elseif ret == 2 then
 	DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[ret])
   elseif ret == 4 then
-    dofile("pads/pads.lua");
+    local A, ERR = dofile_protected("pads/pads.lua");
+	  if not A then OnScreenError(ERR) end
   end
 end
-if doesFileExist("pads/pads.lua") then
-	dofile("pads/pads.lua");
-end
+

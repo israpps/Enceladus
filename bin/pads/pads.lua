@@ -190,9 +190,18 @@ function KeyConfigDialog()
             DLG.item[x] = PS2BBL_MAIN_CONFIG.keys[P][x]
           end
         end
-        local A = DisplayGenerictMOptPromptDiag(DLG, PADBUTTONS[P], DrawOnScreenDualshock)
+        local A
+        local keyy 
+        A, keyy= DisplayGenerictMOptPromptDiag(DLG, PADBUTTONS[P], DrawOnScreenDualshock)
         if A > 0 then
-          local VAL = OFM._start()
+          local VAL = nil
+          if Pads.check(keyy, PAD_CROSS) or Pads.check(keyy, PAD_SQUARE) then
+            VAL = OFM._start()
+            if VAL ~= nil and Pads.check(keyy, PAD_SQUARE) and (VAL:sub(0, 2)=="mc") then VAL = "mc?"..VAL:sub(4) end
+          elseif Pads.check(keyy, PAD_TRIANGLE) then
+            local T = DisplayGenerictMOptPrompt(PS2BBL_CMDS, "Commands")
+            if T > 0 then VAL = PS2BBL_CMDS.item[T] end
+          end
           if VAL == nil or VAL == "" then else PS2BBL_MAIN_CONFIG.keys[P][A] = VAL end
         end
         D = 1
@@ -207,5 +216,4 @@ function KeyConfigDialog()
   end
   
 end
-
 KeyConfigDialog()
