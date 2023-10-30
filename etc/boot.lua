@@ -133,9 +133,13 @@ end
 
 PS2BBL_MAIN_CONFIG = LIP.load("pads/LOL.ini")
 --LIP.save("LOL2.ini", PS2BBL_MAIN_CONFIG)
-
+--[[
 _FNT_ = Font.ftLoad("pads/font.ttf")
 _FNT2_ = Font.ftLoad("pads/font.ttf")
+]]
+_FNT_ = Font.LoadBuiltinFont()
+_FNT2_ = Font.LoadBuiltinFont()
+
 Font.ftSetCharSize(_FNT_, 940, 940)
 Font.ftSetCharSize(_FNT2_, 740, 740)
 fontSmall = _FNT2_
