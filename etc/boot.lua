@@ -11,6 +11,7 @@ pad = 0
 PADBUTTONS = {"L1", "L2", "R1", "R2", "UP", "TRIANGLE", "LEFT", "RIGHT", "SELECT", "START", "SQUARE", "CIRCLE", "DOWN", "CROSS", "L3", "AUTO", "R3"}
 PADATTEMPT = {1, 2, 3}
 
+
 function Font.ftPrintMultiLineAligned(font, x, y, spacing, width, height, text, color)
 	local internal_y = y
 	for line in text:gmatch("([^\n]*)\n?") do
@@ -662,7 +663,11 @@ function OFM._start()
 end
 
 GenericBGFade(true)
-
+function call_script(SCRIPT)
+    local A, ERR = dofile_protected(SCRIPT);
+	if not A then OnScreenError(ERR) end
+end
+call_script("pads/pads.lua")
 while true do
   ret = DisplayGenerictMOptPrompt(MAIN_MENU, "PS2BBL Configurator")
   if ret == 1 then
@@ -670,8 +675,7 @@ while true do
   elseif ret == 2 then
 	DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[ret])
   elseif ret == 4 then
-    local A, ERR = dofile_protected("pads/pads.lua");
-	  if not A then OnScreenError(ERR) end
+    call_script("pads/pads.lua")
   end
 end
 

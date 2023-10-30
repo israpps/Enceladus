@@ -37,6 +37,19 @@ Graphics.setImageFilters(l2, NEAREST)
 Graphics.setImageFilters(l3, NEAREST)
 Graphics.setImageFilters(r3, NEAREST)
 
+function DrawUsableKeys(FLAGS)
+  Graphics.drawScaleImage(cross, 30, SCR_Y-30, 32, 32)
+  Font.ftPrint(_FNT2_, 60, SCR_Y-25, 0, 630, 16, "OK", Color.new(0xff, 0xff, 0xff, 0x80))
+
+  Graphics.drawScaleImage(circle, 30, SCR_Y-60, 32, 32)
+  Font.ftPrint(_FNT2_, 60, SCR_Y-55, 0, 630, 16, "Cancel", Color.new(0xff, 0xff, 0xff, 0x80))
+end
+Screen.clear()
+Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y)
+DrawUsableKeys()
+Screen.flip()
+--while true do end
+
 function DrawOnScreenDualshock(P)
   if P == 9 then
     Graphics.drawScaleImage(pad_select, X_MID-64, Y_MID-16, 32, 32)
@@ -158,6 +171,7 @@ function KeyConfigDialog()
     Screen.clear()
     Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y)
     DrawOnScreenDualshock(P)
+    DrawUsableKeys()
     pad = Pads.get()
     if D == 0 then
       D = 1

@@ -81,7 +81,7 @@ const char * runScript(const char* script, bool isStringBuffer )
     luaRender_init(L);
     	
     printf("done !\n");
-     
+
 	if(!isStringBuffer){
         printf("Loading script : `%s'\n", script);
 	}
