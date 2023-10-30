@@ -1,17 +1,6 @@
 
 
-function DrawUsableKeys(FLAGS)
-  Graphics.drawScaleImage(RES.cross, 30, SCR_Y-30, 32, 32)
-  Font.ftPrint(_FNT2_, 60, SCR_Y-25, 0, 630, 16, "OK", Color.new(0xff, 0xff, 0xff, 0x80))
 
-  Graphics.drawScaleImage(RES.circle, 30, SCR_Y-60, 32, 32)
-  Font.ftPrint(_FNT2_, 60, SCR_Y-55, 0, 630, 16, "Cancel", Color.new(0xff, 0xff, 0xff, 0x80))
-end
-Screen.clear()
-Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
-DrawUsableKeys()
-Screen.flip()
---while true do end
 
 function DrawOnScreenDualshock(P)
   if P == 9 then
@@ -134,7 +123,8 @@ function KeyConfigDialog()
     Screen.clear()
     Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
     DrawOnScreenDualshock(P)
-    DrawUsableKeys()
+    DrawUsableKeys(DUK_CIRCLE|DUK_CROSS, 0x70)
+    Screen.flip()
     pad = Pads.get()
     if D == 0 then
       D = 1
@@ -169,7 +159,7 @@ function KeyConfigDialog()
         end
         local A
         local keyy 
-        A, keyy= DisplayGenerictMOptPromptDiag(DLG, PADBUTTONS[P], DrawOnScreenDualshock)
+        A, keyy= DisplayGenerictMOptPromptDiag(DLG, PADBUTTONS[P], DrawOnScreenDualshock, DUK_CROSS|DUK_CIRCLE|DUK_TRIANGLE|DUK_SQUARE)
         if A > 0 then
           local VAL = nil
           if Pads.check(keyy, PAD_CROSS) or Pads.check(keyy, PAD_SQUARE) then
@@ -186,7 +176,6 @@ function KeyConfigDialog()
       end
     end
 
-    Screen.flip()
     if D > 0 then D = D + 1 end
     if D > 7 then D = 0 end
     --Screen.waitVblankStart()

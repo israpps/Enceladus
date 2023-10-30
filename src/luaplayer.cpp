@@ -69,7 +69,7 @@ const char * runScript(const char* script, bool isStringBuffer )
 	  luaL_openlibs(L);
 
     printf("Loading libs... ");
-    lua_atpanic(L, test_error);
+    //lua_atpanic(L, test_error);
 
 	  // init graphics
     luaGraphics_init(L);
@@ -98,7 +98,6 @@ const char * runScript(const char* script, bool isStringBuffer )
     s = luaL_loadbuffer(L, script, strlen(script), NULL);
   }
 
-		
 	if (s == 0) s = lua_pcall(L, 0, LUA_MULTRET, 0);
 
 	if (s) {

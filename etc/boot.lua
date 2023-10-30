@@ -24,10 +24,16 @@ Graphics.setImageFilters(RES.L2, NEAREST)
 Graphics.setImageFilters(RES.L3, NEAREST)
 Graphics.setImageFilters(RES.R3, NEAREST)
 Font.ftInit()
+_FNT_ = Font.LoadBuiltinFont()
+_FNT2_ = Font.LoadBuiltinFont()
+
+Font.ftSetCharSize(_FNT_, 940, 940)
+Font.ftSetCharSize(_FNT2_, 740, 740)
+fontSmall = _FNT2_
+fontBig = _FNT_
 pad = 0
 PADBUTTONS = {"L1", "L2", "R1", "R2", "UP", "TRIANGLE", "LEFT", "RIGHT", "SELECT", "START", "SQUARE", "CIRCLE", "DOWN", "CROSS", "L3", "AUTO", "R3"}
 PADATTEMPT = {1, 2, 3}
-
 
 function Font.ftPrintMultiLineAligned(font, x, y, spacing, width, height, text, color)
 	local internal_y = y
@@ -130,6 +136,34 @@ function LIP.save(fileName, data)
     System.closeFile(FD);
 end
 
+DUK_CROSS = (1 << 0)
+DUK_CIRCLE = (1 << 1)
+DUK_TRIANGLE = (1 << 2)
+DUK_TRIANGLE_CMD = (1 << 3)|DUK_TRIANGLE
+DUK_CIRCLE_GOBACK = (1 << 4)|DUK_CIRCLE
+DUK_SQUARE = (1 << 5)
+function DrawUsableKeys(FLAGS, alfa)
+	if alfa == nil then alfa = 0x80 end
+	if (FLAGS & DUK_CROSS) ~= 0 then
+		Graphics.drawScaleImage(RES.cross, 30, SCR_Y-35, 32, 32)
+		Font.ftPrint(_FNT2_, 60, SCR_Y-30, 0, 630, 16, "OK", Color.new(0xff, 0xff, 0xff, alfa))
+	end
+	if (FLAGS & DUK_CIRCLE) ~= 0 then
+		local MSG = FLAGS & DUK_CIRCLE_GOBACK and "Cancel" or "Go Back"
+		Graphics.drawScaleImage(RES.circle, 30, SCR_Y-60, 32, 32)
+		Font.ftPrint(_FNT2_, 60, SCR_Y-55, 0, 630, 16, MSG, Color.new(0xff, 0xff, 0xff, alfa))
+	end
+	if (FLAGS & DUK_TRIANGLE) ~= 0 then
+		local MSG = FLAGS & DUK_TRIANGLE_CMD and "Assign command" or "Quit"
+		Graphics.drawScaleImage(RES.triangle, SCR_X-30, SCR_Y-60, 32, 32)
+		Font.ftPrint(_FNT2_, SCR_X-60-(MSG:len()*5), SCR_Y-55, 4, 630, 16, MSG, Color.new(0xff, 0xff, 0xff, alfa))
+	end
+	if (FLAGS & DUK_SQUARE) ~= 0 then
+		local MSG = "Map to mc?:"
+		Graphics.drawScaleImage(RES.square, SCR_X-30, SCR_Y-35, 32, 32)
+		Font.ftPrint(_FNT2_, SCR_X-60-(MSG:len()*5), SCR_Y-30, 4, 630, 16, MSG, Color.new(0xff, 0xff, 0xff, alfa))
+	end
+end
 
 PS2BBL_MAIN_CONFIG = LIP.load("pads/LOL.ini")
 --LIP.save("LOL2.ini", PS2BBL_MAIN_CONFIG)
@@ -137,13 +171,6 @@ PS2BBL_MAIN_CONFIG = LIP.load("pads/LOL.ini")
 _FNT_ = Font.ftLoad("pads/font.ttf")
 _FNT2_ = Font.ftLoad("pads/font.ttf")
 ]]
-_FNT_ = Font.LoadBuiltinFont()
-_FNT2_ = Font.LoadBuiltinFont()
-
-Font.ftSetCharSize(_FNT_, 940, 940)
-Font.ftSetCharSize(_FNT2_, 740, 740)
-fontSmall = _FNT2_
-fontBig = _FNT_
 
 local MAIN_MENU = {
 	item = {
@@ -229,6 +256,7 @@ function DisplayGenerictMOptPrompt(options_t, heading)
     if options_t.desc ~= nil then
       Font.ftPrint(_FNT2_, 80, 350, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
     end
+	DrawUsableKeys(DUK_CIRCLE|DUK_CROSS)
     if A > 0 then A = A - 1 end
     Screen.flip()
     pad = Pads.get()
@@ -258,7 +286,7 @@ function DisplayGenerictMOptPrompt(options_t, heading)
   end
   return T
 end
-function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback)
+function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback, AVAILPADS)
   local T = 1
   local D = 15
   local A = 0x80
@@ -282,6 +310,7 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback)
     if options_t.desc ~= nil then
       Font.ftPrint(_FNT2_, 80, 370, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
     end
+	DrawUsableKeys(AVAILPADS)
     if A > 0 then
 		  A = A - 1
 	  else
@@ -289,7 +318,10 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback)
 	  end
     Screen.flip()
 
-    if (Pads.check(pad, PAD_CROSS) or Pads.check(pad, PAD_TRIANGLE) or Pads.check(pad, PAD_SQUARE)) and D == 0 then
+    if (Pads.check(pad, PAD_CROSS) or
+		(Pads.check(pad, PAD_TRIANGLE) and AVAILPADS&DUK_TRIANGLE) or
+		(Pads.check(pad, PAD_SQUARE) and AVAILPADS&DUK_SQUARE)) and D == 0 
+	then
       D = 1
       Screen.clear()
       break
@@ -688,7 +720,7 @@ function call_script(SCRIPT)
     local A, ERR = dofile_protected(SCRIPT);
 	if not A then OnScreenError(ERR) end
 end
-call_script("pads/pads.lua")
+
 while true do
   ret = DisplayGenerictMOptPrompt(MAIN_MENU, "PS2BBL Configurator")
   if ret == 1 then
