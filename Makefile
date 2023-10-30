@@ -76,8 +76,8 @@ IOP_MODULES = iomanx.o filexio.o \
 			  usbd.o audsrv.o bdm.o bdmfs_fatfs.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o
 
-EMBEDDED_RSC = boot.o
-
+EMBEDDED_RSC = boot.o \
+	BG.o circle.o cross.o down.o L1.o L2.o L3.o left.o R1.o R2.o R3.o right.o select.o square.o start.o triangle.o up.o
 EE_OBJS = $(IOP_MODULES) $(EMBEDDED_RSC) $(APP_CORE) $(LUA_LIBS)
 
 EE_OBJS_DIR = obj/
