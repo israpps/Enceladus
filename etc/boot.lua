@@ -4,8 +4,25 @@ SCR_Y = 480
 X_MID = SCR_X/2
 Y_MID = SCR_Y/2
 Screen.setMode(_480p, SCR_X, SCR_Y, CT24, INTERLACED, FIELD)
-BG = Graphics.loadImage("pads/BG.png")
-Graphics.setImageFilters(BG, LINEAR)
+RES = {}
+RES = Graphics.loadEmbeddedAssets()
+Graphics.setImageFilters(RES.BG, LINEAR)
+Graphics.setImageFilters(RES.circle, NEAREST)
+Graphics.setImageFilters(RES.cross, NEAREST)
+Graphics.setImageFilters(RES.square, NEAREST)
+Graphics.setImageFilters(RES.triangle, NEAREST)
+Graphics.setImageFilters(RES.up, NEAREST)
+Graphics.setImageFilters(RES.down, NEAREST)
+Graphics.setImageFilters(RES.left, NEAREST)
+Graphics.setImageFilters(RES.right, NEAREST)
+Graphics.setImageFilters(RES.start, NEAREST)
+Graphics.setImageFilters(RES.select, NEAREST)
+Graphics.setImageFilters(RES.R1, NEAREST)
+Graphics.setImageFilters(RES.R2, NEAREST)
+Graphics.setImageFilters(RES.L1, NEAREST)
+Graphics.setImageFilters(RES.L2, NEAREST)
+Graphics.setImageFilters(RES.L3, NEAREST)
+Graphics.setImageFilters(RES.R3, NEAREST)
 Font.ftInit()
 pad = 0
 PADBUTTONS = {"L1", "L2", "R1", "R2", "UP", "TRIANGLE", "LEFT", "RIGHT", "SELECT", "START", "SQUARE", "CIRCLE", "DOWN", "CROSS", "L3", "AUTO", "R3"}
@@ -193,7 +210,7 @@ function DisplayGenerictMOptPrompt(options_t, heading)
   local TSIZE = #options_t.item
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y)
+    Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
 
     Font.ftPrint(_FNT_, 40, 40, 0, 630, 32, heading, Color.new(220, 220, 220, 0x80 - A))
     Graphics.drawRect(0, 60, SCR_X, 1, Color.new(255, 255, 255, 0x80-A))
@@ -245,7 +262,7 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback)
   local TSIZE = #options_t.item
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y)
+    Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
 	  if draw_callback ~= nil then draw_callback(0) end
     Graphics.drawRect(0, 81, SCR_X, 379-81, Color.new(0, 0, 0, 50-A))
     Font.ftPrint(_FNT_, 40, 60, 0, 630, 32, heading, Color.new(220, 220, 220, 0x80 - A))
@@ -299,7 +316,7 @@ function GenericBGFade(fadein)
 	if fadein then A = 1 end
 	while A < 0x80 and A > 0 do
 	  Screen.clear()
-	  Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, A))
+	  Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, A))
 	  Screen.flip()
 	  if fadein then A = A+1 else A = A-1 end
 	end
@@ -624,7 +641,7 @@ function OFM._start()
   while OFM.keepInOFMApp do
     pad = Pads.get()
     Screen.clear()
-  	Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, 0x80))
+  	Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, 0x80))
     OFM.drawOFMoverlay() -- draws overlay
       if ofmItemTotal >= 1 then
   		  OFM.checkPadUpDown() -- check up/down buttons

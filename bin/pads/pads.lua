@@ -1,144 +1,107 @@
-local circle = Graphics.loadImage("pads/circle.png")
-local cross = Graphics.loadImage("pads/cross.png")
-local square = Graphics.loadImage("pads/square.png")
-local triangle = Graphics.loadImage("pads/triangle.png")
 
-local up = Graphics.loadImage("pads/up.png")
-local down = Graphics.loadImage("pads/down.png")
-local left = Graphics.loadImage("pads/left.png")
-local right = Graphics.loadImage("pads/right.png")
-
-local start = Graphics.loadImage("pads/start.png")
-local pad_select = Graphics.loadImage("pads/select.png")
-
-local r1 = Graphics.loadImage("pads/R1.png")
-local r2 = Graphics.loadImage("pads/R2.png")
-
-local l1 = Graphics.loadImage("pads/L1.png")
-local l2 = Graphics.loadImage("pads/L2.png")
-
-local l3 = Graphics.loadImage("pads/L3.png")
-local r3 = Graphics.loadImage("pads/R3.png")
-
-Graphics.setImageFilters(circle, NEAREST)
-Graphics.setImageFilters(cross, NEAREST)
-Graphics.setImageFilters(square, NEAREST)
-Graphics.setImageFilters(triangle, NEAREST)
-Graphics.setImageFilters(up, NEAREST)
-Graphics.setImageFilters(down, NEAREST)
-Graphics.setImageFilters(left, NEAREST)
-Graphics.setImageFilters(right, NEAREST)
-Graphics.setImageFilters(start, NEAREST)
-Graphics.setImageFilters(pad_select, NEAREST)
-Graphics.setImageFilters(r1, NEAREST)
-Graphics.setImageFilters(r2, NEAREST)
-Graphics.setImageFilters(l1, NEAREST)
-Graphics.setImageFilters(l2, NEAREST)
-Graphics.setImageFilters(l3, NEAREST)
-Graphics.setImageFilters(r3, NEAREST)
 
 function DrawUsableKeys(FLAGS)
-  Graphics.drawScaleImage(cross, 30, SCR_Y-30, 32, 32)
+  Graphics.drawScaleImage(RES.cross, 30, SCR_Y-30, 32, 32)
   Font.ftPrint(_FNT2_, 60, SCR_Y-25, 0, 630, 16, "OK", Color.new(0xff, 0xff, 0xff, 0x80))
 
-  Graphics.drawScaleImage(circle, 30, SCR_Y-60, 32, 32)
+  Graphics.drawScaleImage(RES.circle, 30, SCR_Y-60, 32, 32)
   Font.ftPrint(_FNT2_, 60, SCR_Y-55, 0, 630, 16, "Cancel", Color.new(0xff, 0xff, 0xff, 0x80))
 end
 Screen.clear()
-Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y)
+Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
 DrawUsableKeys()
 Screen.flip()
 --while true do end
 
 function DrawOnScreenDualshock(P)
   if P == 9 then
-    Graphics.drawScaleImage(pad_select, X_MID-64, Y_MID-16, 32, 32)
+    Graphics.drawScaleImage(RES.select, X_MID-64, Y_MID-16, 32, 32)
   else
-    Graphics.drawScaleImage(pad_select, X_MID-64, Y_MID-16, 32, 32, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.select, X_MID-64, Y_MID-16, 32, 32, Color.new(128, 128, 128, 60))
   end
 
   if P == 10 then
-    Graphics.drawScaleImage(start, X_MID+32, Y_MID-16, 32, 32)
+    Graphics.drawScaleImage(RES.start, X_MID+32, Y_MID-16, 32, 32)
   else
-    Graphics.drawScaleImage(start, X_MID+32, Y_MID-16, 32, 32, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.start, X_MID+32, Y_MID-16, 32, 32, Color.new(128, 128, 128, 60))
   end
 
   if P == 5 then
-    Graphics.drawScaleImage(up, X_MID-216, Y_MID-64-8, 64, 64)
+    Graphics.drawScaleImage(RES.up, X_MID-216, Y_MID-64-8, 64, 64)
   else
-    Graphics.drawScaleImage(up, X_MID-216, Y_MID-64-8, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.up, X_MID-216, Y_MID-64-8, 64, 64, Color.new(128, 128, 128, 60))
   end
   if P == 13 then
-    Graphics.drawScaleImage(down, X_MID-216, Y_MID+8, 64, 64)
+    Graphics.drawScaleImage(RES.down, X_MID-216, Y_MID+8, 64, 64)
   else
-    Graphics.drawScaleImage(down, X_MID-216, Y_MID+8, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.down, X_MID-216, Y_MID+8, 64, 64, Color.new(128, 128, 128, 60))
   end
 
   if P == 7 then
-    Graphics.drawScaleImage(left, X_MID-256, Y_MID-32, 64, 64)
+    Graphics.drawScaleImage(RES.left, X_MID-256, Y_MID-32, 64, 64)
   else
-    Graphics.drawScaleImage(left, X_MID-256, Y_MID-32, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.left, X_MID-256, Y_MID-32, 64, 64, Color.new(128, 128, 128, 60))
   end
 
   if P == 8 then
-    Graphics.drawScaleImage(right, X_MID-176, Y_MID-32, 64, 64)
+    Graphics.drawScaleImage(RES.right, X_MID-176, Y_MID-32, 64, 64)
   else
-    Graphics.drawScaleImage(right, X_MID-176, Y_MID-32, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.right, X_MID-176, Y_MID-32, 64, 64, Color.new(128, 128, 128, 60))
   end
 
   if P == 6 then
-    Graphics.drawScaleImage(triangle, X_MID+152, Y_MID-64-8, 64, 64)
+    Graphics.drawScaleImage(RES.triangle, X_MID+152, Y_MID-64-8, 64, 64)
   else
-    Graphics.drawScaleImage(triangle, X_MID+152, Y_MID-64-8, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.triangle, X_MID+152, Y_MID-64-8, 64, 64, Color.new(128, 128, 128, 60))
   end
 
   if P == 14 then
-    Graphics.drawScaleImage(cross, X_MID+152, Y_MID+8, 64, 64)
+    Graphics.drawScaleImage(RES.cross, X_MID+152, Y_MID+8, 64, 64)
   else
-    Graphics.drawScaleImage(cross, X_MID+152, Y_MID+8, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.cross, X_MID+152, Y_MID+8, 64, 64, Color.new(128, 128, 128, 60))
   end
 
   if P == 11 then
-    Graphics.drawScaleImage(square, X_MID+112, Y_MID-32, 64, 64)
+    Graphics.drawScaleImage(RES.square, X_MID+112, Y_MID-32, 64, 64)
   else
-    Graphics.drawScaleImage(square, X_MID+112, Y_MID-32, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.square, X_MID+112, Y_MID-32, 64, 64, Color.new(128, 128, 128, 60))
   end
 
   if P == 12 then
-    Graphics.drawScaleImage(circle, X_MID+192, Y_MID-32, 64, 64)
+    Graphics.drawScaleImage(RES.circle, X_MID+192, Y_MID-32, 64, 64)
   else
-    Graphics.drawScaleImage(circle, X_MID+192, Y_MID-32, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.circle, X_MID+192, Y_MID-32, 64, 64, Color.new(128, 128, 128, 60))
   end
 
   if P == 1 then
-    Graphics.drawScaleImage(l1, X_MID-256, Y_MID-140, 64, 64)
+    Graphics.drawScaleImage(RES.L1, X_MID-256, Y_MID-140, 64, 64)
   else
-    Graphics.drawScaleImage(l1, X_MID-256, Y_MID-140, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.L1, X_MID-256, Y_MID-140, 64, 64, Color.new(128, 128, 128, 60))
   end
 
   if P == 2 then
-    Graphics.drawScaleImage(l2, X_MID-184, Y_MID-140, 64, 64)
+    Graphics.drawScaleImage(RES.L2, X_MID-184, Y_MID-140, 64, 64)
   else
-    Graphics.drawScaleImage(l2, X_MID-184, Y_MID-140, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.L2, X_MID-184, Y_MID-140, 64, 64, Color.new(128, 128, 128, 60))
   end
 
   if P == 3 then
-    Graphics.drawScaleImage(r1, X_MID+112, Y_MID-140, 64, 64)
+    Graphics.drawScaleImage(RES.R1, X_MID+112, Y_MID-140, 64, 64)
   else
-    Graphics.drawScaleImage(r1, X_MID+112, Y_MID-140, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.R1, X_MID+112, Y_MID-140, 64, 64, Color.new(128, 128, 128, 60))
   end
 
   if P == 4 then
-    Graphics.drawScaleImage(r2, X_MID+184, Y_MID-140, 64, 64)
+    Graphics.drawScaleImage(RES.R2, X_MID+184, Y_MID-140, 64, 64)
   else
-    Graphics.drawScaleImage(r2, X_MID+184, Y_MID-140, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.R2, X_MID+184, Y_MID-140, 64, 64, Color.new(128, 128, 128, 60))
   end
 
 
   if P == 15 then
-    Graphics.drawScaleImage(l3, X_MID-112, Y_MID+60, 64, 64)
+    Graphics.drawScaleImage(RES.L3, X_MID-112, Y_MID+60, 64, 64)
   else
-    Graphics.drawScaleImage(l3, X_MID-112, Y_MID+60, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.L3, X_MID-112, Y_MID+60, 64, 64, Color.new(128, 128, 128, 60))
   end
 
   if P == 16 then
@@ -148,9 +111,9 @@ function DrawOnScreenDualshock(P)
   end
 
   if P == 17 then
-    Graphics.drawScaleImage(r3, X_MID+48, Y_MID+60, 64, 64)
+    Graphics.drawScaleImage(RES.R3, X_MID+48, Y_MID+60, 64, 64)
   else
-    Graphics.drawScaleImage(r3, X_MID+48, Y_MID+60, 64, 64, Color.new(128, 128, 128, 60))
+    Graphics.drawScaleImage(RES.R3, X_MID+48, Y_MID+60, 64, 64, Color.new(128, 128, 128, 60))
   end
 end
 
@@ -169,7 +132,7 @@ function KeyConfigDialog()
 
   while true do
     Screen.clear()
-    Graphics.drawScaleImage(BG, 0.0, 0.0, SCR_X, SCR_Y)
+    Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
     DrawOnScreenDualshock(P)
     DrawUsableKeys()
     pad = Pads.get()

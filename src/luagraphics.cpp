@@ -502,20 +502,97 @@ static int lua_getloaddata(lua_State *L){
 	}else return 0;
 }
 
+#define IMPORT_BIN2C(_n)       \
+    extern unsigned char _n[]; \
+    extern unsigned int size_##_n
+
+#define DECLARE_ASSET(_n) {#_n, _n, size_##_n}
+
+IMPORT_BIN2C(BG);
+IMPORT_BIN2C(circle);
+IMPORT_BIN2C(cross);
+IMPORT_BIN2C(down);
+IMPORT_BIN2C(L1);
+IMPORT_BIN2C(L2);
+IMPORT_BIN2C(L3);
+IMPORT_BIN2C(left);
+IMPORT_BIN2C(R1);
+IMPORT_BIN2C(R2);
+IMPORT_BIN2C(R3);
+IMPORT_BIN2C(right);
+IMPORT_BIN2C(select);
+IMPORT_BIN2C(square);
+IMPORT_BIN2C(start);
+IMPORT_BIN2C(triangle);
+IMPORT_BIN2C(up);
+typedef struct embedded_assets {
+	const char* name;
+	uint8_t* PTR;
+	unsigned int size;
+}embedded_assets_;
+enum ASSET_ENUM {
+	E_BG,
+	E_circle,
+	E_cross,
+	E_down,
+	E_L1,
+	E_L2,
+	E_L3,
+	E_left,
+	E_R1,
+	E_R2,
+	E_R3,
+	E_right,
+	E_select,
+	E_square,
+	E_start,
+	E_triangle,
+	E_up,
+	COUNT,
+};
+
+embedded_assets_ ASSETS[] = {
+	DECLARE_ASSET(BG),
+	DECLARE_ASSET(circle),
+	DECLARE_ASSET(cross),
+	DECLARE_ASSET(down),
+	DECLARE_ASSET(L1),
+	DECLARE_ASSET(L2),
+	DECLARE_ASSET(L3),
+	DECLARE_ASSET(left),
+	DECLARE_ASSET(R1),
+	DECLARE_ASSET(R2),
+	DECLARE_ASSET(R3),
+	DECLARE_ASSET(right),
+	DECLARE_ASSET(select),
+	DECLARE_ASSET(square),
+	DECLARE_ASSET(start),
+	DECLARE_ASSET(triangle),
+	DECLARE_ASSET(up),
+};
+
 static int lua_load_embedded_png(lua_State *L) {
-	int argc = lua_gettop(L);
-	if (argc != 2) return luaL_error(L, "wrong number of arguments");
     lua_gc(L, LUA_GCCOLLECT, 0);
-	uint8_t* ptr = (uint8_t *)luaL_checkstring(L, 1);
-	size_t siz = luaL_checkinteger(L, 2);
 	GSTEXTURE* image = NULL;
-	image = loadEmbeddedPNG(ptr, siz, true);
-	lua_pushinteger(L, (uint32_t)(image));
+
+	int cpt = 1;
+	lua_newtable(L);
+		for(int i = 0; i < ASSET_ENUM::COUNT; i++)
+		{
+            lua_pushstring(L, ASSETS[i].name);
+			image = loadEmbeddedPNG(ASSETS[i].PTR, ASSETS[i].size, true);
+			if (image != NULL) 
+				lua_pushinteger(L, (uint32_t)(image));
+			else
+				lua_pushnil(L);
+            lua_settable(L, -3);
+
+		}
 	return 1;
 }
 //Register our Graphics Functions
 static const luaL_Reg Graphics_functions[] = {
-    {"loadImageEmbedded",         lua_load_embedded_png},
+    {"loadEmbeddedAssets", lua_load_embedded_png},
   	{"drawPixel",           		   lua_pixel},
   //{"getPixel",            		  lua_gpixel},
   	{"drawRect",           				lua_rect},
