@@ -31,11 +31,11 @@ export HEADER
 #----------------------- Configuration flags ----------------------#
 #------------------------------------------------------------------#
 #-------------------------- Reset the IOP -------------------------#
-RESET_IOP = 1
+RESET_IOP ?= 1
 #---------------------- enable DEBUGGING MODE ---------------------#
-DEBUG = 0
+DEBUG ?= 1
 #----------------------- Set IP for PS2Client ---------------------#
-PS2LINK_IP = 192.168.1.10
+PS2LINK_IP ?= 192.168.1.10
 #------------------------------------------------------------------#
 
 EE_BIN = bin/enceladus.elf
@@ -47,50 +47,85 @@ EE_INCS += -I$(PS2DEV)/gsKit/include -I$(PS2SDK)/ports/include -I$(PS2SDK)/ports
 
 EE_INCS += -Imodules/ds34bt/ee -Imodules/ds34usb/ee
 
-EE_CFLAGS   += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
-EE_CXXFLAGS += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
+# stuff to send both to C and C++
+GLOBAL_CFLAGS += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
+
+FEATURES_CopyAsync ?= 0
+FEATURES_Sound ?= 0
+FEATURES_Render ?= 0
+FEATURES_md5 ?= 0
 
 ifeq ($(RESET_IOP),1)
-EE_CXXFLAGS += -DRESET_IOP
+GLOBAL_CFLAGS += -DRESET_IOP
 endif
 
 ifeq ($(DEBUG),1)
-EE_CXXFLAGS += -DDEBUG
+ $(info --- debugging enabled)
+ GLOBAL_CFLAGS += -DDEBUG -O0 -g
+else
+  GLOBAL_CFLAGS += -Os
+  EE_LDFLAGS += -s
 endif
 
 BIN2S = $(PS2SDK)/bin/bin2s
 
-#-------------------------- App Content ---------------------------#
+#-------------------------- Fixed source files ---------------------------#
 EXT_LIBS = modules/ds34usb/ee/libds34usb.a modules/ds34bt/ee/libds34bt.a
 
-APP_CORE = main.o system.o pad.o graphics.o render.o \
-		   calc_3d.o gsKit3d_sup.o atlas.o fntsys.o md5.o \
-		   sound.o
+APP_CORE = main.o system.o pad.o graphics.o \
+		   atlas.o fntsys.o
 
-LUA_LIBS =	luaplayer.o luasound.o luacontrols.o \
-			luatimer.o luaScreen.o luagraphics.o \
-			luasystem.o luaRender.o
+LUA_LIBS =	luaplayer.o luasystem.o luacontrols.o \
+			luatimer.o luaScreen.o luagraphics.o
 
 IOP_MODULES = iomanx.o filexio.o \
-			  sio2man.o mcman.o mcserv.o padman.o libsd.o \
-			  usbd.o audsrv.o bdm.o bdmfs_fatfs.o \
+			  sio2man.o mcman.o mcserv.o padman.o \
+			  usbd.o bdm.o bdmfs_fatfs.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o
 
 EMBEDDED_RSC = boot.o \
-	BG.o circle.o cross.o down.o L1.o L2.o L3.o left.o R1.o R2.o R3.o right.o select.o square.o start.o triangle.o up.o
-EE_OBJS = $(IOP_MODULES) $(EMBEDDED_RSC) $(APP_CORE) $(LUA_LIBS)
+	BG.o circle.o cross.o down.o L1.o L2.o L3.o left.o R1.o R2.o R3.o right.o select.o square.o start.o triangle.o up.o \
+	builtin_font.o
+
+#------- Variable source files -------#
+ifeq ($(FEATURES_CopyAsync), 1)
+ GLOBAL_CFLAGS += -DF_CopyAsync
+endif
+ifeq ($(FEATURES_Sound), 1)
+ GLOBAL_CFLAGS += -DF_Sound
+ IOP_MODULES += libsd.o audsrv.o
+ APP_CORE += sound.o
+ LUA_LIBS += luasound.o
+endif
+ifeq ($(FEATURES_Render), 1)
+ GLOBAL_CFLAGS += -DF_Render
+ APP_CORE += render.o calc_3d.o gsKit3d_sup.o 
+ LUA_LIBS += luarender.o
+endif
+ifeq ($(FEATURES_md5), 1)
+ GLOBAL_CFLAGS += -DF_Md5
+ APP_CORE += md5.o
+endif
+
+EE_OBJS = $(APP_CORE) $(LUA_LIBS) $(EMBEDDED_RSC) $(IOP_MODULES)
 
 EE_OBJS_DIR = obj/
 EE_SRC_DIR = src/
 EE_ASM_DIR = asm/
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%) # remap all EE_OBJ to obj subdir
 
+EE_CFLAGS   += $(GLOBAL_CFLAGS)
+EE_CXXFLAGS += $(GLOBAL_CFLAGS)
+
 #------------------------------------------------------------------#
 all: $(EXT_LIBS) $(EE_BIN)
 	@echo "$$HEADER"
 
 	echo "Building $(EE_BIN)..."
+
+ifneq ($(DEBUG),1)
 	$(EE_STRIP) $(EE_BIN)
+endif
 
 	echo "Compressing $(EE_BIN_PKD)...\n"
 	ps2-packer $(EE_BIN) $(EE_BIN_PKD) > /dev/null
@@ -215,6 +250,9 @@ intellisense:
 
 reset:
 	ps2client -h $(PS2LINK_IP) reset   
+
+analize: $(EE_BIN)
+	python3 thirdparty/elf-size-analize.py $(EE_BIN) -R -t mips64r5900el-ps2-elf-
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c | $(EE_OBJS_DIR)
 	@echo "  - $@"

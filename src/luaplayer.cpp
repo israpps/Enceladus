@@ -77,8 +77,12 @@ const char * runScript(const char* script, bool isStringBuffer )
 	luaScreen_init(L);
     luaTimer_init(L);
     luaSystem_init(L);
+#ifdef F_Sound
     luaSound_init(L);
+#endif
+#ifdef F_Render
     luaRender_init(L);
+#endif
     	
     printf("done !\n");
 

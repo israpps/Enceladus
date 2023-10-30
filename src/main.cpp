@@ -52,9 +52,6 @@ extern unsigned int size_mcserv_irx;
 extern unsigned char padman_irx;
 extern unsigned int size_padman_irx;
 
-extern unsigned char libsd_irx;
-extern unsigned int size_libsd_irx;
-
 extern unsigned char cdfs_irx;
 extern unsigned int size_cdfs_irx;
 
@@ -70,14 +67,19 @@ extern unsigned int size_bdmfs_fatfs_irx;
 extern unsigned char usbmass_bd_irx;
 extern unsigned int size_usbmass_bd_irx;
 
-extern unsigned char audsrv_irx;
-extern unsigned int size_audsrv_irx;
-
 extern unsigned char ds34usb_irx;
 extern unsigned int size_ds34usb_irx;
 
 extern unsigned char ds34bt_irx;
 extern unsigned int size_ds34bt_irx;
+
+#ifdef F_Sound
+extern unsigned char libsd_irx;
+extern unsigned int size_libsd_irx;
+
+extern unsigned char audsrv_irx;
+extern unsigned int size_audsrv_irx;
+#endif
 
 char boot_path[255];
 
@@ -174,8 +176,9 @@ int main(int argc, char * argv[])
     initMC();
 
     SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, NULL, NULL);
+#ifdef F_Sound
     SifExecModuleBuffer(&libsd_irx, size_libsd_irx, 0, NULL, NULL);
-
+#endif
     // load pad & mc modules 
     printf("Installing Pad & MC modules...\n");
 
@@ -195,7 +198,9 @@ int main(int argc, char * argv[])
 
     SifExecModuleBuffer(&cdfs_irx, size_cdfs_irx, 0, NULL, NULL);
 
+#ifdef F_Sound
     SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, NULL);
+#endif
 
     //waitUntilDeviceIsReady by fjtrujy
 

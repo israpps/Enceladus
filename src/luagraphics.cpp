@@ -8,6 +8,7 @@
 #include "include/fntsys.h"
 #include "include/luaplayer.h"
 
+#ifdef F_CopyAsync
 static bool asyncDelayed = true;
 
 volatile int imgThreadResult = 1;
@@ -39,7 +40,7 @@ static int imgThread(void* data)
 	ExitDeleteThread();
 	return 0;
 }
-
+#endif
 
 static int lua_fontload(lua_State *L){
 	if (lua_gettop(L) != 1) return luaL_error(L, "wrong number of arguments"); 
@@ -191,7 +192,7 @@ static const luaL_Reg Font_functions[] = {
   {0, 0}
 };
 
-
+#ifdef F_CopyAsync
 static int lua_loadimgasync(lua_State *L){
 	int argc = lua_gettop(L);
 	if (argc != 1) return luaL_error(L, "wrong number of arguments");
@@ -216,6 +217,7 @@ static int lua_loadimgasync(lua_State *L){
 	StartThread(thread, (void*)text);
 	return 0;
 }
+#endif
 
 static int lua_loadimg(lua_State *L) {
 	int argc = lua_gettop(L);
@@ -488,6 +490,7 @@ static int lua_free(lua_State *L) {
 	return 0;
 }
 
+#ifdef F_CopyAsync
 static int lua_getloadstate(lua_State *L){
 	int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
@@ -496,7 +499,6 @@ static int lua_getloadstate(lua_State *L){
 	lua_pushinteger(L, imgThreadResult);
 	return 1;
 }
-
 static int lua_getloaddata(lua_State *L){
 	int argc = lua_gettop(L);
 #ifndef SKIP_ERROR_HANDLING
@@ -509,7 +511,7 @@ static int lua_getloaddata(lua_State *L){
 		return 1;
 	}else return 0;
 }
-
+#endif
 #define IMPORT_BIN2C(_n)       \
     extern unsigned char _n[]; \
     extern unsigned int size_##_n
@@ -609,7 +611,11 @@ static const luaL_Reg Graphics_functions[] = {
 	{"drawTriangle",        		lua_triangle},
 	{"drawQuad",        				lua_quad},
     {"loadImage",           		 lua_loadimg},
+#ifdef F_CopyAsync
   	{"threadLoadImage",        	lua_loadimgasync},
+	{"getLoadState",            lua_getloadstate},
+  	{"getLoadData",     	     lua_getloaddata},
+#endif
   //{"loadAnimatedImage",   	   lua_loadanimg},
   //{"getImageFramesNum",   	lua_getnumframes},
   //{"setImageFrame",       		lua_setframe},
@@ -623,8 +629,6 @@ static const luaL_Reg Graphics_functions[] = {
   	{"getImageWidth",       		   lua_width},
   	{"getImageHeight",      		  lua_height},
     {"freeImage",           			lua_free},
-	{"getLoadState",            lua_getloadstate},
-  	{"getLoadData",     	     lua_getloaddata},
   {0, 0}
 };
 

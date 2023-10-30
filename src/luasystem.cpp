@@ -5,8 +5,10 @@
 #include <dirent.h>
 #include <sys/stat.h>
 #include "include/luaplayer.h"
-#include "include/md5.h"
 #include "include/graphics.h"
+#ifdef F_Md5
+#include "include/md5.h"
+#endif
 
 #include "include/system.h"
 
@@ -74,7 +76,6 @@ static int lua_curdir(lua_State *L) {
 	if(argc == 1) return lua_setCurrentDirectory(L);
 	return luaL_error(L, "Argument error: System.currentDirectory([file]) takes zero or one argument.");
 }
-
 
 static int lua_dir(lua_State *L)
 {
@@ -310,7 +311,7 @@ static void setModulePath()
 {
 	getcwd( modulePath, 256 );
 }
-
+#ifdef F_Md5
 static int lua_md5sum(lua_State *L)
 {
 	size_t size;
@@ -331,7 +332,7 @@ static int lua_md5sum(lua_State *L)
 	
 	return 1;
 }
-
+#endif
 static int lua_sleep(lua_State *L)
 {
 	if (lua_gettop(L) != 1) return luaL_error(L, "milliseconds expected.");
@@ -361,7 +362,6 @@ static int lua_exit(lua_State *L)
         );
 	return 0;
 }
-
 
 void recursive_mkdir(char *dir) {
 	char *p = dir;
@@ -414,7 +414,6 @@ static int lua_openfile(lua_State *L){
 	return 1;
 }
 
-
 static int lua_readfile(lua_State *L){
 	int argc = lua_gettop(L);
 	if (argc != 2) return luaL_error(L, "wrong number of arguments");
@@ -427,7 +426,6 @@ static int lua_readfile(lua_State *L){
 	free(buffer);
 	return 1;
 }
-
 
 static int lua_writefile(lua_State *L){
 	int argc = lua_gettop(L);
@@ -457,7 +455,6 @@ static int lua_seekfile(lua_State *L){
 	return 0;
 }
 
-
 static int lua_sizefile(lua_State *L){
 	int argc = lua_gettop(L);
 	if (argc != 1) return luaL_error(L, "wrong number of arguments");
@@ -468,7 +465,6 @@ static int lua_sizefile(lua_State *L){
 	lua_pushinteger(L, size);
 	return 1;
 }
-
 
 static int lua_checkexist(lua_State *L){
 	int argc = lua_gettop(L);
@@ -482,7 +478,6 @@ static int lua_checkexist(lua_State *L){
 	}
 	return 1;
 }
-
 
 static int lua_loadELF(lua_State *L)
 {
@@ -513,7 +508,6 @@ DiscType DiscTypes[] = {
     {SCECdIllegalMedia, "Unsupported", 16},
     {0x00, "", 0x00}  //end of list
 };              //ends DiscTypes array
-
 
 static int lua_checkValidDisc(lua_State *L)
 {
@@ -558,7 +552,6 @@ static int lua_checkDiscTray(lua_State *L)
     return 1; //return value quantity on stack
 }
 
-
 static int lua_getDiscType(lua_State *L)
 {
     int discType;
@@ -576,6 +569,7 @@ static int lua_getDiscType(lua_State *L)
 
 extern void *_gp;
 
+#ifdef F_CopyAsync
 #define BUFSIZE (64*1024)
 
 static volatile off_t progress, max_progress;
@@ -614,7 +608,6 @@ static int copyThread(void* data)
 	ExitDeleteThread();
     return 0;
 }
-
 
 static int lua_copyasync(lua_State *L){
 	int argc = lua_gettop(L);
@@ -657,6 +650,8 @@ static int lua_getfileprogress(lua_State *L) {
 
 	return 1;
 }
+#endif
+
 
 static int lua_direxists(lua_State *L)
 {
@@ -692,11 +687,15 @@ static const luaL_Reg System_functions[] = {
 	{"removeDirectory",           lua_removeDir},
 	{"moveFile",	               lua_movefile},
 	{"copyFile",	               lua_copyfile},
+#ifdef F_CopyAsync
 	{"threadCopyFile",	          lua_copyasync},
 	{"getFileProgress",	    lua_getfileprogress},
+#endif
 	{"removeFile",               lua_removeFile},
 	{"rename",                       lua_rename},
+#ifdef F_Md5
 	{"md5sum",                       lua_md5sum},
+#endif
 	{"sleep",                         lua_sleep},
 	{"getFreeMemory",         lua_getFreeMemory},
 	{"exitToBrowser",                  lua_exit},
