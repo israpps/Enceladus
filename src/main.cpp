@@ -265,7 +265,7 @@ int main(int argc, char * argv[])
             sleep(1); //ensures message is printed no matter what
 		    scr_clear();
 		    scr_setXY(5, 2);
-		    scr_printf("Enceladus ERROR!\n");
+		    scr_printf("ERROR AT BOOT SCRIPT\n");
 		    scr_printf(errMsg);
 		    puts(errMsg);
 		    scr_printf("\nPress [start] to restart\n");

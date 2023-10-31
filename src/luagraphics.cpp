@@ -88,8 +88,17 @@ static int lua_ftload(lua_State *L){
 }
 extern unsigned char builtin_font[];
 extern unsigned int size_builtin_font;
+extern unsigned char Inter_Regular[];
+extern unsigned int size_Inter_Regular;
 static int lua_ftloadDefault(lua_State *L){
-	int fntHandle = fntLoadbuff(builtin_font, size_builtin_font);
+	int fontid = 0;
+	int fntHandle;
+	if (lua_gettop(L) == 1) fontid = luaL_checkinteger(L, 1);
+	if (fontid == 0) {
+		fntHandle = fntLoadbuff(builtin_font, size_builtin_font);
+	} else if (fontid == 1) {
+		fntHandle = fntLoadbuff(Inter_Regular, size_Inter_Regular);
+	} else return luaL_error(L, "Invalid ID for builtin fonts");
     lua_pushinteger(L, fntHandle);
 	return 1;
 }

@@ -85,7 +85,7 @@ IOP_MODULES = iomanx.o filexio.o \
 
 EMBEDDED_RSC = boot.o \
 	BG.o circle.o cross.o down.o L1.o L2.o L3.o left.o R1.o R2.o R3.o right.o select.o square.o start.o triangle.o up.o \
-	builtin_font.o
+	builtin_font.o Inter_Regular.o
 
 #------- Variable source files -------#
 ifeq ($(FEATURES_CopyAsync), 1)
@@ -141,6 +141,9 @@ $(EE_ASM_DIR)%.s: EMBED/%.png
 
 $(EE_ASM_DIR)%.s: EMBED/%.ttf
 	$(BIN2S) $< $@ $(shell basename $< .ttf)
+
+$(EE_ASM_DIR)%.s: EMBED/%.otf
+	$(BIN2S) $< $@ $(shell basename $< .otf)
 #------------------------------------------------------------------#
 
 

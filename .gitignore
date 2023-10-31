@@ -1,9 +1,12 @@
 
 .vscode/launch.json
 *.ttf
-!bin/*.ttf
-*.bak
 *.otf
+!bin/*.ttf
+!bin/*.otf
+!EMBED/*.ttf
+!EMBED/*.otf
+*.bak
 bin/img/bg0.png
 bin/img/bg1.png
 bin/img/bg2.png

@@ -25,7 +25,7 @@ Graphics.setImageFilters(RES.L3, NEAREST)
 Graphics.setImageFilters(RES.R3, NEAREST)
 Font.ftInit()
 _FNT_ = Font.LoadBuiltinFont()
-_FNT2_ = Font.LoadBuiltinFont()
+_FNT2_ = Font.LoadBuiltinFont(1)
 
 Font.ftSetCharSize(_FNT_, 940, 940)
 Font.ftSetCharSize(_FNT2_, 740, 740)
@@ -34,6 +34,15 @@ fontBig = _FNT_
 pad = 0
 PADBUTTONS = {"L1", "L2", "R1", "R2", "UP", "TRIANGLE", "LEFT", "RIGHT", "SELECT", "START", "SQUARE", "CIRCLE", "DOWN", "CROSS", "L3", "AUTO", "R3"}
 PADATTEMPT = {1, 2, 3}
+
+function Special_tostring(VAL)
+  if type(VAL) == "nil" then return "<not set>"
+  elseif type(VAL) == "boolean" then if VAL then return "1" else return "0" end
+  else
+    return tostring(VAL)
+  end
+end
+
 
 function Font.ftPrintMultiLineAligned(font, x, y, spacing, width, height, text, color)
 	local internal_y = y
@@ -44,6 +53,7 @@ function Font.ftPrintMultiLineAligned(font, x, y, spacing, width, height, text, 
 end
 
 function OnScreenError(STR)
+  print("ERROR")
   print(STR)
   Screen.clear()
   Font.ftPrint(_FNT_, X_MID, 40, 8, 630, 32, "ERROR", Color.new(220, 220, 220, 0x80))
@@ -57,7 +67,20 @@ end
 function new_config_struct()
   local T = {
     keys = {},
-    config = {},
+    config = {
+      SKIP_PS2LOGO = true,
+      KEY_READ_WAIT_TIME = 4000,
+      OSDHISTORY_READ = true,
+      EJECT_TRAY =  true,
+      LOGO_DISPLAY = 2,
+      LOAD_IRX_E0 = "",
+      LOAD_IRX_E1 = "",
+      LOAD_IRX_E2 = "",
+      LOAD_IRX_E3 = "",
+      LOAD_IRX_E4 = "",
+      LOAD_IRX_E5 = "",
+      LOAD_IRX_E6 = "",
+    },
   }
   for i = 1, #PADBUTTONS do
     T.keys[i] = {}
@@ -69,60 +92,66 @@ function new_config_struct()
 end
 
 PS2BBL_MAIN_CONFIG = new_config_struct()
-
-
 print("LIP (Lua Ini Parser)\tCopyright (c) 2012 Carreras Nicolas. modified by El_isra for PS2BBL Usage");
-LIP = {};
+LIP = {}
 
 --- Returns a table containing all the data from the INI file.
---@param fileName The name of the INI file to parse. [string]
---@return The table containing all data from the INI file. [table]
+--@param fileName The name of the INI file to parse.
+--@return The table containing all data from the INI file.
 function LIP.load(fileName)
-	local FD = System.openFile(fileName, FREAD);
-  local file = System.readFile(FD, System.sizeFile(FD));
 	local data = new_config_struct()
-	for line in file:gmatch('[^\n]+') do
-		local param, value = line:match('^([%w|_]+)%s-=[ ]?%s-(.+)[\r\n]');
-    -- TODO: CLEANUP --print(string.format("- '%s' = '%s'", param, value))
-		if(param ~= nil and value ~= nil)then
-			if param:find("^LK_.*_E[123]")then --Launch keys are special case. handle them as a structure, not as data pairs....
-        for i = 1, #PADBUTTONS do
-          if param:find("^LK_"..PADBUTTONS[i]) then
-            for x = 1, 3, 1 do
-              if param == string.format("LK_%s_E%d", PADBUTTONS[i], PADATTEMPT[x]) then
-                data.keys[i][x] = value
-                goto BRK
+  local ret = 0
+	local FD = System.openFile(fileName, FREAD);
+  local file
+  if FD < 0 then
+    print("LIP.load: Cannot open"..fileName)
+    ret = -5
+  else
+    file = System.readFile(FD, System.sizeFile(FD));
+	  for line in file:gmatch('[^\n]+') do
+	  	local param, value = line:match('^([%w|_]+)%s-=[ ]?%s-(.+)[\r\n]');
+      -- TODO: CLEANUP --print(string.format("- '%s' = '%s'", param, value))
+	  	if(param ~= nil and value ~= nil)then
+	  		if param:find("^LK_.*_E[123]")then --Launch keys are special case. handle them as a structure, not as data pairs....
+          for i = 1, #PADBUTTONS do
+            if param:find("^LK_"..PADBUTTONS[i]) then
+              for x = 1, 3, 1 do
+                if param == string.format("LK_%s_E%d", PADBUTTONS[i], PADATTEMPT[x]) then
+                  data.keys[i][x] = value
+                  goto BRK
+                end
               end
             end
           end
-        end
-        print(string.format("Unknown Launch KEY ('%s' = '%s')", param, value))
-        ::BRK::
-      else
-			  if(tonumber(value))then
-			  	value = tonumber(value);
-			  elseif(value == 'true')then
-			  	value = true;
-			  elseif(value == 'false')then
-			  	value = false;
-			  end
-        data.config[param] = value;
-			end
-		end
-	end
-	System.closeFile(FD)
-	return data;
+          print(string.format("Unknown Launch KEY ('%s' = '%s')", param, value))
+          ::BRK::
+        else
+	  		  if(tonumber(value))then
+	  		  	value = tonumber(value);
+	  		  elseif(value == 'true')then
+	  		  	value = true;
+	  		  elseif(value == 'false')then
+	  		  	value = false;
+	  		  end
+          data.config[param] = value;
+	  		end
+	  	end
+	  end
+  end
+	if FD >= 0 then System.closeFile(FD) end
+  if ret < 0 then data = nil end
+	return data, ret
 end
 
 --- Saves all the data from a table to an INI file.
----@param fileName string The name of the INI file to fill. [string]
----@param data table The table containing all the data to store. [table]
+---@param fileName string The name of the INI file to fill.
+---@param data table The table containing all the data to store.
 function LIP.save(fileName, data)
 	local FD = System.openFile(fileName, FCREATE);
 	local contents = "";
 
 	for key, value in pairs(data.config) do
-		contents = contents .. ('%s = %s\n'):format(key, tostring(value))
+		if (key ~= nil and key ~= "") and (value ~= nil and value ~= "") then contents = contents .. ('%s = %s\n'):format(key, Special_tostring(value)) end
 	end --we iterate this crap twice: first, leave launch keys for the bottom
   contents = contents.."\n"
   for i = 1, #PADBUTTONS do
@@ -230,6 +259,16 @@ PS2BBL_CMDS = {
     "Runs HDD diagnosis tests (only works if PS2BBL has HDD support enabled)"
 	},
 }
+MAIN_CONFIG_DLG = {
+	item = {
+		"Main Config",
+		"Launch Keys",
+	},
+	desc = {
+		"Configure the main aspects of PS2BBL",
+		"Configure wich applications to run when bound key is pressed",
+	},
+}
 function Drawbar(x, y, prog, col)
 	Graphics.drawRect(x-(prog*2), y, prog*4, 5, col)
 end
@@ -286,6 +325,7 @@ function DisplayGenerictMOptPrompt(options_t, heading)
   end
   return T
 end
+
 function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback, AVAILPADS)
   local T = 1
   local D = 15
@@ -320,7 +360,7 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback, AVAILP
 
     if (Pads.check(pad, PAD_CROSS) or
 		(Pads.check(pad, PAD_TRIANGLE) and AVAILPADS&DUK_TRIANGLE) or
-		(Pads.check(pad, PAD_SQUARE) and AVAILPADS&DUK_SQUARE)) and D == 0 
+		(Pads.check(pad, PAD_SQUARE) and AVAILPADS&DUK_SQUARE)) and D == 0
 	then
       D = 1
       Screen.clear()
@@ -347,6 +387,17 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback, AVAILP
   return T, pad
 end
 
+function IntSlider(is_milisecond)
+
+end
+
+function change_path_to_multimc(VAL)
+  local FINAL
+  local niee = string.find(VAL, ":", 1, true)
+  FINAL = "mc?"..VAL:sub(niee)
+    return FINAL
+end
+
 function GenericBGFade(fadein)
 	local A = 0x79
 	if fadein then A = 1 end
@@ -357,13 +408,6 @@ function GenericBGFade(fadein)
 	  if fadein then A = A+1 else A = A-1 end
 	end
 end
-local CURRITEM = 0
-local ret = 0
-
-
-cfgt = {}
-cfgt.item = {}
-cfgt.item = PADBUTTONS
 
 
 --
@@ -379,12 +423,12 @@ end
 
 -- check pad up/down
 function OFM.checkPadUpDown()
-	if Pads.check(pad, PAD_UP) then
+	if Pads.check(OFM.paad, PAD_UP) then
 		PadUpHolding=PadUpHolding+1
 	else
 		PadUpHolding=0
 	end
-	if Pads.check(pad, PAD_DOWN) then
+	if Pads.check(OFM.paad, PAD_DOWN) then
 		PadDownHolding=PadDownHolding+1
 	else
 		PadDownHolding=0
@@ -674,8 +718,10 @@ function OFM._start()
   if plusYValue == nil then plusYValue=0 end
   local ret = nil
   OFM.keepInOFMApp=true
+  OFM.paad = 0
+  OFM.oldpad = 0
   while OFM.keepInOFMApp do
-    pad = Pads.get()
+    OFM.paad = Pads.get()
     Screen.clear()
   	Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, 0x80))
     OFM.drawOFMoverlay() -- draws overlay
@@ -683,7 +729,7 @@ function OFM._start()
   		  OFM.checkPadUpDown() -- check up/down buttons
       end
   	OFM.listFiles() -- print list of items
-      if Pads.check(pad, PAD_CROSS) and not Pads.check(oldpad, PAD_CROSS) then
+      if Pads.check(OFM.paad, PAD_CROSS) and not Pads.check(OFM.oldpad, PAD_CROSS) then
           -- enter directory
           if ofmItem[OFM.ofmSelectedItem].Type == "folder" then
               OFM.enterSelectedDirectory()
@@ -692,7 +738,7 @@ function OFM._start()
             goto GETLOST
           end
       end
-      if Pads.check(pad, PAD_CIRCLE) and not Pads.check(oldpad, PAD_CIRCLE) then
+      if Pads.check(OFM.paad, PAD_CIRCLE) and not Pads.check(OFM.oldpad, PAD_CIRCLE) then
           if OFM.ofmFolder[0] >= 1 then
               OFM.goBackFromDirectory()
           else
@@ -700,12 +746,12 @@ function OFM._start()
               ret = nil
           end
       end
-      if Pads.check(pad, PAD_TRIANGLE) and not Pads.check(oldpad, PAD_TRIANGLE) then
+      if Pads.check(OFM.paad, PAD_TRIANGLE) and not Pads.check(OFM.oldpad, PAD_TRIANGLE) then
           OFM.keepInOFMApp=false
           ret = nil
       end
       Screen.waitVblankStart()
-      oldpad = pad;
+      OFM.oldpad = OFM.paad;
       Screen.flip()
   end
   ::GETLOST::
@@ -721,14 +767,154 @@ function call_script(SCRIPT)
 	if not A then OnScreenError(ERR) end
 end
 
+function Configure_PS2BBL_opts()
+  local T = 1
+  local D = 15
+  local A = 0x80
+  local heading = "PS2BBL Settings"
+  local IRXX = "Defines a path to an IRX driver to be loaded on memory when PS2BBL reads config"
+  local options_t = {
+    item = {
+      "SKIP_PS2LOGO",
+      "KEY_READ_WAIT_TIME",
+      "OSDHISTORY_READ",
+      "EJECT_TRAY",
+      "LOGO_DISPLAY",
+      "LOAD_IRX_E0",
+      "LOAD_IRX_E1",
+      "LOAD_IRX_E2",
+      "LOAD_IRX_E3",
+      "LOAD_IRX_E4",
+      "LOAD_IRX_E5",
+      "LOAD_IRX_E6",
+    },
+    desc = {
+      "Run PS2 games with PS2LOGO program or run game directly",
+      "Time (in miliseconds) that PS2BBL will wait for a key press before\nLaunching AUTO Applications",
+      "Change PS2BBL Logo color based on memory card play history",
+      "If PS2BBL should open the disc tray (if empty)\nWhen user calls disc launcher commands",
+      "Logo display setting.\n2: show logo and console info, 1: show console info\n0:Dont show anything",
+      IRXX,
+      IRXX,
+      IRXX,
+      IRXX,
+      IRXX,
+      IRXX,
+      IRXX,
+      IRXX,
+      IRXX,
+      IRXX,
+    },
+    ptr = {
+      PS2BBL_MAIN_CONFIG.config.SKIP_PS2LOGO,
+      PS2BBL_MAIN_CONFIG.config.KEY_READ_WAIT_TIME,
+      PS2BBL_MAIN_CONFIG.config.OSDHISTORY_READ,
+      PS2BBL_MAIN_CONFIG.config.EJECT_TRAY,
+      PS2BBL_MAIN_CONFIG.config.LOGO_DISPLAY,
+      PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E0,
+      PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E1,
+      PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E2,
+      PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E3,
+      PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E4,
+      PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E5,
+      PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E6,
+    }
+  }
+  local TSIZE = #options_t.item
+  while true do
+    Screen.clear()
+    Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
+
+    Font.ftPrint(_FNT_, 40, 40, 0, 630, 32, heading, Color.new(220, 220, 220, 0x80 - A))
+    Graphics.drawRect(0, 60, SCR_X, 1, Color.new(255, 255, 255, 0x80-A))
+    for i = 1, #options_t.item do
+      local MSGG = options_t.item[i].." = "..Special_tostring(options_t.ptr[i])
+      if i == T then
+        Font.ftPrint(_FNT2_, 60+1, 60+(i*20), 0, 630, 16, MSGG, Color.new(0xff, 0xff, 0xff, 0x80 - A))
+      else
+        Font.ftPrint(_FNT2_, 60, 60+(i*20), 0, 630, 16, MSGG, Color.new(0xff, 0xff, 0xff, 0x70 - A))
+      end
+    end
+    Graphics.drawRect(0, 330, SCR_X, 1, Color.new(0xff, 0xff, 0xff, 0x80-A))
+    if options_t.desc ~= nil then
+      Font.ftPrint(_FNT2_, 80, 350, 0, 600, 64, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
+    end
+	  DrawUsableKeys(T > 5 and (DUK_CIRCLE_GOBACK|DUK_CROSS|DUK_SQUARE) or (DUK_CIRCLE_GOBACK|DUK_CROSS))
+    if A > 0 then A = A - 1 end
+    Screen.flip()
+    pad = Pads.get()
+
+    if Pads.check(pad, PAD_CROSS) and D == 0 then
+      D = 1
+      if T == 1 then options_t.ptr[T] = not options_t.ptr[T]
+      elseif T == 2 then local wololo = IntSlider(true) if wololo ~= nil then options_t.ptr[T] = wololo end
+      elseif T == 3 then options_t.ptr[T] = not options_t.ptr[T]
+      elseif T == 4 then options_t.ptr[T] = not options_t.ptr[T]
+      elseif T == 5 then options_t.ptr[T] = options_t.ptr[T]+1 if options_t.ptr[T] > 2 then options_t.ptr[T] = 0 end
+      else
+        pad = 0
+        local path = OFM._start()
+        pad = 0
+        if path ~= nil and path ~= "" then options_t.ptr[T] = path end
+      end
+    end
+
+    if Pads.check(pad, PAD_CIRCLE) and D == 0 then
+        PS2BBL_MAIN_CONFIG.config.SKIP_PS2LOGO = options_t.ptr[1]
+        PS2BBL_MAIN_CONFIG.config.KEY_READ_WAIT_TIME = options_t.ptr[2]
+        PS2BBL_MAIN_CONFIG.config.OSDHISTORY_READ = options_t.ptr[3]
+        PS2BBL_MAIN_CONFIG.config.EJECT_TRAY = options_t.ptr[4]
+        PS2BBL_MAIN_CONFIG.config.LOGO_DISPLAY = options_t.ptr[5]
+        PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E0 = options_t.ptr[6]
+        PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E1 = options_t.ptr[7]
+        PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E2 = options_t.ptr[8]
+        PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E3 = options_t.ptr[9]
+        PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E4 = options_t.ptr[10]
+        PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E5 = options_t.ptr[11]
+        PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E6 = options_t.ptr[12]
+      T = 0
+      break
+    end
+    if Pads.check(pad, PAD_SQUARE) and D == 0 then
+      D = 1
+      pad = 0
+      local path = OFM._start()
+      pad = 0
+      if path ~= nil and path ~= "" then options_t.ptr[T] = change_path_to_multimc(path) end
+    end
+
+    if Pads.check(pad, PAD_UP) and D == 0 then
+      T = T - 1
+      D = 1
+    elseif Pads.check(pad, PAD_DOWN) and D == 0 then
+      T = T + 1
+      D = 1
+    end
+    if D > 0 then D = D + 1 end
+    if D > 10 then D = 0 end
+    if T < 1 then T = TSIZE end
+    if T > TSIZE then T = 1 end
+  end
+  return T
+end
+
+
 while true do
-  ret = DisplayGenerictMOptPrompt(MAIN_MENU, "PS2BBL Configurator")
-  if ret == 1 then
-	DisplayGenerictMOptPrompt(LOAD_CONF, MAIN_MENU.item[ret])
-  elseif ret == 2 then
-	DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[ret])
-  elseif ret == 4 then
-    call_script("pads/pads.lua")
+  local aret = 0
+  aret = DisplayGenerictMOptPrompt(MAIN_MENU, "PS2BBL Configurator")
+  if aret == 1 then
+	  DisplayGenerictMOptPrompt(LOAD_CONF, MAIN_MENU.item[aret])
+  elseif aret == 2 then
+	  DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[aret])
+  elseif aret == 4 then
+    local subret = 0
+    subret = DisplayGenerictMOptPrompt(MAIN_CONFIG_DLG, MAIN_MENU.item[aret])
+    if subret == 1 then
+      Configure_PS2BBL_opts()
+    elseif subret == 2 then
+      call_script("pads/pads.lua")
+    end
+    LIP.save("TEST.ini", PS2BBL_MAIN_CONFIG)
   end
 end
 
