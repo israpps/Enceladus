@@ -133,17 +133,14 @@ endif
 #--------------------- Embedded ressources ------------------------#
 
 $(EE_ASM_DIR)boot.s: etc/boot.lua | $(EE_ASM_DIR)
-	echo "Embedding boot script..."
 	$(BIN2S) $< $@ bootString
 
 # Images
 $(EE_ASM_DIR)%.s: EMBED/%.png
 	$(BIN2S) $< $@ $(shell basename $< .png)
-	echo "Embedding $< Image..."
 
 $(EE_ASM_DIR)%.s: EMBED/%.ttf
 	$(BIN2S) $< $@ $(shell basename $< .ttf)
-	echo "Embedding $< Font..."
 #------------------------------------------------------------------#
 
 
@@ -176,7 +173,6 @@ $(EE_ASM_DIR)audsrv.s: $(PS2SDK)/iop/irx/audsrv.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ audsrv_irx
 
 $(EE_ASM_DIR)bdm.s: $(PS2SDK)/iop/irx/bdm.irx | $(EE_ASM_DIR)
-	echo "Embedding Block Device Manager(BDM)..."
 	$(BIN2S) $< $@ bdm_irx
 
 $(EE_ASM_DIR)bdmfs_fatfs.s: $(PS2SDK)/iop/irx/bdmfs_fatfs.irx | $(EE_ASM_DIR)
