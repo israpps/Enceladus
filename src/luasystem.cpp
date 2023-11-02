@@ -760,10 +760,37 @@ static int lua_loadmx4siobd(lua_State *L) {
 	lua_pushinteger(L, result);
 	return 2;
 }
+
+#include <smem.h>
+#include <smod.h>
+static int lua_getmodulelist(lua_State *L) {
+
+    smod_mod_info_t info;
+    smod_mod_info_t *curr = NULL;
+    char sName[21];
+    int rv = -1;
+    int i = 1;
+
+	lua_newtable(L);
+    while (rv != 0) {
+        while ((rv = smod_get_next_mod(curr, &info)) != 0) {
+            smem_read(info.name, sName, 20);
+            sName[20] = 0;
+			printf("%d: %s\n", i, sName);
+			lua_pushnumber(L, i++);  // push key for file entry
+        	lua_pushstring(L, sName);
+			lua_settable(L, -3);
+			curr = &info;
+        }
+    }
+	return 1;
+}
+
 static const luaL_Reg Sif_functions[] = {
 	{"loadModule",             			   lua_sifloadmodule},
 	{"loadModuleBuffer",             lua_sifloadmodulebuffer},
 	{"load_MX4SIO_Module", 					lua_loadmx4siobd},
+	{"GetLoadedModuleList", 			   lua_getmodulelist},
 	{0, 0}
 };
 
