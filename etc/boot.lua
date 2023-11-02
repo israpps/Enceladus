@@ -35,6 +35,27 @@ pad = 0
 PADBUTTONS = {"L1", "L2", "R1", "R2", "UP", "TRIANGLE", "LEFT", "RIGHT", "SELECT", "START", "SQUARE", "CIRCLE", "DOWN", "CROSS", "L3", "AUTO", "R3"}
 PADATTEMPT = {1, 2, 3}
 
+Notif_queue = {
+	display = function ()
+		if #Notif_queue.msg < 1 then return end
+		Graphics.drawRect(30, 30, X_MID-30, 32, Color.new(0, 0, 0, 0x40))
+		Font.ftPrint(_FNT2_, 30, 30, 0, X_MID-30, 32, Notif_queue.msg[1], Color.new(0x80, 0x80, 0, Notif_queue.ALFA))
+		Notif_queue.ALFA = Notif_queue.ALFA-1
+		if Notif_queue.ALFA < 1 then
+			Notif_queue.ALFA = 0x80
+			table.remove(Notif_queue.msg, 1)
+		end
+	end,
+	ALFA = 0x80,
+	msg = {}
+}
+
+function Screen.SpecialFlip(notif)
+	if notif ~= nil then
+		Notif_queue.display()
+	end
+	Screen.flip()
+end
 function Special_tostring(VAL)
   if type(VAL) == "nil" then return "<not set>"
   elseif type(VAL) == "boolean" then if VAL then return "1" else return "0" end
@@ -60,7 +81,7 @@ function OnScreenError(STR)
   Graphics.drawRect(0, 60, SCR_X, 1, Color.new(255, 0, 0, 0x80))
   Font.ftPrintMultiLineAligned(_FNT_, X_MID, 90, 8, 630, 32, STR,  Color.new(220, 0, 0, 0x80))
   Graphics.drawRect(0, 330, SCR_X, 1, Color.new(0xff, 0, 0, 0x80))
-  Screen.flip()
+  Screen.SpecialFlip(true)
   while true do end
 end
 
@@ -195,11 +216,7 @@ function DrawUsableKeys(FLAGS, alfa)
 end
 
 PS2BBL_MAIN_CONFIG = LIP.load("pads/LOL.ini")
---LIP.save("LOL2.ini", PS2BBL_MAIN_CONFIG)
---[[
-_FNT_ = Font.ftLoad("pads/font.ttf")
-_FNT2_ = Font.ftLoad("pads/font.ttf")
-]]
+
 
 local MAIN_MENU = {
 	item = {
@@ -218,9 +235,10 @@ local MAIN_MENU = {
 local LOAD_CONF = {
 	item = {
 		"mc0:/PS2BBL/CONFIG.INI",
-		"mc0:/PS2BBL/CONFIG.INI",
+		"mc1:/PS2BBL/CONFIG.INI",
 		"mass:/PS2BBL/CONFIG.INI",
-		"hdd0:__sysconf/PS2BBL/CONFIG.INI",
+		"massX:/PS2BBL/CONFIG.INI",
+		"hdd0:__sysconf:pfs:/PS2BBL/CONFIG.INI",
 	},
 	desc = {
 		"Read config from Memory Card on slot 1",
@@ -297,7 +315,7 @@ function DisplayGenerictMOptPrompt(options_t, heading)
     end
 	DrawUsableKeys(DUK_CIRCLE|DUK_CROSS)
     if A > 0 then A = A - 1 end
-    Screen.flip()
+    Screen.SpecialFlip(true)
     pad = Pads.get()
 
     if Pads.check(pad, PAD_CROSS) and D == 0 then
@@ -356,7 +374,7 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback, AVAILP
 	  else
 		  pad = Pads.get()
 	  end
-    Screen.flip()
+    Screen.SpecialFlip(true)
 
     if (Pads.check(pad, PAD_CROSS) or
 		(Pads.check(pad, PAD_TRIANGLE) and AVAILPADS&DUK_TRIANGLE) or
@@ -404,7 +422,7 @@ function GenericBGFade(fadein)
 	while A < 0x80 and A > 0 do
 	  Screen.clear()
 	  Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, A))
-	  Screen.flip()
+	  Screen.SpecialFlip(true)
 	  if fadein then A = A+1 else A = A-1 end
 	end
 end
@@ -752,7 +770,7 @@ function OFM._start()
       end
       Screen.waitVblankStart()
       OFM.oldpad = OFM.paad;
-      Screen.flip()
+      Screen.SpecialFlip(true)
   end
   ::GETLOST::
   OFM.ofmFolder=nil
@@ -769,7 +787,7 @@ end
 
 function Configure_PS2BBL_opts()
   local T = 1
-  local D = 15
+  local D = 1
   local A = 0x80
   local heading = "PS2BBL Settings"
   local IRXX = "Defines a path to an IRX driver to be loaded on memory when PS2BBL reads config"
@@ -841,18 +859,19 @@ function Configure_PS2BBL_opts()
     end
 	  DrawUsableKeys(T > 5 and (DUK_CIRCLE_GOBACK|DUK_CROSS|DUK_SQUARE) or (DUK_CIRCLE_GOBACK|DUK_CROSS))
     if A > 0 then A = A - 1 end
-    Screen.flip()
+    Screen.SpecialFlip(true)
     pad = Pads.get()
 
     if Pads.check(pad, PAD_CROSS) and D == 0 then
       D = 1
+	  pad = 0
       if T == 1 then options_t.ptr[T] = not options_t.ptr[T]
       elseif T == 2 then local wololo = IntSlider(true) if wololo ~= nil then options_t.ptr[T] = wololo end
       elseif T == 3 then options_t.ptr[T] = not options_t.ptr[T]
       elseif T == 4 then options_t.ptr[T] = not options_t.ptr[T]
       elseif T == 5 then options_t.ptr[T] = options_t.ptr[T]+1 if options_t.ptr[T] > 2 then options_t.ptr[T] = 0 end
       else
-        pad = 0
+		D = 1
         local path = OFM._start()
         pad = 0
         if path ~= nil and path ~= "" then options_t.ptr[T] = path end

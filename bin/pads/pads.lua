@@ -124,7 +124,7 @@ function KeyConfigDialog()
     Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
     DrawOnScreenDualshock(P)
     DrawUsableKeys(DUK_CIRCLE|DUK_CROSS, 0x70)
-    Screen.flip()
+    Screen.SpecialFlip(true)
     pad = Pads.get()
     if D == 0 then
       D = 1
