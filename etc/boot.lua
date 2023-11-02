@@ -128,7 +128,8 @@ print("LIP (Lua Ini Parser)\tCopyright (c) 2012 Carreras Nicolas. modified by El
 LIP = {
 --- Returns a table containing all the data from the INI file.
 ---@param fileName string The name of the INI file to parse.
----@return table The table containing all data from the INI file.
+---@return table|nil data the table containing all data from the INI file. nil if an error ocurred
+---@return integer error the error code in case an issue arised while reading
 load = function (fileName)
 	local data = new_config_struct()
   local ret = 0
@@ -170,7 +171,10 @@ load = function (fileName)
 	  end
   end
 	if FD >= 0 then System.closeFile(FD) end
-  if ret < 0 then data = nil end
+  if ret < 0 then
+    data = nil
+    table.insert(Notif_queue.msg, string.format("Failed to read '%s'\nerror code: %d", fileName, ret))
+  end
 	return data, ret
 end;
 
