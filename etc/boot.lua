@@ -409,12 +409,14 @@ function IntSlider(is_milisecond)
 
 end
 
-function change_path_to_multimc(VAL)
+function replace_device(VAL, NEWDEV)
   local FINAL
   local niee = string.find(VAL, ":", 1, true)
-  FINAL = "mc?"..VAL:sub(niee)
+  FINAL = NEWDEV..VAL:sub(niee)
     return FINAL
 end
+
+
 
 function GenericBGFade(fadein)
 	local A = 0x79
@@ -899,7 +901,7 @@ function Configure_PS2BBL_opts()
       pad = 0
       local path = OFM._start()
       pad = 0
-      if path ~= nil and path ~= "" then options_t.ptr[T] = change_path_to_multimc(path) end
+      if path ~= nil and path ~= "" then options_t.ptr[T] = replace_device(path, "mc?") end
     end
 
     if Pads.check(pad, PAD_UP) and D == 0 then
