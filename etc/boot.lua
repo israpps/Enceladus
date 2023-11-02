@@ -37,12 +37,14 @@ PADATTEMPT = {1, 2, 3}
 
 Notif_queue = {
 	display = function ()
+    local Q
 		if #Notif_queue.msg < 1 then return end
-		Graphics.drawRect(30, 30, X_MID-30, 32, Color.new(0, 0, 0, 0x40))
+    if #Notif_queue.msg > 1 then Q = 0x40 elseif Notif_queue.ALFA > 0x40 then Q = 0x40 else Q = Notif_queue.ALFA end
+		Graphics.drawRect(30, 30, X_MID-30, 40, Color.new(0, 0, 0, Q))
 		Font.ftPrint(_FNT2_, 30, 30, 0, X_MID-30, 32, Notif_queue.msg[1], Color.new(0x80, 0x80, 0, Notif_queue.ALFA))
 		Notif_queue.ALFA = Notif_queue.ALFA-1
 		if Notif_queue.ALFA < 1 then
-			Notif_queue.ALFA = 0x80
+			Notif_queue.ALFA = 0x90
 			table.remove(Notif_queue.msg, 1)
 		end
 	end,
