@@ -164,7 +164,7 @@ function KeyConfigDialog()
           local VAL = nil
           if Pads.check(keyy, PAD_CROSS) or Pads.check(keyy, PAD_SQUARE) then
             VAL = OFM._start()
-            if VAL ~= nil and Pads.check(keyy, PAD_SQUARE) and replace_device(VAL, "mc?") end
+            if VAL ~= nil and Pads.check(keyy, PAD_SQUARE) then VAL = replace_device(VAL, "mc?") end
           elseif Pads.check(keyy, PAD_TRIANGLE) then
             local T = DisplayGenerictMOptPrompt(PS2BBL_CMDS, "Commands")
             if T > 0 then VAL = PS2BBL_CMDS.item[T] end
