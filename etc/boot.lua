@@ -122,12 +122,12 @@ end
 
 PS2BBL_MAIN_CONFIG = new_config_struct()
 print("LIP (Lua Ini Parser)\tCopyright (c) 2012 Carreras Nicolas. modified by El_isra for PS2BBL Usage");
-LIP = {}
-
+--- INI handling functions
+LIP = {
 --- Returns a table containing all the data from the INI file.
---@param fileName The name of the INI file to parse.
---@return The table containing all data from the INI file.
-function LIP.load(fileName)
+---@param fileName string The name of the INI file to parse.
+---@return table The table containing all data from the INI file.
+load = function (fileName)
 	local data = new_config_struct()
   local ret = 0
 	local FD = System.openFile(fileName, FREAD);
@@ -170,29 +170,45 @@ function LIP.load(fileName)
 	if FD >= 0 then System.closeFile(FD) end
   if ret < 0 then data = nil end
 	return data, ret
-end
+end;
 
 --- Saves all the data from a table to an INI file.
 ---@param fileName string The name of the INI file to fill.
 ---@param data table The table containing all the data to store.
-function LIP.save(fileName, data)
+save = function (fileName, data)
 	local FD = System.openFile(fileName, FCREATE);
 	local contents = "";
-
-	for key, value in pairs(data.config) do
-		if (key ~= nil and key ~= "") and (value ~= nil and value ~= "") then contents = contents .. ('%s = %s\n'):format(key, Special_tostring(value)) end
-	end --we iterate this crap twice: first, leave launch keys for the bottom
-  contents = contents.."\n"
-  for i = 1, #PADBUTTONS do
-    for x = 1, 3, 1 do
-      if data.keys[i][x] ~= nil then
-        contents = contents .. ('LK_%s_E%d = %s\n'):format(PADBUTTONS[i], x, data.keys[i][x])
+	if (FD >= 0) then
+    local subtbl = {}
+		for key, value in pairs(data.config) do
+      if not(key ~= nil and key ~= "") and (value ~= nil and value ~= "") then goto continue end
+			if (key:sub(1,9) ~= "LOAD_IRX_") then
+        contents = contents .. ('%s = %s\n'):format(key, Special_tostring(value))
+      else
+        table.insert(subtbl, key)
       end
+		    ::continue::
+		end
+    if #subtbl > 0 then
+      table.sort(subtbl)
+  		contents = contents.."\n"
+      for _, k in ipairs(subtbl) do contents = contents .. ('%s = %s\n'):format(k, Special_tostring(data.config[k])) end
     end
-  end
-    System.writeFile(FD, contents, string.len(contents));
-    System.closeFile(FD);
-end
+  		contents = contents.."\n"
+  		for i = 1, #PADBUTTONS do
+  		  for x = 1, 3, 1 do
+  		    if data.keys[i][x] ~= nil then
+  		      contents = contents .. ('LK_%s_E%d = %s\n'):format(PADBUTTONS[i], x, data.keys[i][x])
+  		    end
+  		  end
+  		end
+		System.writeFile(FD, contents, string.len(contents));
+		System.closeFile(FD);
+	else
+    table.insert(Notif_queue.msg, string.format("Failed to save config to '%s'\nerr %d", fileName, FD))
+	end
+end;
+}
 
 DUK_CROSS = (1 << 0)
 DUK_CIRCLE = (1 << 1)
