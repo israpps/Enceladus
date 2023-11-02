@@ -498,31 +498,31 @@ function OFM.refreshFileList(directory, tempmode)
 
 		-- MEMORY CARD 1
 		mctypea = System.getMCInfo(0)
-		if mctypea.type == 2 then
+		if mctypea.type == 2 and mctypea.format == 1 then
 			ofmItemTotal=ofmItemTotal+1
 			ofmItem[ofmItemTotal] = {};
-			ofmItem[ofmItemTotal].Name = "Memory Card 1" -- displayed name
+			ofmItem[ofmItemTotal].Name = "mc0:/" -- displayed name
 			ofmItem[ofmItemTotal].Type = "folder" -- "file" or "folder"
 			ofmItem[ofmItemTotal].Dir = "mc0:/" -- directory (path)
-			ofmItem[ofmItemTotal].Size = "" -- displayed size
+			ofmItem[ofmItemTotal].Size = string.format("%.1fMb Free", mctypea.freemem/1024)
 		end
 
 		-- MEMORY CARD 2
 		mctypeb = System.getMCInfo(1)
-		if mctypeb.type == 2 then
+		if mctypeb.type == 2 and mctypeb.format == 1 then
 			ofmItemTotal=ofmItemTotal+1
 			ofmItem[ofmItemTotal] = {};
-			ofmItem[ofmItemTotal].Name = "Memory Card 2"
+			ofmItem[ofmItemTotal].Name = "mc1:/"
 			ofmItem[ofmItemTotal].Type = "folder"
 			ofmItem[ofmItemTotal].Dir = "mc1:/"
-			ofmItem[ofmItemTotal].Size = ""
+			ofmItem[ofmItemTotal].Size = string.format("%.1fMb Free", mctypeb.freemem/1024)
 		end
 
 		-- HDD
 		if System.doesDirectoryExist("hdd0:/") then
 			ofmItemTotal=ofmItemTotal+1
 			ofmItem[ofmItemTotal] = {};
-			ofmItem[ofmItemTotal].Name = "Hard Drive"
+			ofmItem[ofmItemTotal].Name = "hdd0:/"
 			ofmItem[ofmItemTotal].Type = "folder"
 			ofmItem[ofmItemTotal].Dir = "hdd0:/"
 			ofmItem[ofmItemTotal].Size = ""
@@ -532,7 +532,7 @@ function OFM.refreshFileList(directory, tempmode)
 		if System.doesDirectoryExist("cdfs:/") then
 			ofmItemTotal=ofmItemTotal+1
 			ofmItem[ofmItemTotal] = {};
-			ofmItem[ofmItemTotal].Name = "Optical Drive"
+			ofmItem[ofmItemTotal].Name = "cdfs:/"
 			ofmItem[ofmItemTotal].Type = "folder"
 			ofmItem[ofmItemTotal].Dir = "cdfs:/"
 			ofmItem[ofmItemTotal].Size = ""
@@ -556,7 +556,7 @@ function OFM.refreshFileList(directory, tempmode)
 		if System.doesDirectoryExist("host:/") then
 			ofmItemTotal=ofmItemTotal+1
 			ofmItem[ofmItemTotal] = {};
-			ofmItem[ofmItemTotal].Name = "Host directory"
+			ofmItem[ofmItemTotal].Name = "host:/"
 			ofmItem[ofmItemTotal].Type = "folder"
 			ofmItem[ofmItemTotal].Dir = "host:/"
 			ofmItem[ofmItemTotal].Size = ""
@@ -744,6 +744,7 @@ function OFM._start()
   local ret = nil
   OFM.paad = 0
   OFM.oldpad = 0
+  OFM.first_roll = true
   while OFM.keepInOFMApp do
 	if not OFM.first_roll then OFM.paad = Pads.get() else OFM.first_roll = false end
     Screen.clear()
