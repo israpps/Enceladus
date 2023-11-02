@@ -748,10 +748,22 @@ static int lua_sifloadmodulebuffer(lua_State *L){
 	return 1;
 }
 
+
+extern unsigned char mx4sio_bd_irx[];
+extern unsigned int size_mx4sio_bd_irx;
+
+static int lua_loadmx4siobd(lua_State *L) {
+	int irx_id, result;
+	irx_id = SifExecModuleBuffer(&mx4sio_bd_irx, size_mx4sio_bd_irx, 0, NULL, &result);
+	printf(" [MX4SIO_BD]: id=%d, ret=%d\n", irx_id, result);
+	lua_pushinteger(L, irx_id);
+	lua_pushinteger(L, result);
+	return 2;
+}
 static const luaL_Reg Sif_functions[] = {
 	{"loadModule",             			   lua_sifloadmodule},
 	{"loadModuleBuffer",             lua_sifloadmodulebuffer},
-
+	{"load_MX4SIO_Module", 					lua_loadmx4siobd},
 	{0, 0}
 };
 

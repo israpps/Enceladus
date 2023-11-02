@@ -50,6 +50,7 @@ EE_INCS += -Imodules/ds34bt/ee -Imodules/ds34usb/ee
 # stuff to send both to C and C++
 GLOBAL_CFLAGS += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
 
+FORCE_FILEXIO_LOAD ?= 1
 FEATURES_CopyAsync ?= 0
 FEATURES_Sound ?= 0
 FEATURES_Render ?= 0
@@ -85,7 +86,7 @@ LUA_LIBS =	luaplayer.o luasystem.o luacontrols.o \
 IOP_MODULES = iomanx.o filexio.o \
 			  sio2man.o mcman.o mcserv.o padman.o \
 			  usbd.o bdm.o bdmfs_fatfs.o \
-			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o
+			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o mx4sio_bd.o
 
 EMBEDDED_RSC = boot.o \
 	BG.o circle.o cross.o down.o L1.o L2.o L3.o left.o R1.o R2.o R3.o right.o select.o square.o start.o triangle.o up.o \
@@ -152,44 +153,12 @@ $(EE_ASM_DIR)%.s: EMBED/%.otf
 
 
 #-------------------- Embedded IOP Modules ------------------------#
-$(EE_ASM_DIR)iomanx.s: $(PS2SDK)/iop/irx/iomanX.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ iomanX_irx
+vpath %.irx iop/
+vpath %.irx $(PS2SDK)/iop/irx/
+IRXTAG = $(notdir $(addsuffix _irx, $(basename $<)))
 
-$(EE_ASM_DIR)filexio.s: $(PS2SDK)/iop/irx/fileXio.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ fileXio_irx
-
-$(EE_ASM_DIR)sio2man.s: $(PS2SDK)/iop/irx/sio2man.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ sio2man_irx
-	
-$(EE_ASM_DIR)mcman.s: $(PS2SDK)/iop/irx/mcman.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ mcman_irx
-
-$(EE_ASM_DIR)mcserv.s: $(PS2SDK)/iop/irx/mcserv.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ mcserv_irx
-
-$(EE_ASM_DIR)padman.s: $(PS2SDK)/iop/irx/padman.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ padman_irx
-	
-$(EE_ASM_DIR)libsd.s: $(PS2SDK)/iop/irx/libsd.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ libsd_irx
-
-$(EE_ASM_DIR)usbd.s: $(PS2SDK)/iop/irx/usbd.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ usbd_irx
-
-$(EE_ASM_DIR)audsrv.s: $(PS2SDK)/iop/irx/audsrv.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ audsrv_irx
-
-$(EE_ASM_DIR)bdm.s: $(PS2SDK)/iop/irx/bdm.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ bdm_irx
-
-$(EE_ASM_DIR)bdmfs_fatfs.s: $(PS2SDK)/iop/irx/bdmfs_fatfs.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ bdmfs_fatfs_irx
-
-$(EE_ASM_DIR)usbmass_bd.s: $(PS2SDK)/iop/irx/usbmass_bd.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ usbmass_bd_irx
-
-$(EE_ASM_DIR)cdfs.s: $(PS2SDK)/iop/irx/cdfs.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ cdfs_irx
+$(EE_ASM_DIR)%.s: $(PS2SDK)/iop/irx/%.irx | $(EE_ASM_DIR)
+	$(BIN2S) $< $@ $(IRXTAG)
 
 modules/ds34bt/ee/libds34bt.a: modules/ds34bt/ee
 	$(MAKE) -C $<
