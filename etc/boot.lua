@@ -456,16 +456,16 @@ end
 
 -----------
 -- round file size
-OFM = {}
-function OFM.ofmRoundSize(inputValue)
+OFM = {
+ofmRoundSize = function (inputValue)
 	roundValue=inputValue*10
 	roundTempValueA,roundTempValueB = math.modf(roundValue/1)
 	roundValue= 1 * (roundTempValueA + (roundTempValueB > 0.5 and 1 or 0))
 	roundValue=roundValue/10
 	return roundValue
-end
+end;
 -- check pad up/down
-function OFM.checkPadUpDown()
+checkPadUpDown = function ()
 	if Pads.check(OFM.paad, PAD_UP) then
 		PadUpHolding=PadUpHolding+1
 	else
@@ -503,9 +503,9 @@ function OFM.checkPadUpDown()
 	if OFM.ofmSelectedItem > ofmItemTotal then
 		OFM.ofmSelectedItem = ofmItemTotal
 	end
-end
+end;
 -- refresh files list -- directory to list / list files in directory (true) or mount paths (false)
-function OFM.refreshFileList(directory, tempmode)
+refreshFileList = function (directory, tempmode)
 	if tempmode == false then
 		ofmItemTotal = 0
 		OFM.ofmSelectedItem = 1
@@ -660,9 +660,9 @@ function OFM.refreshFileList(directory, tempmode)
 			table.sort(ofmItem, function (TempTabA, TempTabB) return TempTabA.TypeAndName < TempTabB.TypeAndName end)
 		end
 	end
-end
+end;
 -- displaying list of files
-function OFM.listFiles()
+listFiles = function ()
 	OFM.AdjustY = 0
 	if OFM.ofmSelectedItem < 15 then
 		ofmItemTotalB=OFM.ofmSelectedItem+24
@@ -702,9 +702,9 @@ function OFM.listFiles()
 		Font.ftPrint(fontBig, 16, TempY, 0, 500, 64, ofmItem[nr].Name, TMPCOL)
 		Font.ftPrint(fontBig, 548, TempY, 0, 500, 64, ofmItem[nr].Size, TMPCOL)
 	end
-end
+end;
 -- entering selected directory
-function OFM.enterSelectedDirectory()
+enterSelectedDirectory = function ()
 	if ofmItem[OFM.ofmSelectedItem].Name ~= "." and ofmItem[OFM.ofmSelectedItem].Name ~= ".." then
 		if System.doesDirectoryExist(OFM.ofmCurrentPath..ofmItem[OFM.ofmSelectedItem].Dir) then
 			OFM.ofmFolder[0] = OFM.ofmFolder[0]+1
@@ -716,9 +716,9 @@ function OFM.enterSelectedDirectory()
 			OFM.refreshFileList(OFM.ofmCurrentPath, true)
 		end
 	end
-end
+end;
 -- go back from selected directory
-function OFM.goBackFromDirectory()
+goBackFromDirectory = function ()
 	if OFM.ofmFolder[0] == 1 then
 		OFM.ofmFolder[0] = 0
 		OFM.ofmFolder[1] = ""
@@ -738,13 +738,13 @@ function OFM.goBackFromDirectory()
 			end
 		end
     end
-end
+end;
 -- draw overlay
-function OFM.drawOFMoverlay()
+drawOFMoverlay = function ()
 	Font.ftPrint(fontSmall, 16, plusYValue+51, 0, 704, 64, OFM.ofmCurrentPath, OFM.COLOR_LIST)
     Graphics.drawRect(0, 71, SCR_X, 1, Color.new(255, 255, 255, 0x80))
-end
-function OFM._start()
+end;
+_start = function ()
   OFM.ofmScrollDelay=4
   OFM.ofmWaitBeforeScroll=14
   OFM.COLOR_LIST=Color.new(255,255,255,128)
@@ -801,6 +801,8 @@ function OFM._start()
   ofmItem=nil
   return ret
 end
+}
+
 -----------
 
 GenericBGFade(true)
