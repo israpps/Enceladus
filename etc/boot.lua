@@ -56,6 +56,14 @@ function Screen.SpecialFlip(notif)
 	end
 	Screen.flip()
 end
+function BDM.GetDeviceAlias(indx)
+	local A = BDM.GetDeviceType(indx)
+	if A == BD_USB then return string.format("usb%d:/", indx)
+	elseif A == BD_MX4SIO then return string.format("mx4sio%d:/", indx)
+	elseif A == BD_ILINK then return string.format("ilink%d:/", indx)
+	elseif A == BD_UDPBD then return string.format("udpbd%d:/", indx)
+	else return string.format("mass%d:/", indx) end
+end
 function Special_tostring(VAL)
   if type(VAL) == "nil" then return "<not set>"
   elseif type(VAL) == "boolean" then if VAL then return "1" else return "0" end
@@ -430,7 +438,7 @@ function GenericBGFade(fadein)
 end
 
 
---
+-----------
 -- round file size
 OFM = {}
 function OFM.ofmRoundSize(inputValue)
@@ -440,7 +448,6 @@ function OFM.ofmRoundSize(inputValue)
 	roundValue=roundValue/10
 	return roundValue
 end
-
 -- check pad up/down
 function OFM.checkPadUpDown()
 	if Pads.check(OFM.paad, PAD_UP) then
@@ -481,7 +488,6 @@ function OFM.checkPadUpDown()
 		OFM.ofmSelectedItem = ofmItemTotal
 	end
 end
-
 -- refresh files list -- directory to list / list files in directory (true) or mount paths (false)
 function OFM.refreshFileList(directory, tempmode)
 	if tempmode == false then
@@ -533,13 +539,17 @@ function OFM.refreshFileList(directory, tempmode)
 		end
 
 		-- MASS
-		if System.doesDirectoryExist("mass:/") then
-			ofmItemTotal=ofmItemTotal+1
-			ofmItem[ofmItemTotal] = {};
-			ofmItem[ofmItemTotal].Name = "USB Drive"
-			ofmItem[ofmItemTotal].Type = "folder"
-			ofmItem[ofmItemTotal].Dir = "mass:/"
-			ofmItem[ofmItemTotal].Size = ""
+		for i = 0, 10, 1 do
+			bdbd = string.format("mass%d:/", i)
+			if System.doesDirectoryExist(bdbd) then
+				ofmItemTotal=ofmItemTotal+1
+				ofmItem[ofmItemTotal] = {};
+				ofmItem[ofmItemTotal].Name = BDM.GetDeviceAlias(i)
+				ofmItem[ofmItemTotal].Type = "folder"
+				ofmItem[ofmItemTotal].Dir = bdbd
+				ofmItem[ofmItemTotal].Size = ""
+			end
+			
 		end
 
 		-- HOST
@@ -635,7 +645,6 @@ function OFM.refreshFileList(directory, tempmode)
 		end
 	end
 end
-
 -- displaying list of files
 function OFM.listFiles()
 	OFM.AdjustY = 0
@@ -678,7 +687,6 @@ function OFM.listFiles()
 		Font.ftPrint(fontBig, 548, TempY, 0, 500, 64, ofmItem[nr].Size, TMPCOL)
 	end
 end
-
 -- entering selected directory
 function OFM.enterSelectedDirectory()
 	if ofmItem[OFM.ofmSelectedItem].Name ~= "." and ofmItem[OFM.ofmSelectedItem].Name ~= ".." then
@@ -693,7 +701,6 @@ function OFM.enterSelectedDirectory()
 		end
 	end
 end
-
 -- go back from selected directory
 function OFM.goBackFromDirectory()
 	if OFM.ofmFolder[0] == 1 then
@@ -716,13 +723,11 @@ function OFM.goBackFromDirectory()
 		end
     end
 end
-
 -- draw overlay
 function OFM.drawOFMoverlay()
 	Font.ftPrint(fontSmall, 16, plusYValue+51, 0, 704, 64, OFM.ofmCurrentPath, OFM.COLOR_LIST)
     Graphics.drawRect(0, 71, SCR_X, 1, Color.new(255, 255, 255, 0x80))
 end
-
 function OFM._start()
   OFM.ofmScrollDelay=4
   OFM.ofmWaitBeforeScroll=14
@@ -737,11 +742,10 @@ function OFM._start()
   OFM.keepInOFMApp=true
   if plusYValue == nil then plusYValue=0 end
   local ret = nil
-  OFM.keepInOFMApp=true
   OFM.paad = 0
   OFM.oldpad = 0
   while OFM.keepInOFMApp do
-    OFM.paad = Pads.get()
+	if not OFM.first_roll then OFM.paad = Pads.get() else OFM.first_roll = false end
     Screen.clear()
   	Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, 0x80))
     OFM.drawOFMoverlay() -- draws overlay
@@ -780,6 +784,7 @@ function OFM._start()
   ofmItem=nil
   return ret
 end
+-----------
 
 GenericBGFade(true)
 function call_script(SCRIPT)
