@@ -44,17 +44,17 @@ Notif_queue = {
 	display = function ()
     local Q
 		if #Notif_queue.msg < 1 then return end
-    if #Notif_queue.msg > 1 then Q = 0x40 elseif Notif_queue.ALFA > 0x40 then Q = 0x40 else Q = Notif_queue.ALFA end
+    if #Notif_queue.msg > 1 then Q = 0x50 elseif Notif_queue.ALFA > 0x50 then Q = 0x50 else Q = math.floor(Notif_queue.ALFA) end
 		Graphics.drawRect(30, 30, X_MID-30, 40, Color.new(0, 0, 0, Q))
-		Font.ftPrint(_FNT2_, 30, 30, 0, X_MID-30, 32, Notif_queue.msg[1], Color.new(0x80, 0x80, 0, Notif_queue.ALFA))
-		Notif_queue.ALFA = Notif_queue.ALFA-1
+		Font.ftPrint(_FNT2_, 32, 32, 0, X_MID-30, 32, Notif_queue.msg[1], Color.new(0, 100, 255, math.floor(Notif_queue.ALFA)))
+		Notif_queue.ALFA = Notif_queue.ALFA-.5
 		if Notif_queue.ALFA < 1 then
 			Notif_queue.ALFA = 0x90
 			table.remove(Notif_queue.msg, 1)
 		end
-	end,
-	ALFA = 0x80,
-	msg = {}
+	end;
+	ALFA = 0x80;
+	msg = {};
 }
 
 function LoadHDD_Stuff()
@@ -88,6 +88,7 @@ function Screen.SpecialFlip(notif)
 	end
 	Screen.flip()
 end
+
 function BDM.GetDeviceAlias(indx)
 	local A = BDM.GetDeviceType(indx)
 	if A == BD_USB then return string.format("usb%d:/", indx)
@@ -96,6 +97,7 @@ function BDM.GetDeviceAlias(indx)
 	elseif A == BD_UDPBD then return string.format("udpbd%d:/", indx)
 	else return string.format("mass%d:/", indx) end
 end
+
 function Special_tostring(VAL)
   if type(VAL) == "nil" then return "<not set>"
   elseif type(VAL) == "boolean" then if VAL then return "1" else return "0" end
@@ -103,7 +105,6 @@ function Special_tostring(VAL)
     return tostring(VAL)
   end
 end
-
 
 function Font.ftPrintMultiLineAligned(font, x, y, spacing, width, height, text, color)
 	local internal_y = y
@@ -134,13 +135,13 @@ function new_config_struct()
       OSDHISTORY_READ = true,
       EJECT_TRAY =  true,
       LOGO_DISPLAY = 2,
-      LOAD_IRX_E0 = "",
-      LOAD_IRX_E1 = "",
-      LOAD_IRX_E2 = "",
-      LOAD_IRX_E3 = "",
-      LOAD_IRX_E4 = "",
-      LOAD_IRX_E5 = "",
-      LOAD_IRX_E6 = "",
+      LOAD_IRX_E0 = nil,
+      LOAD_IRX_E1 = nil,
+      LOAD_IRX_E2 = nil,
+      LOAD_IRX_E3 = nil,
+      LOAD_IRX_E4 = nil,
+      LOAD_IRX_E5 = nil,
+      LOAD_IRX_E6 = nil,
     },
   }
   for i = 1, #PADBUTTONS do
@@ -255,14 +256,16 @@ load = function (fileName)
   if ret < 0 then
     data = nil
     table.insert(Notif_queue.msg, string.format("Failed to read '%s'\nerror code: %d", fileName, ret))
+  else
+    table.insert(Notif_queue.msg, string.format("Successfully loaded from\n%s", fileName))
   end
 	return data, ret
 end;
-
 --- Saves all the data from a table to an INI file.
 ---@param fileName string The name of the INI file to fill.
----@param data table The table containing all the data to store.
+---@param data table|nil The table containing all the data to store.
 save = function (fileName, data)
+  if data == nil then table.insert(Notif_queue.msg, "Config Save aborted: Config structure is NIL") end
 	local FD = System.openFile(fileName, FCREATE);
 	local contents = "";
 	if (FD >= 0) then
@@ -291,6 +294,7 @@ save = function (fileName, data)
   		end
 		System.writeFile(FD, contents, string.len(contents));
 		System.closeFile(FD);
+    table.insert(Notif_queue.msg, string.format("Successfully saved to\n%s", fileName))
 	else
     table.insert(Notif_queue.msg, string.format("Failed to save config to '%s'\nerr %d", fileName, FD))
 	end
@@ -303,6 +307,9 @@ DUK_TRIANGLE = (1 << 2)
 DUK_TRIANGLE_CMD = (1 << 3)|DUK_TRIANGLE
 DUK_CIRCLE_GOBACK = (1 << 4)|DUK_CIRCLE
 DUK_SQUARE = (1 << 5)
+DUK_INTSLIDER = (1 << 6)
+DUK_SELECT_CLEAR = (1 << 7)
+DUK_START_SAVE = (1 << 8)
 function DrawUsableKeys(FLAGS, alfa)
 	if alfa == nil then alfa = 0x80 end
 	if (FLAGS & DUK_CROSS) ~= 0 then
@@ -324,10 +331,28 @@ function DrawUsableKeys(FLAGS, alfa)
 		Graphics.drawScaleImage(RES.square, SCR_X-30, SCR_Y-35, 32, 32)
 		Font.ftPrint(_FNT2_, SCR_X-60-(MSG:len()*5), SCR_Y-30, 4, 630, 16, MSG, Color.new(0xff, 0xff, 0xff, alfa))
 	end
+	if (FLAGS & DUK_INTSLIDER) ~= 0 then
+		Graphics.drawScaleImage(RES.L1, 190, SCR_Y-60, 32, 32)
+		Font.ftPrint(_FNT2_, 220, SCR_Y-55, 0, 630, 16, "-1000", Color.new(0xff, 0xff, 0xff, alfa))
+
+		Graphics.drawScaleImage(RES.R1, SCR_X-230, SCR_Y-60, 32, 32)
+		Font.ftPrint(_FNT2_, SCR_X-270, SCR_Y-55, 4, 630, 16, "+1000", Color.new(0xff, 0xff, 0xff, alfa))
+
+		Graphics.drawScaleImage(RES.L2, 190, SCR_Y-35, 32, 32)
+		Font.ftPrint(_FNT2_, 220, SCR_Y-30, 0, 630, 16, "-100", Color.new(0xff, 0xff, 0xff, alfa))
+
+		Graphics.drawScaleImage(RES.R2, SCR_X-230, SCR_Y-35, 32, 32)
+		Font.ftPrint(_FNT2_, SCR_X-270, SCR_Y-30, 4, 630, 16, "+100", Color.new(0xff, 0xff, 0xff, alfa))
+	end
+	if (FLAGS & DUK_SELECT_CLEAR) ~= 0 then
+		Graphics.drawScaleImage(RES.select, 190, SCR_Y-60, 32, 32)
+		Font.ftPrint(_FNT2_, 225, SCR_Y-55, 0, 630, 16, "clear", Color.new(0xff, 0xff, 0xff, alfa))
+	end
+	if (FLAGS & DUK_START_SAVE) ~= 0 then
+    Graphics.drawScaleImage(RES.start, SCR_X-230, SCR_Y-60, 32, 32)
+    Font.ftPrint(_FNT2_, SCR_X-265, SCR_Y-55, 4, 630, 16, "Save", Color.new(0xff, 0xff, 0xff, alfa))
+  end
 end
-
-PS2BBL_MAIN_CONFIG = LIP.load("pads/LOL.ini")
-
 
 local MAIN_MENU = {
 	item = {
@@ -355,6 +380,7 @@ local LOAD_CONF = {
 		"Read config from Memory Card on slot 1",
 		"Read config from Memory Card on slot 2",
 		"Read config from USB Mass storage",
+		"Read config from MX4SIO SDCard",
 		"Read config from Internal HDD",
 	},
 }
@@ -406,7 +432,7 @@ end
 --0, 0xde, 0xf
 function DisplayGenerictMOptPrompt(options_t, heading)
   local T = 1
-  local D = 15
+  local D = 1
   local A = 0x80
   local TSIZE = #options_t.item
   while true do
@@ -481,7 +507,7 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback, AVAILP
     if options_t.desc ~= nil then
       Font.ftPrint(_FNT2_, 80, 370, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
     end
-	DrawUsableKeys(AVAILPADS)
+	  DrawUsableKeys(AVAILPADS)
     if A > 0 then
 		  A = A - 1
 	  else
@@ -491,6 +517,8 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback, AVAILP
 
     if (Pads.check(pad, PAD_CROSS) or
 		(Pads.check(pad, PAD_TRIANGLE) and AVAILPADS&DUK_TRIANGLE) or
+		(Pads.check(pad, PAD_SELECT) and AVAILPADS&DUK_SELECT_CLEAR) or
+		(Pads.check(pad, PAD_SELECT) and AVAILPADS&DUK_TRIANGLE) or
 		(Pads.check(pad, PAD_SQUARE) and AVAILPADS&DUK_SQUARE)) and D == 0
 	then
       D = 1
@@ -518,26 +546,58 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback, AVAILP
   return T, pad
 end
 
-function IntSlider(is_milisecond)
+function IntSlider(is_milisecond, VAL, heading)
+  local origval = VAL
+	local QUIT = false
+	if heading == nil then heading = "" end
+	local D = 1
+	while not QUIT do
+	  Screen.clear()
+	  Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
+	  Graphics.drawRect(0, Y_MID-30, SCR_X, 60, Color.new(0, 0, 0, 50))
+	  Font.ftPrint(_FNT_, X_MID, Y_MID-60, 8, 630, 32, heading, Color.new(220, 220, 220, 0x80))
+	  Graphics.drawRect(0, Y_MID-30, SCR_X, 1, Color.new(255, 255, 255, 0x80))
+	  Graphics.drawRect(0, Y_MID+30, SCR_X, 1, Color.new(255, 255, 255, 0x80))
+	  Font.ftPrint(_FNT_, X_MID, Y_MID, 8, 630, 32, VAL, Color.new(220, 220, 220, 0x80))
 
+	  DrawUsableKeys(DUK_INTSLIDER|DUK_CIRCLE|DUK_CROSS)
+	  Screen.SpecialFlip(true)
+	  pad = Pads.get()
+	  if Pads.check(pad, PAD_CROSS) and D==0 then
+	    return VAL
+	  end
+	  if Pads.check(pad, PAD_CIRCLE) and D==0 then
+      return origval
+	  end
+	  if Pads.check(pad, PAD_R1) and D==0 then
+	    D=1
+	    VAL = VAL+1000
+	  end
+	  if Pads.check(pad, PAD_R2) and D==0 then
+	    D=1
+	    VAL = VAL+100
+	  end
+	  if Pads.check(pad, PAD_L1) and D==0 then
+	    D=1
+	    VAL = VAL-1000
+	  end
+	  if Pads.check(pad, PAD_L2) and D==0 then
+	    D=1
+	    VAL = VAL-100
+	  end
+	  if D >= 10 then D=0 else D = D+1 end
+	  if VAL < 0 then VAL = 0 end
+	  if VAL > 10000 then VAL = 10000 end
+	end
 end
 
-function replace_device(VAL, NEWDEV)
-  local FINAL
-  local niee = string.find(VAL, ":", 1, true)
-  FINAL = NEWDEV..VAL:sub(niee)
-    return FINAL
-end
-
-
-
-function GenericBGFade(fadein)
+function GenericBGFade(fadein, allow_notif)
 	local A = 0x79
 	if fadein then A = 1 end
 	while A < 0x80 and A > 0 do
 	  Screen.clear()
 	  Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, A))
-	  Screen.SpecialFlip(true)
+	  Screen.SpecialFlip(allow_notif)
 	  if fadein then A = A+1 else A = A-1 end
 	end
 end
@@ -894,7 +954,7 @@ end
 
 -----------
 
-GenericBGFade(true)
+GenericBGFade(true, nil)
 function call_script(SCRIPT)
     local A, ERR = dofile_protected(SCRIPT);
 	if not A then OnScreenError(ERR) end
@@ -972,16 +1032,16 @@ function Configure_PS2BBL_opts()
     if options_t.desc ~= nil then
       Font.ftPrint(_FNT2_, 80, 350, 0, 600, 64, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
     end
-	  DrawUsableKeys(T > 5 and (DUK_CIRCLE_GOBACK|DUK_CROSS|DUK_SQUARE) or (DUK_CIRCLE_GOBACK|DUK_CROSS))
+	  DrawUsableKeys(T > 5 and (DUK_CIRCLE_GOBACK|DUK_CROSS|DUK_SQUARE|DUK_SELECT_CLEAR|DUK_START_SAVE) or (DUK_CIRCLE_GOBACK|DUK_CROSS))
     if A > 0 then A = A - 1 end
     Screen.SpecialFlip(true)
     pad = Pads.get()
 
     if Pads.check(pad, PAD_CROSS) and D == 0 then
       D = 1
-	  pad = 0
+	    pad = 0
       if T == 1 then options_t.ptr[T] = not options_t.ptr[T]
-      elseif T == 2 then local wololo = IntSlider(true) if wololo ~= nil then options_t.ptr[T] = wololo end
+      elseif T == 2 then local wololo = IntSlider(true, options_t.ptr[T], options_t.item[T]) if wololo ~= nil then options_t.ptr[T] = wololo end
       elseif T == 3 then options_t.ptr[T] = not options_t.ptr[T]
       elseif T == 4 then options_t.ptr[T] = not options_t.ptr[T]
       elseif T == 5 then options_t.ptr[T] = options_t.ptr[T]+1 if options_t.ptr[T] > 2 then options_t.ptr[T] = 0 end
@@ -993,7 +1053,8 @@ function Configure_PS2BBL_opts()
       end
     end
 
-    if Pads.check(pad, PAD_CIRCLE) and D == 0 then
+    if (Pads.check(pad, PAD_CIRCLE) or Pads.check(pad, PAD_START)) and D == 0 then
+      if Pads.check(pad, PAD_START) then
         PS2BBL_MAIN_CONFIG.config.SKIP_PS2LOGO = options_t.ptr[1]
         PS2BBL_MAIN_CONFIG.config.KEY_READ_WAIT_TIME = options_t.ptr[2]
         PS2BBL_MAIN_CONFIG.config.OSDHISTORY_READ = options_t.ptr[3]
@@ -1006,15 +1067,20 @@ function Configure_PS2BBL_opts()
         PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E4 = options_t.ptr[10]
         PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E5 = options_t.ptr[11]
         PS2BBL_MAIN_CONFIG.config.LOAD_IRX_E6 = options_t.ptr[12]
+      end
       T = 0
       break
     end
-    if Pads.check(pad, PAD_SQUARE) and D == 0 then
+    if Pads.check(pad, PAD_SQUARE) and D == 0 and T > 5 then
       D = 1
       pad = 0
       local path = OFM._start()
       pad = 0
       if path ~= nil and path ~= "" then options_t.ptr[T] = replace_device(path, "mc?") end
+    end
+    if Pads.check(pad, PAD_SELECT) and D == 0 and T > 5 then
+      D = 1
+      options_t.ptr[T] = nil
     end
 
     if Pads.check(pad, PAD_UP) and D == 0 then
@@ -1035,20 +1101,29 @@ end
 
 while true do
   local aret = 0
+  local sret = 0
   aret = DisplayGenerictMOptPrompt(MAIN_MENU, "PS2BBL Configurator")
   if aret == 1 then
-	  DisplayGenerictMOptPrompt(LOAD_CONF, MAIN_MENU.item[aret])
-  elseif aret == 2 then
-	  DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[aret])
-  elseif aret == 4 then
-    local subret = 0
-    subret = DisplayGenerictMOptPrompt(MAIN_CONFIG_DLG, MAIN_MENU.item[aret])
-    if subret == 1 then
-      Configure_PS2BBL_opts()
-    elseif subret == 2 then
-      call_script("pads/pads.lua")
+	  sret = DisplayGenerictMOptPrompt(LOAD_CONF, MAIN_MENU.item[aret])
+    if sret ~= 0 then
+      Check_device_ld(sret)
+      local sub_PS2BBL_MAIN_CONFIG = LIP.load(CheckPath(LOAD_CONF.item[sret]))
+      if sub_PS2BBL_MAIN_CONFIG ~= nil then PS2BBL_MAIN_CONFIG = sub_PS2BBL_MAIN_CONFIG end
     end
-    LIP.save("TEST.ini", PS2BBL_MAIN_CONFIG)
+  elseif aret == 2 then
+    Check_device_ld(sret)
+	  sret = DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[aret])
+    if sret ~= 0 then
+  	  LIP.save(CheckPath(LOAD_CONF.item[sret]), PS2BBL_MAIN_CONFIG)
+    end
+  elseif aret == 4 then
+    sret = DisplayGenerictMOptPrompt(MAIN_CONFIG_DLG, MAIN_MENU.item[aret])
+    if sret ~= 0 then
+      if sret == 1 then
+        Configure_PS2BBL_opts()
+      elseif sret == 2 then
+        call_script("pads/pads.lua")
+      end
+    end
   end
 end
-

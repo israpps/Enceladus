@@ -159,7 +159,7 @@ function KeyConfigDialog()
         end
         local A
         local keyy 
-        A, keyy= DisplayGenerictMOptPromptDiag(DLG, PADBUTTONS[P], DrawOnScreenDualshock, DUK_CROSS|DUK_CIRCLE|DUK_TRIANGLE|DUK_SQUARE)
+        A, keyy= DisplayGenerictMOptPromptDiag(DLG, PADBUTTONS[P], DrawOnScreenDualshock, DUK_CROSS|DUK_CIRCLE|DUK_TRIANGLE|DUK_SQUARE|DUK_SELECT_CLEAR)
         if A > 0 then
           local VAL = nil
           if Pads.check(keyy, PAD_CROSS) or Pads.check(keyy, PAD_SQUARE) then
@@ -169,7 +169,11 @@ function KeyConfigDialog()
             local T = DisplayGenerictMOptPrompt(PS2BBL_CMDS, "Commands")
             if T > 0 then VAL = PS2BBL_CMDS.item[T] end
           end
-          if VAL == nil or VAL == "" then else PS2BBL_MAIN_CONFIG.keys[P][A] = VAL end
+          if VAL == nil or VAL == "" then
+            if Pads.check(keyy, PAD_SELECT) then PS2BBL_MAIN_CONFIG.keys[P][A] = nil end
+           else
+            PS2BBL_MAIN_CONFIG.keys[P][A] = VAL
+          end
         end
         D = 1
         pad = 0

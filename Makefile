@@ -83,7 +83,7 @@ APP_CORE = main.o system.o pad.o graphics.o \
 LUA_LIBS =	luaplayer.o luasystem.o luacontrols.o \
 			luatimer.o luaScreen.o luagraphics.o luaBDM.o
 
-IOP_MODULES = iomanx.o filexio.o \
+IOP_MODULES = iomanX.o fileXio.o \
 			  sio2man.o mcman.o mcserv.o padman.o \
 			  usbd.o bdm.o bdmfs_fatfs.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o mx4sio_bd.o \
