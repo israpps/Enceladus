@@ -30,55 +30,29 @@ extern "C"{
 #include <libds34bt.h>
 #include <libds34usb.h>
 }
-
+#define EXTERN_IRX(_n) \
+extern unsigned char _n[]; \
+extern unsigned int size_##_n
 extern char bootString[];
 extern unsigned int size_bootString;
 
-extern unsigned char iomanX_irx[];
-extern unsigned int size_iomanX_irx;
-
-extern unsigned char fileXio_irx[];
-extern unsigned int size_fileXio_irx;
-
-extern unsigned char sio2man_irx;
-extern unsigned int size_sio2man_irx;
-
-extern unsigned char mcman_irx;
-extern unsigned int size_mcman_irx;
-
-extern unsigned char mcserv_irx;
-extern unsigned int size_mcserv_irx;
-
-extern unsigned char padman_irx;
-extern unsigned int size_padman_irx;
-
-extern unsigned char cdfs_irx;
-extern unsigned int size_cdfs_irx;
-
-extern unsigned char usbd_irx;
-extern unsigned int size_usbd_irx;
-
-extern unsigned char bdm_irx;
-extern unsigned int size_bdm_irx;
-
-extern unsigned char bdmfs_fatfs_irx;
-extern unsigned int size_bdmfs_fatfs_irx;
-
-extern unsigned char usbmass_bd_irx;
-extern unsigned int size_usbmass_bd_irx;
-
-extern unsigned char ds34usb_irx;
-extern unsigned int size_ds34usb_irx;
-
-extern unsigned char ds34bt_irx;
-extern unsigned int size_ds34bt_irx;
+EXTERN_IRX(iomanX_irx);
+EXTERN_IRX(fileXio_irx);
+EXTERN_IRX(sio2man_irx);
+EXTERN_IRX(mcman_irx);
+EXTERN_IRX(mcserv_irx);
+EXTERN_IRX(padman_irx);
+EXTERN_IRX(cdfs_irx);
+EXTERN_IRX(usbd_irx);
+EXTERN_IRX(bdm_irx);
+EXTERN_IRX(bdmfs_fatfs_irx);
+EXTERN_IRX(usbmass_bd_irx);
+EXTERN_IRX(ds34usb_irx);
+EXTERN_IRX(ds34bt_irx);
 
 #ifdef F_Sound
-extern unsigned char libsd_irx;
-extern unsigned int size_libsd_irx;
-
-extern unsigned char audsrv_irx;
-extern unsigned int size_audsrv_irx;
+EXTERN_IRX(libsd_irx)
+EXTERN_IRX(audsrv_irx)
 #endif
 
 char boot_path[255];

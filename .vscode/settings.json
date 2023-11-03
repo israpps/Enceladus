@@ -1,6 +1,11 @@
 {
   "Lua.diagnostics.globals": [
     "AMBIENT",
+    "BDM",
+    "BD_ILINK",
+    "BD_MX4SIO",
+    "BD_UDPBD",
+    "BD_USB",
     "CT16",
     "CT16S",
     "CT24",
@@ -19,6 +24,7 @@
     "Font",
     "Graphics",
     "INTERLACED",
+    "IOP",
     "LINEAR",
     "Lights",
     "NEAREST",

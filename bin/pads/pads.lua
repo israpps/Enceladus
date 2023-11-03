@@ -123,7 +123,7 @@ function KeyConfigDialog()
     Screen.clear()
     Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
     DrawOnScreenDualshock(P)
-    DrawUsableKeys(DUK_CIRCLE|DUK_CROSS, 0x70)
+    DrawUsableKeys(DUK_CIRCLE_GOBACK|DUK_CROSS, 0x70)
     Screen.SpecialFlip(true)
     pad = Pads.get()
     if D == 0 then
@@ -158,7 +158,7 @@ function KeyConfigDialog()
           end
         end
         local A
-        local keyy 
+        local keyy
         A, keyy= DisplayGenerictMOptPromptDiag(DLG, PADBUTTONS[P], DrawOnScreenDualshock, DUK_CROSS|DUK_CIRCLE|DUK_TRIANGLE|DUK_SQUARE|DUK_SELECT_CLEAR)
         if A > 0 then
           local VAL = nil
@@ -178,12 +178,15 @@ function KeyConfigDialog()
         D = 1
         pad = 0
       end
+      if Pads.check(pad, PAD_CIRCLE) then
+        return
+      end
     end
 
     if D > 0 then D = D + 1 end
     if D > 7 then D = 0 end
     --Screen.waitVblankStart()
   end
-  
+
 end
 KeyConfigDialog()

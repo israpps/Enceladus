@@ -265,7 +265,7 @@ end;
 ---@param fileName string The name of the INI file to fill.
 ---@param data table|nil The table containing all the data to store.
 save = function (fileName, data)
-  if data == nil then table.insert(Notif_queue.msg, "Config Save aborted: Config structure is NIL") end
+  if data == nil or data.config == nil or data.keys == nil then table.insert(Notif_queue.msg, "Config Save aborted: Config structure is NIL") end
 	local FD = System.openFile(fileName, FCREATE);
 	local contents = "";
 	if (FD >= 0) then
@@ -282,7 +282,11 @@ save = function (fileName, data)
     if #subtbl > 0 then
       table.sort(subtbl)
   		contents = contents.."\n"
-      for _, k in ipairs(subtbl) do contents = contents .. ('%s = %s\n'):format(k, Special_tostring(data.config[k])) end
+      for _, k in ipairs(subtbl) do
+        if data.config[k] ~= nil and data.config[k] ~= "" then
+          contents = contents .. ('%s = %s\n'):format(k, Special_tostring(data.config[k]))
+        end
+      end
     end
   		contents = contents.."\n"
   		for i = 1, #PADBUTTONS do
@@ -300,7 +304,7 @@ save = function (fileName, data)
 	end
 end;
 }
-
+--#region DrawUsableKeys
 DUK_CROSS = (1 << 0)
 DUK_CIRCLE = (1 << 1)
 DUK_TRIANGLE = (1 << 2)
@@ -353,6 +357,7 @@ function DrawUsableKeys(FLAGS, alfa)
     Font.ftPrint(_FNT2_, SCR_X-265, SCR_Y-55, 4, 630, 16, "Save", Color.new(0xff, 0xff, 0xff, alfa))
   end
 end
+--#endregion
 
 local MAIN_MENU = {
 	item = {
@@ -604,7 +609,6 @@ end
 
 
 -----------
--- round file size
 OFM = {
 ofmRoundSize = function (inputValue)
 	roundValue=inputValue*10
@@ -951,7 +955,6 @@ _start = function ()
   return ret
 end
 }
-
 -----------
 
 GenericBGFade(true, nil)
@@ -1102,7 +1105,7 @@ end
 while true do
   local aret = 0
   local sret = 0
-  aret = DisplayGenerictMOptPrompt(MAIN_MENU, "PS2BBL Configurator")
+  aret = DisplayGenerictMOptPrompt(MAIN_MENU, "PS2BBL Configurator".." - CLOSED BETA 1")
   if aret == 1 then
 	  sret = DisplayGenerictMOptPrompt(LOAD_CONF, MAIN_MENU.item[aret])
     if sret ~= 0 then
@@ -1127,3 +1130,4 @@ while true do
     end
   end
 end
+ 
