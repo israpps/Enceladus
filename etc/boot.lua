@@ -35,6 +35,11 @@ pad = 0
 PADBUTTONS = {"L1", "L2", "R1", "R2", "UP", "TRIANGLE", "LEFT", "RIGHT", "SELECT", "START", "SQUARE", "CIRCLE", "DOWN", "CROSS", "L3", "AUTO", "R3"}
 PADATTEMPT = {1, 2, 3}
 
+GSTATE = {
+  HDD_LOADED = false;
+  MX4SIO_LOADED = false;
+}
+
 Notif_queue = {
 	display = function ()
     local Q
@@ -51,6 +56,31 @@ Notif_queue = {
 	ALFA = 0x80,
 	msg = {}
 }
+
+function LoadHDD_Stuff()
+  if GSTATE.HDD_LOADED then return end
+  local ret, str = IOP.LoadHDDModules()
+  if not ret then
+    table.insert(Notif_queue.msg, str)
+  else
+    GSTATE.HDD_LOADED = true
+  end
+end
+
+function LoadMX4_Stuff()
+  if GSTATE.MX4SIO_LOADED then return end
+  local id, result = IOP.load_MX4SIO_Module()
+  if id < 0 or result ~= 0 then
+    table.insert(Notif_queue.msg, ("Failed to load MX4SIO_BD.IRX\nID: %d, ret:%d"):format(id, result))
+  else
+    GSTATE.MX4SIO_LOADED = true
+  end
+end
+
+function Check_device_ld(sret)
+  if sret == 4 then LoadMX4_Stuff() end
+  if sret == 5 then LoadHDD_Stuff() end
+end
 
 function Screen.SpecialFlip(notif)
 	if notif ~= nil then
@@ -121,6 +151,57 @@ function new_config_struct()
   end
   return T
 end
+
+function replace_device(VAL, NEWDEV)
+  local FINAL
+  local niee = string.find(VAL, ":", 1, true)
+  FINAL = NEWDEV..VAL:sub(niee)
+    return FINAL
+end
+
+
+--- Processes a HDD full path into its components. (eg: `hdd0:__system:pfs:/osd110/hosdsys.elf`)
+---@param PATH string
+---@return string mountpart: will return partition path for mounting (`hdd0:__system`)
+---@return string pfsindx: will return pfs index (`pfs:`)
+---@return string filepath: will return path to file when partition gets mounted (`pfs:/osd110/hosdsys.elf`)
+function GetMountData(PATH)
+  local CNT = 0
+  local TBL = {}
+  for i in string.gmatch(PATH, "[^:]*") do
+    table.insert(TBL, i)
+    CNT = CNT+1
+  end
+  local mountpart = ""
+  local pfsindx   = ""
+  local filepath  = ""
+  if CNT == 4 then
+    mountpart = string.format("%s:%s", TBL[1], TBL[2])
+    pfsindx   = string.format("%s:", TBL[3])
+    filepath  = string.format("%s:%s", TBL[3], TBL[4])
+  end
+  return mountpart, pfsindx, filepath
+end
+
+function CheckPath(PATH)
+  local pos = string.find(PATH, ":", 1, true)
+  local DEV = PATH:sub(1, pos)
+	local NEWPATH = PATH
+  if DEV == "mx4sio:" then
+    local indx = BDM.GetDeviceByType(BD_MX4SIO)
+    if indx >= 0 then NEWPATH = replace_device(PATH, ("mass%d"):format(indx)) end
+  elseif DEV == "ilink:" then
+    local indx = BDM.GetDeviceByType(BD_ILINK)
+    if indx >= 0 then NEWPATH = replace_device(PATH, ("mass%d"):format(indx)) end
+  elseif DEV == "hdd0:" then
+    local MountPart
+    MountPart, _, NEWPATH = GetMountData(PATH)
+    if System.MountHDDPartition(MountPart) ~= 0 then table.insert(Notif_queue.msg, "Failed to mount partition "..MountPart) end
+  --elseif DEV == "mc?:" then
+  end
+	return NEWPATH
+end
+
 
 PS2BBL_MAIN_CONFIG = new_config_struct()
 print("LIP (Lua Ini Parser)\tCopyright (c) 2012 Carreras Nicolas. modified by El_isra for PS2BBL Usage");
@@ -267,7 +348,7 @@ local LOAD_CONF = {
 		"mc0:/PS2BBL/CONFIG.INI",
 		"mc1:/PS2BBL/CONFIG.INI",
 		"mass:/PS2BBL/CONFIG.INI",
-		"massX:/PS2BBL/CONFIG.INI",
+		"mx4sio:/PS2BBL/CONFIG.INI",
 		"hdd0:__sysconf:pfs:/PS2BBL/CONFIG.INI",
 	},
 	desc = {
@@ -280,14 +361,16 @@ local LOAD_CONF = {
 local SAVE_CONF = {
 	item = {
 		"mc0:/PS2BBL/CONFIG.INI",
-		"mc0:/PS2BBL/CONFIG.INI",
+		"mc1:/PS2BBL/CONFIG.INI",
 		"mass:/PS2BBL/CONFIG.INI",
+		"mx4sio:/PS2BBL/CONFIG.INI",
 		"hdd0:__sysconf/PS2BBL/CONFIG.INI",
 	},
 	desc = {
 		"Save config into Memory Card on slot 1",
 		"Save config into Memory Card on slot 2",
 		"Save config into USB Mass storage",
+		"Save config into MX4SIO SDCard",
 		"Save config into Internal HDD",
 	},
 }

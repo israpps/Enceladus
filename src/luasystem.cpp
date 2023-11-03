@@ -4,6 +4,12 @@
 #include <sys/fcntl.h>
 #include <dirent.h>
 #include <sys/stat.h>
+
+#define NEWLIB_PORT_AWARE
+#include <fileXio_rpc.h>
+#include <fileio.h>
+#include <hdd-ioctl.h>
+
 #include "include/luaplayer.h"
 #include "include/graphics.h"
 #ifdef F_Md5
@@ -671,6 +677,82 @@ static int lua_direxists(lua_State *L)
     lua_pushboolean(L, ret);
     return 1;
 }
+bool hdd_ok = false;
+int mnt(const char* path, int index, int openmod)
+{
+    char PFS[5+1] = "pfs0:";
+    if (index > 0)
+        PFS[3] = '0' + index;
+
+    printf("Mounting '%s' into pfs%d:\n", path, index);
+    if (fileXioMount(PFS, path, openmod) < 0) // mount
+    {
+        printf("Mount failed. unmounting trying again...\n");
+        if (fileXioUmount(PFS) < 0) //try to unmount then mount again in case it got mounted by something else
+        {
+            printf("Unmount failed!!!\n");
+        }
+        if (fileXioMount(PFS, path, openmod) < 0)
+        {
+            printf("mount failed again!\n");
+            return -1;
+        } else {
+            printf("Second mount succeeded!\n");
+        }
+    } else printf("mount successfull on first attemp\n");
+    return 0;
+}
+
+int umnt(int indx)
+{
+    char PFS[5+1] = "pfs0:";
+    PFS[3] = '0' + indx;
+    int ret = fileXioUmount(PFS);
+    printf("%s: pfs%d: returned %d\n", __func__, indx, ret);
+    return ret;
+}
+
+static int MountPart(lua_State *L)
+{
+    int openmod = FIO_MT_RDWR;
+    const char* mount;
+#ifdef RESERVE_PFS0
+    int indx = 1;
+#else
+    int indx = 0;
+#endif
+    int argc = lua_gettop(L);
+	if (!hdd_ok) goto err;
+	if (argc < 1 || argc >= 4) return luaL_error(L, "%s: wrong number of arguments, between 1 and 3", __func__); 
+
+    mount = luaL_checkstring(L, 1);
+    if (argc >= 2) 
+        indx = luaL_checkinteger(L, 2);
+    if (argc == 3) 
+        openmod = luaL_checkinteger(L, 3);
+#ifdef RESERVE_PFS0
+    if (indx == 0 && bootpath_is_on_HDD) luaL_error(L, "%s: pfs0:/ is reserved\n", __func__);
+#endif
+    printf("%s: %s %d %d\n", __func__, mount, indx, openmod);
+    lua_pushinteger(L, mnt(mount, indx, openmod));
+    return 1;
+err:
+	lua_pushinteger(L, -1);
+	return 1;
+}
+
+static int UmountPart(lua_State *L)
+{
+	if (lua_gettop(L) != 1) return luaL_error(L, "%s: wrong number of arguments, expected 1 integer", __func__);
+
+    int index = luaL_checkinteger(L, 1);
+	if (!hdd_ok) goto err;
+    lua_pushinteger(L, umnt(index));
+    return 1;
+err:
+	lua_pushinteger(L, -1);
+	return 1;
+}
 
 
 static const luaL_Reg System_functions[] = {
@@ -705,6 +787,8 @@ static const luaL_Reg System_functions[] = {
 	{"checkValidDisc",       lua_checkValidDisc},
 	{"getDiscType",             lua_getDiscType},
 	{"checkDiscTray",         lua_checkDiscTray},
+  	{"MountHDDPartition",             MountPart},
+  	{"UnMountHDDPartition",          UmountPart},
 	{0, 0}
 };
 
@@ -728,7 +812,6 @@ static int lua_sifloadmodule(lua_State *L){
 	return 1;
 }
 
-
 static int lua_sifloadmodulebuffer(lua_State *L){
 	int argc = lua_gettop(L);
 	if (argc != 2 && argc != 4) return luaL_error(L, "wrong number of arguments");
@@ -747,7 +830,6 @@ static int lua_sifloadmodulebuffer(lua_State *L){
 	lua_pushinteger(L, result);
 	return 1;
 }
-
 
 extern unsigned char mx4sio_bd_irx[];
 extern unsigned int size_mx4sio_bd_irx;
@@ -786,11 +868,91 @@ static int lua_getmodulelist(lua_State *L) {
 	return 1;
 }
 
+
+static int CheckHDD(void) {
+    int ret = fileXioDevctl("hdd0:", HDIOC_STATUS, NULL, 0, NULL, 0);
+    /* 0 = HDD connected and formatted, 1 = not formatted, 2 = HDD not usable, 3 = HDD not connected. */
+    printf("%s: HDD status is %d\n", __func__, ret);
+    if ((ret >= 3) || (ret < 0))
+        return -1;
+    return ret;
+}
+#define EXTERN_IRX(_n) \
+extern unsigned char _n[]; \
+extern unsigned int size_##_n
+
+EXTERN_IRX(ps2dev9_irx);
+EXTERN_IRX(ps2atad_irx);
+EXTERN_IRX(ps2hdd_irx);
+EXTERN_IRX(ps2fs_irx);
+
+static int lua_loadHDDDrivers(lua_State *L) 
+{
+	bool HDD_USABLE = false;
+    int ID, RET, HDDSTAT = 3;
+	bool retval = true;
+	char msg[128];
+    static const char hddarg[] = "-o" "\0" "4" "\0" "-n" "\0" "20";
+    static const char pfsarg[] = "-m" "\0" "4" "\0" "-o" "\0" "10" "\0" "-n" "\0" "40";
+
+    /* PS2DEV9.IRX */
+    ID = SifExecModuleBuffer(&ps2dev9_irx, size_ps2dev9_irx, 0, NULL, &RET);
+    printf(" [DEV9]: ret=%d, ID=%d\n", RET, ID);
+    if (ID < 0 || RET == 1) {
+		retval = false;
+		snprintf(msg, 127, "Failed to load DEV9.IRX (ID:%d, ret:%d)", ID, RET);
+		goto err;
+	}
+
+    /* PS2ATAD.IRX */
+    ID = SifExecModuleBuffer(&ps2atad_irx, size_ps2atad_irx, 0, NULL, &RET);
+    printf(" [ATAD]: ret=%d, ID=%d\n", RET, ID);
+    if (ID < 0 || RET == 1) {
+		retval = false;
+		snprintf(msg, 127, "Failed to load ATAD.IRX (ID:%d, ret:%d)", ID, RET);
+		goto err;
+	}
+
+    /* PS2HDD.IRX */
+    ID = SifExecModuleBuffer(&ps2hdd_irx, size_ps2hdd_irx, sizeof(hddarg), hddarg, &RET);
+    printf(" [PS2HDD]: ret=%d, ID=%d\n", RET, ID);
+    if (ID < 0 || RET == 1) {
+		retval = false;
+		snprintf(msg, 127, "Failed to load PS2HDD.IRX (ID:%d, ret:%d)", ID, RET);
+		goto err;
+	}
+
+    /* Check if HDD is formatted and ready to be used */
+    HDDSTAT = CheckHDD();
+    HDD_USABLE = (HDDSTAT == 0 || HDDSTAT == 1); // ONLY if HDD is usable. as we will offer HDD Formatting operation
+
+    /* PS2FS.IRX */
+    if (HDD_USABLE)
+    {
+        ID = SifExecModuleBuffer(&ps2fs_irx, size_ps2fs_irx, sizeof(pfsarg), pfsarg,  &RET);
+        printf("  [PS2FS]: ret=%d, ID=%d\n", RET, ID);
+        if (ID < 0 || RET == 1) {
+			retval = false;
+			snprintf(msg, 127, "Failed to load PFS.IRX (ID:%d, ret:%d)", ID, RET);
+			goto err;
+		} else {hdd_ok = true;}
+    } else {
+		retval = false;
+		snprintf(msg, 127, "HDD invalid status: %d", HDDSTAT);
+	}
+err:
+	lua_pushboolean(L, retval);
+	if (!retval) lua_pushstring(L, msg); else lua_pushnil(L);
+	return 2;
+
+}
+
 static const luaL_Reg Sif_functions[] = {
 	{"loadModule",             			   lua_sifloadmodule},
 	{"loadModuleBuffer",             lua_sifloadmodulebuffer},
 	{"load_MX4SIO_Module", 					lua_loadmx4siobd},
 	{"GetLoadedModuleList", 			   lua_getmodulelist},
+	{"LoadHDDModules",		 			  lua_loadHDDDrivers},
 	{0, 0}
 };
 
@@ -806,6 +968,12 @@ void luaSystem_init(lua_State *L) {
 	lua_newtable(L);
 	luaL_setfuncs(L, Sif_functions, 0);
 	lua_setglobal(L, "IOP");
+
+	lua_pushinteger(L, FIO_MT_RDWR);
+	lua_setglobal (L, "FIO_MT_RDWR");
+
+	lua_pushinteger(L, FIO_MT_RDONLY);
+	lua_setglobal (L, "FIO_MT_RDONLY");
 
 	lua_pushinteger(L, O_RDONLY);
 	lua_setglobal(L, "FREAD");
@@ -834,4 +1002,3 @@ void luaSystem_init(lua_State *L) {
 	lua_pushinteger(L, 2);
 	lua_setglobal(L, "READ_WRITE");
 }
-
