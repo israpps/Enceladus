@@ -830,9 +830,10 @@ static int lua_sifloadmodulebuffer(lua_State *L){
 	lua_pushinteger(L, result);
 	return 1;
 }
-
-extern unsigned char mx4sio_bd_irx[];
-extern unsigned int size_mx4sio_bd_irx;
+#define EXTERN_IRX(_n) \
+extern unsigned char _n[]; \
+extern unsigned int size_##_n
+EXTERN_IRX(mx4sio_bd_irx);
 
 static int lua_loadmx4siobd(lua_State *L) {
 	int irx_id, result;
@@ -877,9 +878,6 @@ static int CheckHDD(void) {
         return -1;
     return ret;
 }
-#define EXTERN_IRX(_n) \
-extern unsigned char _n[]; \
-extern unsigned int size_##_n
 
 EXTERN_IRX(ps2dev9_irx);
 EXTERN_IRX(ps2atad_irx);
