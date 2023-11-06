@@ -888,7 +888,7 @@ static int lua_loadHDDDrivers(lua_State *L)
 {
 	bool HDD_USABLE = false;
     int ID, RET, HDDSTAT = 3;
-	bool retval = true;
+	int retval = 1;
 	char msg[128];
     static const char hddarg[] = "-o" "\0" "4" "\0" "-n" "\0" "20";
     static const char pfsarg[] = "-m" "\0" "4" "\0" "-o" "\0" "10" "\0" "-n" "\0" "40";
@@ -897,8 +897,8 @@ static int lua_loadHDDDrivers(lua_State *L)
     ID = SifExecModuleBuffer(&ps2dev9_irx, size_ps2dev9_irx, 0, NULL, &RET);
     printf(" [DEV9]: ret=%d, ID=%d\n", RET, ID);
     if (ID < 0 || RET == 1) {
-		retval = false;
-		snprintf(msg, 127, "Failed to load DEV9.IRX (ID:%d, ret:%d)", ID, RET);
+		retval = 0;
+		snprintf(msg, 127, "DEV9.IRX (ID:%d, ret:%d)", ID, RET);
 		goto err;
 	}
 
@@ -906,8 +906,8 @@ static int lua_loadHDDDrivers(lua_State *L)
     ID = SifExecModuleBuffer(&ps2atad_irx, size_ps2atad_irx, 0, NULL, &RET);
     printf(" [ATAD]: ret=%d, ID=%d\n", RET, ID);
     if (ID < 0 || RET == 1) {
-		retval = false;
-		snprintf(msg, 127, "Failed to load ATAD.IRX (ID:%d, ret:%d)", ID, RET);
+		retval = 0;
+		snprintf(msg, 127, "ATAD.IRX (ID:%d, ret:%d)", ID, RET);
 		goto err;
 	}
 
@@ -915,8 +915,8 @@ static int lua_loadHDDDrivers(lua_State *L)
     ID = SifExecModuleBuffer(&ps2hdd_irx, size_ps2hdd_irx, sizeof(hddarg), hddarg, &RET);
     printf(" [PS2HDD]: ret=%d, ID=%d\n", RET, ID);
     if (ID < 0 || RET == 1) {
-		retval = false;
-		snprintf(msg, 127, "Failed to load PS2HDD.IRX (ID:%d, ret:%d)", ID, RET);
+		retval = 0;
+		snprintf(msg, 127, "PS2HDD.IRX (ID:%d, ret:%d)", ID, RET);
 		goto err;
 	}
 
@@ -930,16 +930,16 @@ static int lua_loadHDDDrivers(lua_State *L)
         ID = SifExecModuleBuffer(&ps2fs_irx, size_ps2fs_irx, sizeof(pfsarg), pfsarg,  &RET);
         printf("  [PS2FS]: ret=%d, ID=%d\n", RET, ID);
         if (ID < 0 || RET == 1) {
-			retval = false;
-			snprintf(msg, 127, "Failed to load PFS.IRX (ID:%d, ret:%d)", ID, RET);
+			retval = 0;
+			snprintf(msg, 127, "PFS.IRX (ID:%d, ret:%d)", ID, RET);
 			goto err;
 		} else {hdd_ok = true;}
     } else {
-		retval = false;
-		snprintf(msg, 127, "HDD invalid status: %d", HDDSTAT);
+		retval = 2;
+		snprintf(msg, 127, "%d", HDDSTAT);
 	}
 err:
-	lua_pushboolean(L, retval);
+	lua_pushinteger(L, retval);
 	if (!retval) lua_pushstring(L, msg); else lua_pushnil(L);
 	return 2;
 
