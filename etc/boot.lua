@@ -968,7 +968,7 @@ _start = function ()
           -- enter directory
           if ofmItem[OFM.ofmSelectedItem].Type == "folder" then
               OFM.enterSelectedDirectory()
-          else
+          elseif ofmItem[OFM.ofmSelectedItem].Name ~= "." and ofmItem[OFM.ofmSelectedItem].Name ~= ".." then
             ret = OFM.ofmCurrentPath..ofmItem[OFM.ofmSelectedItem].Name
             goto GETLOST
           end
