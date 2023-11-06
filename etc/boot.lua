@@ -132,6 +132,7 @@ function OnScreenError(STR)
   end
 end
 
+
 function new_config_struct()
   local T = {
     keys = {},
@@ -526,29 +527,32 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback, AVAILP
 	  end
     Screen.SpecialFlip(true)
 
-    if (Pads.check(pad, PAD_CROSS) or
-		(Pads.check(pad, PAD_TRIANGLE) and AVAILPADS&DUK_TRIANGLE) or
-		(Pads.check(pad, PAD_SELECT) and AVAILPADS&DUK_SELECT_CLEAR) or
-		(Pads.check(pad, PAD_SELECT) and AVAILPADS&DUK_TRIANGLE) or
-		(Pads.check(pad, PAD_SQUARE) and AVAILPADS&DUK_SQUARE)) and D == 0
-	then
-      D = 1
-      Screen.clear()
-      break
+    if D == 0 then
+      if (Pads.check(pad, PAD_CROSS) or
+		  (Pads.check(pad, PAD_TRIANGLE) and AVAILPADS&DUK_TRIANGLE) or
+		  (Pads.check(pad, PAD_SELECT) and AVAILPADS&DUK_SELECT_CLEAR) or
+		  (Pads.check(pad, PAD_SELECT) and AVAILPADS&DUK_TRIANGLE) or
+		  (Pads.check(pad, PAD_SQUARE) and AVAILPADS&DUK_SQUARE))
+	    then
+        D = 1
+        Screen.clear()
+        break
+      end
+
+      if Pads.check(pad, PAD_CIRCLE) then
+        T = 0
+        break
+      end
+
+      if Pads.check(pad, PAD_UP) then
+        T = T - 1
+        D = 1
+      elseif Pads.check(pad, PAD_DOWN) then
+        T = T + 1
+        D = 1
+      end
     end
 
-    if Pads.check(pad, PAD_CIRCLE) and D == 0 then
-      T = 0
-      break
-    end
-
-    if Pads.check(pad, PAD_UP) and D == 0 then
-      T = T - 1
-      D = 1
-    elseif Pads.check(pad, PAD_DOWN) and D == 0 then
-      T = T + 1
-      D = 1
-    end
     if D > 0 then D = D + 1 end
     if D > 10 then D = 0 end
     if T < 1 then T = TSIZE end
@@ -1199,4 +1203,3 @@ while true do
     end
   end
 end
- 
