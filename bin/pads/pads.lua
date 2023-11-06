@@ -1,7 +1,5 @@
 
-
-
-
+--#region
 function DrawOnScreenDualshock(P)
   if P == 9 then
     Graphics.drawScaleImage(RES.select, X_MID-64, Y_MID-16, 32, 32)
@@ -105,7 +103,7 @@ function DrawOnScreenDualshock(P)
     Graphics.drawScaleImage(RES.R3, X_MID+48, Y_MID+60, 64, 64, Color.new(128, 128, 128, 60))
   end
 end
-
+---@return boolean something_changed bool to indicate if user made any change
 function KeyConfigDialog()
   local keymap = {}
   keymap[1] = {01, 02, 03, 04}
@@ -118,6 +116,7 @@ function KeyConfigDialog()
   local D = 1
   local P = 1
   local pad = nil
+  local something_changed = false
 
   while true do
     Screen.clear()
@@ -157,29 +156,38 @@ function KeyConfigDialog()
             DLG.item[x] = PS2BBL_MAIN_CONFIG.keys[P][x]
           end
         end
-        local A
+        local A = 0
         local keyy
-        A, keyy= DisplayGenerictMOptPromptDiag(DLG, PADBUTTONS[P], DrawOnScreenDualshock, DUK_CROSS|DUK_CIRCLE|DUK_TRIANGLE|DUK_SQUARE|DUK_SELECT_CLEAR)
-        if A > 0 then
-          local VAL = nil
-          if Pads.check(keyy, PAD_CROSS) or Pads.check(keyy, PAD_SQUARE) then
-            VAL = OFM._start()
-            if VAL ~= nil and Pads.check(keyy, PAD_SQUARE) then VAL = replace_device(VAL, "mc?") end
-          elseif Pads.check(keyy, PAD_TRIANGLE) then
-            local T = DisplayGenerictMOptPrompt(PS2BBL_CMDS, "Commands")
-            if T > 0 then VAL = PS2BBL_CMDS.item[T] end
+        repeat
+          A, keyy= DisplayGenerictMOptPromptDiag(DLG, PADBUTTONS[P], DrawOnScreenDualshock, DUK_CROSS|DUK_CIRCLE_GOBACK|DUK_TRIANGLE|DUK_SQUARE|DUK_SELECT_CLEAR)
+          if A > 0 then
+            local VAL = nil
+            if Pads.check(keyy, PAD_CROSS) or Pads.check(keyy, PAD_SQUARE) then
+              VAL = OFM._start()
+              if VAL ~= nil and Pads.check(keyy, PAD_SQUARE) then
+                VAL = replace_device(VAL, "mc?")
+              end
+            elseif Pads.check(keyy, PAD_TRIANGLE) then
+              local T = DisplayGenerictMOptPrompt(PS2BBL_CMDS, "Commands")
+              if T > 0 then
+                VAL = PS2BBL_CMDS.item[T]
+              end
+            end
+            if VAL == nil or VAL == "" then
+              if Pads.check(keyy, PAD_SELECT) then PS2BBL_MAIN_CONFIG.keys[P][A] = nil end
+             else
+              PS2BBL_MAIN_CONFIG.keys[P][A] = VAL
+              DLG.item[A] = VAL -- refresh UI
+              something_changed = true
+            end
           end
-          if VAL == nil or VAL == "" then
-            if Pads.check(keyy, PAD_SELECT) then PS2BBL_MAIN_CONFIG.keys[P][A] = nil end
-           else
-            PS2BBL_MAIN_CONFIG.keys[P][A] = VAL
-          end
-        end
+        until (A == 0)
+
         D = 1
         pad = 0
       end
       if Pads.check(pad, PAD_CIRCLE) then
-        return
+        return something_changed
       end
     end
 
@@ -190,3 +198,4 @@ function KeyConfigDialog()
 
 end
 KeyConfigDialog()
+--#endregion
