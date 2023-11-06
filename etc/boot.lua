@@ -38,6 +38,7 @@ PADATTEMPT = {1, 2, 3}
 GSTATE = {
   HDD_LOADED = false;
   MX4SIO_LOADED = false;
+  CONFIG_LOADSTATE = -1
 }
 
 Notif_queue = {
@@ -554,6 +555,41 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback, AVAILP
     if T > TSIZE then T = 1 end
   end
   return T, pad
+end
+
+function DisplayGenericYES_NO_Prompt(MESSAGE)
+  local T = false
+  local D = 1
+  local A = 0x80
+  while true do
+    Screen.clear()
+    Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
+    Graphics.drawRect(0, Y_MID-60, SCR_X, 120, Color.new(0, 0, 0, 50-A))
+    Font.ftPrintMultiLineAligned(_FNT_, X_MID, Y_MID-30, 20, 630, 16, MESSAGE, Color.new(0xff, 0xff, 0xff, 0x80 - A))
+    Graphics.drawRect(0, Y_MID-60, SCR_X, 2, Color.new(255, 255, 255, 0x80-A))
+    Graphics.drawRect(0, Y_MID+60, SCR_X, 2, Color.new(0xff, 0xff, 0xff, 0x80-A))
+
+	  DrawUsableKeys(DUK_CIRCLE|DUK_CROSS)
+    if A > 0 then A = A - 1 end
+    Screen.SpecialFlip(true)
+    pad = Pads.get()
+    if D == 0 then
+      if Pads.check(pad, PAD_CROSS) then
+        T = true
+        Screen.clear()
+        break
+      end
+
+      if Pads.check(pad, PAD_CIRCLE) then
+        T = false
+        break
+      end
+    end
+
+    if D > 0 then D = D + 1 end
+    if D > 10 then D = 0 end
+  end
+  return T
 end
 
 function IntSlider(is_milisecond, VAL, heading)
@@ -1116,14 +1152,25 @@ while true do
     if sret ~= 0 then
       Check_device_ld(sret)
       local sub_PS2BBL_MAIN_CONFIG = LIP.load(CheckPath(LOAD_CONF.item[sret]))
-      if sub_PS2BBL_MAIN_CONFIG ~= nil then PS2BBL_MAIN_CONFIG = sub_PS2BBL_MAIN_CONFIG end
+      if sub_PS2BBL_MAIN_CONFIG ~= nil then
+		    PS2BBL_MAIN_CONFIG = sub_PS2BBL_MAIN_CONFIG
+        GSTATE.CONFIG_LOADSTATE = 0
+		  else
+        GSTATE.CONFIG_LOADSTATE = -1
+		  end
     end
   elseif aret == 2 then
-    Check_device_ld(sret)
-	  sret = DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[aret])
-    if sret ~= 0 then
-  	  LIP.save(CheckPath(LOAD_CONF.item[sret]), PS2BBL_MAIN_CONFIG)
+    if GSTATE.CONFIG_LOADSTATE < 0 then
+	    if not DisplayGenericYES_NO_Prompt("Warning\nYou are trying to save blank config to file\ncontinue?") then
+        goto BRK_C2
+      end
     end
+    	Check_device_ld(sret)
+		sret = DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[aret])
+    	if sret ~= 0 then
+  		  LIP.save(CheckPath(LOAD_CONF.item[sret]), PS2BBL_MAIN_CONFIG)
+    	end
+    ::BRK_C2::
   elseif aret == 4 then
     sret = DisplayGenerictMOptPrompt(MAIN_CONFIG_DLG, MAIN_MENU.item[aret])
     if sret ~= 0 then
