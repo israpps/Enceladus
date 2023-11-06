@@ -1080,7 +1080,7 @@ function Configure_PS2BBL_opts()
     if options_t.desc ~= nil then
       Font.ftPrint(_FNT2_, 80, 350, 0, 600, 64, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
     end
-	  DrawUsableKeys(T > 5 and (DUK_CIRCLE_GOBACK|DUK_CROSS|DUK_SQUARE|DUK_SELECT_CLEAR|DUK_START_SAVE) or (DUK_CIRCLE_GOBACK|DUK_CROSS))
+	  DrawUsableKeys(T > 5 and (DUK_CIRCLE_GOBACK|DUK_CROSS|DUK_SQUARE|DUK_SELECT_CLEAR|DUK_START_SAVE) or (DUK_CIRCLE_GOBACK|DUK_CROSS|DUK_START_SAVE))
     if A > 0 then A = A - 1 end
     Screen.SpecialFlip(true)
     pad = Pads.get()
