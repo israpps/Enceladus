@@ -1171,6 +1171,23 @@ while true do
   		  LIP.save(CheckPath(LOAD_CONF.item[sret]), PS2BBL_MAIN_CONFIG)
     	end
     ::BRK_C2::
+  elseif aret == 3 then
+	PS2BBL_MAIN_CONFIG = new_config_struct()
+	PS2BBL_MAIN_CONFIG.keys[16][1] = "mass:/APPS/OPNPS2LD.ELF"
+	PS2BBL_MAIN_CONFIG.keys[16][2] = "mc?:/APPS/OPNPS2LD.ELF"
+	PS2BBL_MAIN_CONFIG.keys[16][3] = "mc?:/OPL/OPNPS2LD.ELF"
+	PS2BBL_MAIN_CONFIG.keys[16][3] = "mc?:/OPL/OPNPS2LD.ELF"
+	PS2BBL_MAIN_CONFIG.keys[3][1]  = "mc?:/BOOT/ULE.ELF"
+	PS2BBL_MAIN_CONFIG.keys[3][2]  = "mc?:/APPS/ULE.ELF"
+	PS2BBL_MAIN_CONFIG.keys[3][3]  = "mc?:/BOOT/BOOT.ELF"
+	PS2BBL_MAIN_CONFIG.keys[9][1]  = "rom0:TESTMODE"
+	PS2BBL_MAIN_CONFIG.keys[10][1] = "$OSDSYS"
+	PS2BBL_MAIN_CONFIG.config.SKIP_PS2LOGO = true
+	PS2BBL_MAIN_CONFIG.config.KEY_READ_WAIT_TIME = 4000
+	PS2BBL_MAIN_CONFIG.config.OSDHISTORY_READ = true
+	PS2BBL_MAIN_CONFIG.config.EJECT_TRAY = true
+	PS2BBL_MAIN_CONFIG.config.LOGO_DISPLAY = 2
+  GSTATE.CONFIG_LOADSTATE = 0
   elseif aret == 4 then
     sret = DisplayGenerictMOptPrompt(MAIN_CONFIG_DLG, MAIN_MENU.item[aret])
     if sret ~= 0 then
