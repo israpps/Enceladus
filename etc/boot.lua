@@ -117,13 +117,18 @@ end
 function OnScreenError(STR)
   print("ERROR")
   print(STR)
-  Screen.clear()
-  Font.ftPrint(_FNT_, X_MID, 40, 8, 630, 32, "ERROR", Color.new(220, 220, 220, 0x80))
-  Graphics.drawRect(0, 60, SCR_X, 1, Color.new(255, 0, 0, 0x80))
-  Font.ftPrintMultiLineAligned(_FNT_, X_MID, 90, 8, 630, 32, STR,  Color.new(220, 0, 0, 0x80))
-  Graphics.drawRect(0, 330, SCR_X, 1, Color.new(0xff, 0, 0, 0x80))
-  Screen.SpecialFlip(true)
-  while true do end
+  local Q = 0x40
+  while true do
+    Screen.clear()
+    Font.ftPrint(_FNT_, X_MID, 40, 8, 630, 32, "ERROR AT EXTERNAL SCRIPT", Color.new(255, 255, 255, 0x80))
+    Graphics.drawRect(0, 60, SCR_X, Y_MID+40, Color.new(255, 0, 0, 0x40-Q))
+    Graphics.drawRect(0, 60, SCR_X, 2, Color.new(255, 0, 0, 0x80))
+    Font.ftPrintMultiLineAligned(_FNT2_, X_MID, 70, 20, 630, 32, STR,  Color.new(200, 200, 0, 0x80))
+    Graphics.drawRect(0, Y_MID+100, SCR_X, 2, Color.new(0xff, 0, 0, 0x80))
+    Font.ftPrintMultiLineAligned(_FNT2_, X_MID, Y_MID+120, 20, 630, 32, "Report to github.com/israpps/PS2BBL-Configurator/issues/", Color.new(255, 255, 255, 0x80))
+    Screen.SpecialFlip(true)
+    if Q > 0 then Q=Q-1 end
+  end
 end
 
 function new_config_struct()
