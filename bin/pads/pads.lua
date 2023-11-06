@@ -145,13 +145,12 @@ function KeyConfigDialog()
       P = keymap[Y][X]
 
       if Pads.check(pad, PAD_CROSS) then
-        print("chose key ".. P .. "\n")
         local DLG = {
           item = {}
         }
         for x = 1, 3, 1 do
           if PS2BBL_MAIN_CONFIG.keys[P][x] == nil or PS2BBL_MAIN_CONFIG.keys[P][x] == "" then
-            DLG.item[x] = "<not set>"
+            DLG.item[x] = LNG.LAB_NOT_SET
           else
             DLG.item[x] = PS2BBL_MAIN_CONFIG.keys[P][x]
           end

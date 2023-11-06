@@ -35,6 +35,73 @@ pad = 0
 PADBUTTONS = {"L1", "L2", "R1", "R2", "UP", "TRIANGLE", "LEFT", "RIGHT", "SELECT", "START", "SQUARE", "CIRCLE", "DOWN", "CROSS", "L3", "AUTO", "R3"}
 PADATTEMPT = {1, 2, 3}
 
+LNG = {
+  MAIN_MENU_PROMPT = "PS2BBL Configurator";
+  MAIN_MENU_LAB_LOAD_CONF = "Load Config";
+  MAIN_MENU_LAB_SAVE_CONF = "Save Config";
+  MAIN_MENU_LAB_LOAD_DEFS = "Load defaults";
+  MAIN_MENU_LAB_CONFIGURE = "Configure";
+  MAIN_MENU_LAB_ABOUT     = "About";
+  MAIN_MENU_LAB_LAUNCHELF = "load ELF";
+  MAIN_MENU_LAB_LAUNCHOSD = "Go back to browser";
+
+  MAIN_MENU_STR_LOAD_CONF = "Read config from a device";
+  MAIN_MENU_STR_SAVE_CONF = "Save config into a device";
+  MAIN_MENU_STR_LOAD_DEFS = "Load the stock config";
+  MAIN_MENU_STR_CONFIGURE = "Browse the configuration values";
+  MAIN_MENU_STR_ABOUT     = "Information about the program";
+  MAIN_MENU_STR_LAUNCHELF = "Load other program";
+  MAIN_MENU_STR_LAUNCHOSD = "Exit PS2BBL configurator into PS2 Browser";
+
+  READ_CONF_FROM_MC0    = "Read config from Memory Card on slot 1";
+  READ_CONF_FROM_MC1    = "Read config from Memory Card on slot 2";
+  READ_CONF_FROM_USB    = "Read config from USB Mass storage";
+  READ_CONF_FROM_MX4SIO = "Read config from MX4SIO SDCard";
+  READ_CONF_FROM_IHDD   = "Read config from Internal HDD";
+
+  SAVE_CONF_INTO_MC0    = "Save config into Memory Card on slot 1";
+  SAVE_CONF_INTO_MC1    = "Save config into Memory Card on slot 2";
+  SAVE_CONF_INTO_USB    = "Save config into USB Mass storage";
+  SAVE_CONF_INTO_MX4SIO = "Save config into MX4SIO SDCard";
+  SAVE_CONF_INTO_IHDD   = "Save config into Internal HDD";
+
+  PS2BBLCMD_STR_CDVD            = "Makes PS2BBL run a disc";
+  PS2BBLCMD_STR_CDVD_NO_PS2LOGO = "Makes PS2BBL run a disc. but skipping usage of PS2LOGO (useful for Mechapwn)";
+  PS2BBLCMD_STR_CREDITS         = "displays credits (duh). and shows compilation date and associated git commit hash";
+  PS2BBLCMD_STR_OSDSYS          = "Executes OSDSYS program (Console main menu).\nbut passing args to avoid booting MC or HDD Updates";
+  PS2BBLCMD_STR_HDDCHECKER      = "Runs HDD diagnosis tests (only works if PS2BBL has HDD support enabled)";
+
+  MAINCONFD_LAB_MNCONF = "Main Config";
+  MAINCONFD_LAB_LKCONF = "Launch Keys";
+  MAINCONFD_STR_MNCONF = "Configure the main aspects of PS2BBL";
+  MAINCONFD_STR_LKCONF = "Configure wich applications to run when bound key is pressed";
+
+  MAINCONFP_STR_PS2LOG = "Run PS2 games with PS2LOGO program or run game directly";
+  MAINCONFP_STR_WAITIM = "Time (in miliseconds) that PS2BBL will wait for a key press before\nLaunching AUTO Applications";
+  MAINCONFP_STR_LGOCOL = "Change PS2BBL Logo color based on memory card play history";
+  MAINCONFP_STR_DISCTR = "If PS2BBL should open the disc tray (if empty)\nWhen user calls disc launcher commands";
+  MAINCONFP_STR_LGODIS = "Logo display setting.\n2: show logo and console info, 1: show console info\n0:Dont show anything";
+  MAINCONFP_STR_IRXLDR = "Defines a path to an IRX driver to be loaded on memory when PS2BBL reads config";
+  CREDITSDL_STR_FULL = [[
+Coded by El_isra (Matias Israelson)
+
+Based on Enceladus by Daniel Sant0s
+Based (design wise) on FreeMcBoot configurator and KELFBinder
+BG Image by berion
+Fonts used: Liberation Sans & Inter (by Rasmus Anderson)
+
+More information at github.com/israpps/PS2BBL-configurator
+]]; -- this is a multi line string, the line breaks of the text file itself are interpreted as literal line breaks.
+--therefore, dont add any newline unless its a single line string
+
+  LAB_NOT_SET = "<not set>";
+  MSG_IRX_LOAD_FAIL = "Failed to load driver: ";
+  MSG_HDD_STAT_ERR = "HDD Status error: ";
+  WARN_EMPTY_CONF_SAVE = "Warning\nYou are trying to save blank config to file\ncontinue?";
+  ERROR_PART_MOUNT_FAIL = "Failed to mount partition: ";
+  ERROR_LUA_EXT_SCRIPT = "ERROR AT EXTERNAL SCRIPT";
+}
+
 GSTATE = {
   HDD_LOADED = false;
   MX4SIO_LOADED = false;
@@ -62,7 +129,8 @@ function LoadHDD_Stuff()
   if GSTATE.HDD_LOADED then return end
   local ret, str = IOP.LoadHDDModules()
   if not ret then
-    table.insert(Notif_queue.msg, str)
+    local msg
+    table.insert(Notif_queue.msg, string.format(msg, str))
   else
     GSTATE.HDD_LOADED = true
   end
@@ -72,7 +140,7 @@ function LoadMX4_Stuff()
   if GSTATE.MX4SIO_LOADED then return end
   local id, result = IOP.load_MX4SIO_Module()
   if id < 0 or result ~= 0 then
-    table.insert(Notif_queue.msg, ("Failed to load MX4SIO_BD.IRX\nID: %d, ret:%d"):format(id, result))
+    table.insert(Notif_queue.msg, ("%sMX4SIO_BD.IRX (ID:%d, ret:%d)"):format(LNG.MSG_IRX_LOAD_FAIL, id, result))
   else
     GSTATE.MX4SIO_LOADED = true
   end
@@ -100,7 +168,7 @@ function BDM.GetDeviceAlias(indx)
 end
 
 function Special_tostring(VAL)
-  if type(VAL) == "nil" then return "<not set>"
+  if type(VAL) == "nil" then return LNG.LAB_NOT_SET
   elseif type(VAL) == "boolean" then if VAL then return "1" else return "0" end
   else
     return tostring(VAL)
@@ -121,7 +189,7 @@ function OnScreenError(STR)
   local Q = 0x40
   while true do
     Screen.clear()
-    Font.ftPrint(_FNT_, X_MID, 40, 8, 630, 32, "ERROR AT EXTERNAL SCRIPT", Color.new(255, 255, 255, 0x80))
+    Font.ftPrint(_FNT_, X_MID, 40, 8, 630, 32, LNG.ERROR_LUA_EXT_SCRIPT, Color.new(255, 255, 255, 0x80))
     Graphics.drawRect(0, 60, SCR_X, Y_MID+40, Color.new(255, 0, 0, 0x40-Q))
     Graphics.drawRect(0, 60, SCR_X, 2, Color.new(255, 0, 0, 0x80))
     Font.ftPrintMultiLineAligned(_FNT2_, X_MID, 70, 20, 630, 32, STR,  Color.new(200, 200, 0, 0x80))
@@ -204,7 +272,11 @@ function CheckPath(PATH)
   elseif DEV == "hdd0:" then
     local MountPart
     MountPart, _, NEWPATH = GetMountData(PATH)
-    if System.MountHDDPartition(MountPart) ~= 0 then table.insert(Notif_queue.msg, "Failed to mount partition "..MountPart) end
+    if GSTATE.HDD_LOADED == 1 then
+      if System.MountHDDPartition(MountPart) ~= 0 then
+        table.insert(Notif_queue.msg, LNG.ERROR_PART_MOUNT_FAIL..MountPart)
+      end
+    end
   --elseif DEV == "mc?:" then
   end
 	return NEWPATH
@@ -368,18 +440,25 @@ end
 
 local MAIN_MENU = {
 	item = {
-		"Load Config",
-		"Save Config",
-		"Load defaults",
-		"Configure"
+    LNG.MAIN_MENU_LAB_LOAD_CONF,
+    LNG.MAIN_MENU_LAB_SAVE_CONF,
+    LNG.MAIN_MENU_LAB_LOAD_DEFS,
+    LNG.MAIN_MENU_LAB_CONFIGURE,
+    LNG.MAIN_MENU_LAB_ABOUT,
+    LNG.MAIN_MENU_LAB_LAUNCHELF,
+    LNG.MAIN_MENU_LAB_LAUNCHOSD,
 	},
 	desc = {
-		"Read config from a device",
-		"Save config into a device",
-		"Load the stock config",
-		"Browse the configuration values"
+    LNG.MAIN_MENU_STR_LOAD_CONF,
+    LNG.MAIN_MENU_STR_SAVE_CONF,
+    LNG.MAIN_MENU_STR_LOAD_DEFS,
+    LNG.MAIN_MENU_STR_CONFIGURE,
+    LNG.MAIN_MENU_STR_ABOUT,
+    LNG.MAIN_MENU_STR_LAUNCHELF,
+    LNG.MAIN_MENU_STR_LAUNCHOSD,
 	},
 }
+
 local LOAD_CONF = {
 	item = {
 		"mc0:/PS2BBL/CONFIG.INI",
@@ -389,11 +468,11 @@ local LOAD_CONF = {
 		"hdd0:__sysconf:pfs:/PS2BBL/CONFIG.INI",
 	},
 	desc = {
-		"Read config from Memory Card on slot 1",
-		"Read config from Memory Card on slot 2",
-		"Read config from USB Mass storage",
-		"Read config from MX4SIO SDCard",
-		"Read config from Internal HDD",
+		LNG.READ_CONF_FROM_MC0,
+		LNG.READ_CONF_FROM_MC1,
+		LNG.READ_CONF_FROM_USB,
+		LNG.READ_CONF_FROM_MX4SIO,
+		LNG.READ_CONF_FROM_IHDD,
 	},
 }
 local SAVE_CONF = {
@@ -405,11 +484,11 @@ local SAVE_CONF = {
 		"hdd0:__sysconf/PS2BBL/CONFIG.INI",
 	},
 	desc = {
-		"Save config into Memory Card on slot 1",
-		"Save config into Memory Card on slot 2",
-		"Save config into USB Mass storage",
-		"Save config into MX4SIO SDCard",
-		"Save config into Internal HDD",
+		LNG.SAVE_CONF_INTO_MC0,
+		LNG.SAVE_CONF_INTO_MC1,
+		LNG.SAVE_CONF_INTO_USB,
+		LNG.SAVE_CONF_INTO_MX4SIO,
+		LNG.SAVE_CONF_INTO_IHDD,
 	},
 }
 PS2BBL_CMDS = {
@@ -421,23 +500,24 @@ PS2BBL_CMDS = {
     "$HDDCHECKER",
 	},
 	desc = {
-		"Makes PS2BBL run a disc",
-		"Makes PS2BBL run a disc. but skipping usage of PS2LOGO (useful for Mechapwn)",
-		"displays credits (duh). and shows compilation date and associated git commit hash",
-		"Executes OSDSYS program (Console main menu).\nbut passing args to avoid booting MC or HDD Updates",
-    "Runs HDD diagnosis tests (only works if PS2BBL has HDD support enabled)"
+    LNG.PS2BBLCMD_STR_CDVD,
+    LNG.PS2BBLCMD_STR_CDVD_NO_PS2LOGO,
+    LNG.PS2BBLCMD_STR_CREDITS,
+    LNG.PS2BBLCMD_STR_OSDSYS,
+    LNG.PS2BBLCMD_STR_HDDCHECKER,
 	},
 }
 MAIN_CONFIG_DLG = {
 	item = {
-		"Main Config",
-		"Launch Keys",
+		LNG.MAINCONFD_LAB_MNCONF,
+		LNG.MAINCONFD_LAB_LKCONF,
 	},
 	desc = {
-		"Configure the main aspects of PS2BBL",
-		"Configure wich applications to run when bound key is pressed",
+		LNG.MAINCONFD_STR_MNCONF,
+		LNG.MAINCONFD_STR_LKCONF,
 	},
 }
+--#region uicommon
 function Drawbar(x, y, prog, col)
 	Graphics.drawRect(x-(prog*2), y, prog*4, 5, col)
 end
@@ -651,7 +731,7 @@ function GenericBGFade(fadein, allow_notif)
 	  if fadein then A = A+1 else A = A-1 end
 	end
 end
-
+--#endregion
 
 -----------
 OFM = {
@@ -1013,7 +1093,6 @@ function Configure_PS2BBL_opts()
   local D = 1
   local A = 0x80
   local heading = "PS2BBL Settings"
-  local IRXX = "Defines a path to an IRX driver to be loaded on memory when PS2BBL reads config"
   local options_t = {
     item = {
       "SKIP_PS2LOGO",
@@ -1030,21 +1109,21 @@ function Configure_PS2BBL_opts()
       "LOAD_IRX_E6",
     },
     desc = {
-      "Run PS2 games with PS2LOGO program or run game directly",
-      "Time (in miliseconds) that PS2BBL will wait for a key press before\nLaunching AUTO Applications",
-      "Change PS2BBL Logo color based on memory card play history",
-      "If PS2BBL should open the disc tray (if empty)\nWhen user calls disc launcher commands",
-      "Logo display setting.\n2: show logo and console info, 1: show console info\n0:Dont show anything",
-      IRXX,
-      IRXX,
-      IRXX,
-      IRXX,
-      IRXX,
-      IRXX,
-      IRXX,
-      IRXX,
-      IRXX,
-      IRXX,
+      LNG.MAINCONFP_STR_PS2LOG,
+      LNG.MAINCONFP_STR_WAITIM,
+      LNG.MAINCONFP_STR_LGOCOL,
+      LNG.MAINCONFP_STR_DISCTR,
+      LNG.MAINCONFP_STR_LGODIS,
+      LNG.MAINCONFP_STR_IRXLDR,
+      LNG.MAINCONFP_STR_IRXLDR,
+      LNG.MAINCONFP_STR_IRXLDR,
+      LNG.MAINCONFP_STR_IRXLDR,
+      LNG.MAINCONFP_STR_IRXLDR,
+      LNG.MAINCONFP_STR_IRXLDR,
+      LNG.MAINCONFP_STR_IRXLDR,
+      LNG.MAINCONFP_STR_IRXLDR,
+      LNG.MAINCONFP_STR_IRXLDR,
+      LNG.MAINCONFP_STR_IRXLDR,
     },
     ptr = {
       PS2BBL_MAIN_CONFIG.config.SKIP_PS2LOGO,
@@ -1146,11 +1225,40 @@ function Configure_PS2BBL_opts()
   return T
 end
 
+function FollowThatTrainCJ()
+  local PATH = OFM._start()
+  if PATH ~= nil or PATH ~= "" then
+    if doesFileExist(PATH) then System.loadELF(PATH) end
+  end
+end
 
+function Credits()
+  local Q = 0x80
+  local goinorcomin = true
+  while true do
+    pad = Pads.get()
+    Screen.clear()
+    Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
+    Font.ftPrint(_FNT_, X_MID, 40, 8, 630, 32, LNG.MAIN_MENU_PROMPT, Color.new(255, 255, 255, 0x80-Q))
+    Graphics.drawRect(0, 60, SCR_X, Y_MID+100, Color.new(0, 0, 0, 0x40-Q))
+    Graphics.drawRect(0, 60, SCR_X, 2, Color.new(255, 255, 255, 0x80-Q))
+    Font.ftPrintMultiLineAligned(_FNT_, X_MID, 70, 25, 630, 32, LNG.CREDITSDL_STR_FULL,  Color.new(200, 200, 200, 0x80-Q))
+    Graphics.drawRect(0, Y_MID+160, SCR_X, 2, Color.new(255, 255, 255, 0x80-Q))
+    DrawUsableKeys(DUK_CIRCLE_GOBACK)
+    Screen.SpecialFlip(true)
+    if Pads.check(pad, PAD_CIRCLE) then goinorcomin = false end
+    if goinorcomin then
+      if Q > 0 then Q=Q-1 end
+    else
+      if Q < 0x80 then Q=Q+1 else return end
+    end
+  end
+end
+--PROGRAM BEHAVIOR BEGINS
 while true do
   local aret = 0
   local sret = 0
-  aret = DisplayGenerictMOptPrompt(MAIN_MENU, "PS2BBL Configurator".." - CLOSED BETA 1")
+  aret = DisplayGenerictMOptPrompt(MAIN_MENU, LNG.MAIN_MENU_PROMPT.." - CLOSED BETA 1")
   if aret == 1 then
 	  sret = DisplayGenerictMOptPrompt(LOAD_CONF, MAIN_MENU.item[aret])
     if sret ~= 0 then
@@ -1165,33 +1273,33 @@ while true do
     end
   elseif aret == 2 then
     if GSTATE.CONFIG_LOADSTATE < 0 then
-	    if not DisplayGenericYES_NO_Prompt("Warning\nYou are trying to save blank config to file\ncontinue?") then
+	    if not DisplayGenericYES_NO_Prompt(LNG.WARN_EMPTY_CONF_SAVE) then
         goto BRK_C2
       end
     end
-    	Check_device_ld(sret)
 		sret = DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[aret])
-    	if sret ~= 0 then
-  		  LIP.save(CheckPath(LOAD_CONF.item[sret]), PS2BBL_MAIN_CONFIG)
-    	end
+    Check_device_ld(sret)
+    if sret ~= 0 then
+  	  LIP.save(CheckPath(LOAD_CONF.item[sret]), PS2BBL_MAIN_CONFIG)
+    end
     ::BRK_C2::
   elseif aret == 3 then
-	PS2BBL_MAIN_CONFIG = new_config_struct()
-	PS2BBL_MAIN_CONFIG.keys[16][1] = "mass:/APPS/OPNPS2LD.ELF"
-	PS2BBL_MAIN_CONFIG.keys[16][2] = "mc?:/APPS/OPNPS2LD.ELF"
-	PS2BBL_MAIN_CONFIG.keys[16][3] = "mc?:/OPL/OPNPS2LD.ELF"
-	PS2BBL_MAIN_CONFIG.keys[16][3] = "mc?:/OPL/OPNPS2LD.ELF"
-	PS2BBL_MAIN_CONFIG.keys[3][1]  = "mc?:/BOOT/ULE.ELF"
-	PS2BBL_MAIN_CONFIG.keys[3][2]  = "mc?:/APPS/ULE.ELF"
-	PS2BBL_MAIN_CONFIG.keys[3][3]  = "mc?:/BOOT/BOOT.ELF"
-	PS2BBL_MAIN_CONFIG.keys[9][1]  = "rom0:TESTMODE"
-	PS2BBL_MAIN_CONFIG.keys[10][1] = "$OSDSYS"
-	PS2BBL_MAIN_CONFIG.config.SKIP_PS2LOGO = true
-	PS2BBL_MAIN_CONFIG.config.KEY_READ_WAIT_TIME = 4000
-	PS2BBL_MAIN_CONFIG.config.OSDHISTORY_READ = true
-	PS2BBL_MAIN_CONFIG.config.EJECT_TRAY = true
-	PS2BBL_MAIN_CONFIG.config.LOGO_DISPLAY = 2
-  GSTATE.CONFIG_LOADSTATE = 0
+	  PS2BBL_MAIN_CONFIG = new_config_struct()
+	  PS2BBL_MAIN_CONFIG.keys[16][1] = "mass:/APPS/OPNPS2LD.ELF"
+	  PS2BBL_MAIN_CONFIG.keys[16][2] = "mc?:/APPS/OPNPS2LD.ELF"
+	  PS2BBL_MAIN_CONFIG.keys[16][3] = "mc?:/OPL/OPNPS2LD.ELF"
+	  PS2BBL_MAIN_CONFIG.keys[16][3] = "mc?:/OPL/OPNPS2LD.ELF"
+	  PS2BBL_MAIN_CONFIG.keys[3][1]  = "mc?:/BOOT/ULE.ELF"
+	  PS2BBL_MAIN_CONFIG.keys[3][2]  = "mc?:/APPS/ULE.ELF"
+	  PS2BBL_MAIN_CONFIG.keys[3][3]  = "mc?:/BOOT/BOOT.ELF"
+	  PS2BBL_MAIN_CONFIG.keys[9][1]  = "rom0:TESTMODE"
+	  PS2BBL_MAIN_CONFIG.keys[10][1] = "$OSDSYS"
+	  PS2BBL_MAIN_CONFIG.config.SKIP_PS2LOGO = true
+	  PS2BBL_MAIN_CONFIG.config.KEY_READ_WAIT_TIME = 4000
+	  PS2BBL_MAIN_CONFIG.config.OSDHISTORY_READ = true
+	  PS2BBL_MAIN_CONFIG.config.EJECT_TRAY = true
+	  PS2BBL_MAIN_CONFIG.config.LOGO_DISPLAY = 2
+    GSTATE.CONFIG_LOADSTATE = 0
   elseif aret == 4 then
     sret = DisplayGenerictMOptPrompt(MAIN_CONFIG_DLG, MAIN_MENU.item[aret])
     if sret ~= 0 then
@@ -1201,5 +1309,11 @@ while true do
         call_script("pads/pads.lua")
       end
     end
+  elseif aret == 5 then
+    Credits()
+  elseif aret == 6 then
+    FollowThatTrainCJ()
+  elseif aret == 7 then
+    System.exitToBrowser()
   end
 end
