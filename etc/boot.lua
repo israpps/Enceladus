@@ -103,9 +103,9 @@ More information at github.com/israpps/PS2BBL-configurator
 }
 
 GSTATE = {
-  HDD_LOADED = false;
-  MX4SIO_LOADED = false;
-  CONFIG_LOADSTATE = -1
+  HDD_LOADED = 0;--0: not loaded, 1: loaded, -1: failed to load
+  MX4SIO_LOADED = 0;--0: not loaded, 1: loaded, -1: failed to load
+  CONFIG_LOADSTATE = -1;--if <0: no config loaded, >0: config loaded
 }
 
 Notif_queue = {
@@ -126,23 +126,26 @@ Notif_queue = {
 }
 
 function LoadHDD_Stuff()
-  if GSTATE.HDD_LOADED then return end
+  if GSTATE.HDD_LOADED <0 then return end
   local ret, str = IOP.LoadHDDModules()
-  if not ret then
+  if ret ~= 1 then
     local msg
+    if ret == 0 then msg = LNG.MSG_IRX_LOAD_FAIL..str else msg = LNG.MSG_HDD_STAT_ERR..str end
     table.insert(Notif_queue.msg, string.format(msg, str))
+    GSTATE.HDD_LOADED = -1
   else
-    GSTATE.HDD_LOADED = true
+    GSTATE.HDD_LOADED = 1
   end
 end
 
 function LoadMX4_Stuff()
-  if GSTATE.MX4SIO_LOADED then return end
+  if GSTATE.MX4SIO_LOADED <0 then return end
   local id, result = IOP.load_MX4SIO_Module()
   if id < 0 or result ~= 0 then
     table.insert(Notif_queue.msg, ("%sMX4SIO_BD.IRX (ID:%d, ret:%d)"):format(LNG.MSG_IRX_LOAD_FAIL, id, result))
+    GSTATE.MX4SIO_LOADED = -1
   else
-    GSTATE.MX4SIO_LOADED = true
+    GSTATE.MX4SIO_LOADED = 1
   end
 end
 
