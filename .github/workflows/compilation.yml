@@ -28,6 +28,12 @@ jobs:
     - run: |
         git fetch --prune --unshallow
 
+    - name: update lua
+      run: |
+        git clone --depth 1 -b fix-dofile https://github.com/israpps/lua
+        cd lua/
+        make clean all install platform=PS2
+
     - name: Compile project
       run: |
         make clean all
