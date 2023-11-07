@@ -83,16 +83,16 @@ LNG = {
   MAINCONFP_STR_LGODIS = "Logo display setting.\n2: show logo and console info, 1: show console info\n0:Dont show anything";
   MAINCONFP_STR_IRXLDR = "Defines a path to an IRX driver to be loaded on memory when PS2BBL reads config";
   CREDITSDL_STR_FULL = [[
-Coded by El_isra (Matias Israelson)
-
-Based on Enceladus by Daniel Sant0s
-Based (design wise) on FreeMcBoot configurator and KELFBinder
-BG Image by berion
-Fonts used: Liberation Sans & Inter (by Rasmus Anderson)
-
-More information at github.com/israpps/PS2BBL-configurator
-]]; -- this is a multi line string, the line breaks of the text file itself are interpreted as literal line breaks.
---therefore, dont add any newline unless its a single line string
+ Coded by El_isra (Matias Israelson)
+ 
+ Based on Enceladus by Daniel Sant0s
+ Based (design wise) on FreeMcBoot configurator and KELFBinder
+ BG Image by berion
+ Fonts used: Liberation Sans & Inter (by Rasmus Anderson)
+ 
+ More information at github.com/israpps/PS2BBL-configurator
+ ]]; -- this is a multi line string, the line breaks of the text file itself are interpreted as literal line breaks.
+ --therefore, dont add any newline unless its a single line string
 
   LAB_NOT_SET = "<not set>";
   MSG_IRX_LOAD_FAIL = "Failed to load driver: ";
@@ -398,50 +398,53 @@ DUK_SELECT_CLEAR = (1 << 7)
 DUK_START_SAVE = (1 << 8)
 function DrawUsableKeys(FLAGS, alfa)
 	if alfa == nil then alfa = 0x80 end
+  local txcol, pngcol
+  txcol = Color.new(255, 255, 255, alfa)
+  pngcol = Color.new(128, 128, 129, alfa)
 	if (FLAGS & DUK_CROSS) ~= 0 then
-		Graphics.drawScaleImage(RES.cross, 30, SCR_Y-35, 32, 32)
-		Font.ftPrint(_FNT2_, 60, SCR_Y-30, 0, 630, 16, "OK", Color.new(0xff, 0xff, 0xff, alfa))
+		Graphics.drawScaleImage(RES.cross, 30, SCR_Y-35, 32, 32, pngcol)
+		Font.ftPrint(_FNT2_, 60, SCR_Y-30, 0, 630, 16, "OK", txcol)
 	end
 	if (FLAGS & DUK_CIRCLE) ~= 0 then
 		local MSG = FLAGS & DUK_CIRCLE_GOBACK and "Cancel" or "Go Back"
-		Graphics.drawScaleImage(RES.circle, 30, SCR_Y-60, 32, 32)
-		Font.ftPrint(_FNT2_, 60, SCR_Y-55, 0, 630, 16, MSG, Color.new(0xff, 0xff, 0xff, alfa))
+		Graphics.drawScaleImage(RES.circle, 30, SCR_Y-60, 32, 32, pngcol)
+		Font.ftPrint(_FNT2_, 60, SCR_Y-55, 0, 630, 16, MSG, txcol)
 	end
 	if (FLAGS & DUK_TRIANGLE) ~= 0 then
 		local MSG = FLAGS & DUK_TRIANGLE_CMD and "Assign command" or "Quit"
-		Graphics.drawScaleImage(RES.triangle, SCR_X-30, SCR_Y-60, 32, 32)
-		Font.ftPrint(_FNT2_, SCR_X-60-(MSG:len()*5), SCR_Y-55, 4, 630, 16, MSG, Color.new(0xff, 0xff, 0xff, alfa))
+		Graphics.drawScaleImage(RES.triangle, SCR_X-30, SCR_Y-60, 32, 32, pngcol)
+		Font.ftPrint(_FNT2_, SCR_X-60-(MSG:len()*5), SCR_Y-55, 4, 630, 16, MSG, txcol)
 	end
 	if (FLAGS & DUK_SQUARE) ~= 0 then
 		local MSG = "Map to mc?:"
-		Graphics.drawScaleImage(RES.square, SCR_X-30, SCR_Y-35, 32, 32)
-		Font.ftPrint(_FNT2_, SCR_X-60-(MSG:len()*5), SCR_Y-30, 4, 630, 16, MSG, Color.new(0xff, 0xff, 0xff, alfa))
+		Graphics.drawScaleImage(RES.square, SCR_X-30, SCR_Y-35, 32, 32, pngcol)
+		Font.ftPrint(_FNT2_, SCR_X-60-(MSG:len()*5), SCR_Y-30, 4, 630, 16, MSG, txcol)
 	end
 	if (FLAGS & DUK_INTSLIDER) ~= 0 then
-		Graphics.drawScaleImage(RES.L1, 190, SCR_Y-60, 32, 32)
-		Font.ftPrint(_FNT2_, 220, SCR_Y-55, 0, 630, 16, "-1000", Color.new(0xff, 0xff, 0xff, alfa))
+		Graphics.drawScaleImage(RES.L1, 190, SCR_Y-60, 32, 32, pngcol)
+		Font.ftPrint(_FNT2_, 220, SCR_Y-55, 0, 630, 16, "-1000", txcol)
 
-		Graphics.drawScaleImage(RES.R1, SCR_X-230, SCR_Y-60, 32, 32)
-		Font.ftPrint(_FNT2_, SCR_X-270, SCR_Y-55, 4, 630, 16, "+1000", Color.new(0xff, 0xff, 0xff, alfa))
+		Graphics.drawScaleImage(RES.R1, SCR_X-230, SCR_Y-60, 32, 32, pngcol)
+		Font.ftPrint(_FNT2_, SCR_X-270, SCR_Y-55, 4, 630, 16, "+1000", txcol)
 
-		Graphics.drawScaleImage(RES.L2, 190, SCR_Y-35, 32, 32)
-		Font.ftPrint(_FNT2_, 220, SCR_Y-30, 0, 630, 16, "-100", Color.new(0xff, 0xff, 0xff, alfa))
+		Graphics.drawScaleImage(RES.L2, 190, SCR_Y-35, 32, 32, pngcol)
+		Font.ftPrint(_FNT2_, 220, SCR_Y-30, 0, 630, 16, "-100", txcol)
 
-		Graphics.drawScaleImage(RES.R2, SCR_X-230, SCR_Y-35, 32, 32)
-		Font.ftPrint(_FNT2_, SCR_X-270, SCR_Y-30, 4, 630, 16, "+100", Color.new(0xff, 0xff, 0xff, alfa))
+		Graphics.drawScaleImage(RES.R2, SCR_X-230, SCR_Y-35, 32, 32, pngcol)
+		Font.ftPrint(_FNT2_, SCR_X-270, SCR_Y-30, 4, 630, 16, "+100", txcol)
 	end
 	if (FLAGS & DUK_SELECT_CLEAR) ~= 0 then
-		Graphics.drawScaleImage(RES.select, 190, SCR_Y-60, 32, 32)
-		Font.ftPrint(_FNT2_, 225, SCR_Y-55, 0, 630, 16, "clear", Color.new(0xff, 0xff, 0xff, alfa))
+		Graphics.drawScaleImage(RES.select, 190, SCR_Y-60, 32, 32, pngcol)
+		Font.ftPrint(_FNT2_, 225, SCR_Y-55, 0, 630, 16, "clear", txcol)
 	end
 	if (FLAGS & DUK_START_SAVE) ~= 0 then
-    Graphics.drawScaleImage(RES.start, SCR_X-230, SCR_Y-60, 32, 32)
-    Font.ftPrint(_FNT2_, SCR_X-265, SCR_Y-55, 4, 630, 16, "Save", Color.new(0xff, 0xff, 0xff, alfa))
+    Graphics.drawScaleImage(RES.start, SCR_X-230, SCR_Y-60, 32, 32, pngcol)
+    Font.ftPrint(_FNT2_, SCR_X-265, SCR_Y-55, 4, 630, 16, "Save", txcol)
   end
 end
 --#endregion
 
-local MAIN_MENU = {
+MAIN_MENU = {
 	item = {
     LNG.MAIN_MENU_LAB_LOAD_CONF,
     LNG.MAIN_MENU_LAB_SAVE_CONF,
@@ -462,7 +465,7 @@ local MAIN_MENU = {
 	},
 }
 
-local LOAD_CONF = {
+LOAD_CONF = {
 	item = {
 		"mc0:/PS2BBL/CONFIG.INI",
 		"mc1:/PS2BBL/CONFIG.INI",
@@ -478,7 +481,7 @@ local LOAD_CONF = {
 		LNG.READ_CONF_FROM_IHDD,
 	},
 }
-local SAVE_CONF = {
+SAVE_CONF = {
 	item = {
 		"mc0:/PS2BBL/CONFIG.INI",
 		"mc1:/PS2BBL/CONFIG.INI",
@@ -540,7 +543,7 @@ function DisplayGenerictMOptPrompt(options_t, heading)
       if i == T then
         Font.ftPrint(_FNT2_, 60+1, 60+(i*20), 0, 630, 16, options_t.item[T], Color.new(0xff, 0xff, 0xff, 0x80 - A))
       else
-        Font.ftPrint(_FNT2_, 60, 60+(i*20), 0, 630, 16, options_t.item[i], Color.new(0xff, 0xff, 0xff, 0x70 - A))
+        Font.ftPrint(_FNT2_, 60,   60+(i*20), 0, 630, 16, options_t.item[i], Color.new(0xff, 0xff, 0xff, 0x70 - A))
       end
     end
     Graphics.drawRect(0, 330, SCR_X, 1, Color.new(0xff, 0xff, 0xff, 0x80-A))
@@ -859,6 +862,7 @@ refreshFileList = function (directory, tempmode)
 			ofmItem[ofmItemTotal].Size = ""
 		end
 	else
+    local isHDDRoot = (directory == "hdd0:/")
 		ofmItemTotal=1
 		OFM.ofmSelectedItem=1
 		listdir = nil
@@ -876,7 +880,16 @@ refreshFileList = function (directory, tempmode)
 				ofmItem[nr] = {};
 				ofmItem[nr].Name = listdir[nr].name
 				ofmItem[nr].Size = ""
-				if directory == "mc0:/" or directory == "mc1:/" then
+        if listdir[nr].PartitionType ~= nil then --if enceladus has update from El_isra for partition type...
+          if listdir[nr].PartitionType ~= 0x0100 then -- check for PFS Partition ONLY
+            ofmItem[nr].Name = "."
+          else
+            ofmItem[nr].Size = System.GetPFSPartitionFreeSpace("hdd0:"..listdir[nr].name, 1) / 1048576
+            ofmItem[nr].Size = OFM.ofmRoundSize(OFM.ofmRoundSize(ofmItem[nr].Size))
+            ofmItem[nr].Size = ofmItem[nr].Size.." MB"
+          end
+        end
+				if directory == "mc0:/" or directory == "mc1:/" or directory == "hdd0:/" then
 					ofmItem[nr].Type = "folder"
 					ofmItem[nr].Dir = ofmItem[nr].Name.."/"
 					ofmItem[nr].Name = ofmItem[nr].Dir
@@ -917,7 +930,7 @@ refreshFileList = function (directory, tempmode)
 					ofmItem[tempItemCount].Type = ofmItemOld[i].Type
 					ofmItem[tempItemCount].Dir = ofmItemOld[i].Dir
 					ofmItem[tempItemCount].Size = ofmItemOld[i].Size
-				end
+        end
 			end
 			ofmItemOld=nil
 			ofmItemTotal = tempItemCount
@@ -986,7 +999,7 @@ listFiles = function ()
 end;
 -- entering selected directory
 enterSelectedDirectory = function ()
-	if ofmItem[OFM.ofmSelectedItem].Name ~= "." and ofmItem[OFM.ofmSelectedItem].Name ~= ".." then
+	if ofmItem[OFM.ofmSelectedItem].Name ~= "." and ofmItem[OFM.ofmSelectedItem].Name ~= ".." and ofmItem[OFM.ofmSelectedItem].Name ~= "hdd0:/"then
 		if System.doesDirectoryExist(OFM.ofmCurrentPath..ofmItem[OFM.ofmSelectedItem].Dir) then
 			OFM.ofmFolder[0] = OFM.ofmFolder[0]+1
 			OFM.ofmFolder[OFM.ofmFolder[0]] = ofmItem[OFM.ofmSelectedItem].Dir
@@ -996,6 +1009,10 @@ enterSelectedDirectory = function ()
 			end
 			OFM.refreshFileList(OFM.ofmCurrentPath, true)
 		end
+  elseif ofmItem[OFM.ofmSelectedItem].Name == "hdd0:/" then
+    if System.MountHDDPartition("hdd0:"..ofmItem[OFM.ofmSelectedItem].Dir, 0) == 0 then
+      OFM.refreshFileList("pfs0:/", true)
+    end
 	end
 end;
 -- go back from selected directory
@@ -1085,7 +1102,6 @@ end
 }
 -----------
 
-GenericBGFade(true, nil)
 function call_script(SCRIPT)
     local A, ERR = dofile_protected(SCRIPT);
 	if not A then OnScreenError(ERR) end
@@ -1258,6 +1274,9 @@ function Credits()
   end
 end
 --PROGRAM BEHAVIOR BEGINS
+if doesFileExist("lang.lua") then call_script("lang.lua") end
+GenericBGFade(true, nil)
+if doesFileExist("main.lua") then call_script("main.lua") end
 while true do
   local aret = 0
   local sret = 0

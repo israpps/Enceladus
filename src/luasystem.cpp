@@ -1,10 +1,11 @@
 #include <unistd.h>
+#include <errno.h>
 #include <libmc.h>
 #include <malloc.h>
 #include <sys/fcntl.h>
 #include <dirent.h>
 #include <sys/stat.h>
-
+#include <sys/stat.h>
 #define NEWLIB_PORT_AWARE
 #include <fileXio_rpc.h>
 #include <fileio.h>
@@ -118,8 +119,8 @@ static int lua_dir(lua_State *L)
 	
 	// read from MC ?
         
-        if( !strcmp( path, "mc0:" ) || !strcmp( path, "mc1:" ) )
-        {       
+    if( !strcmp( path, "mc0:" ) || !strcmp( path, "mc1:" ) )
+    {       
                 int	nPort;
                 int	numRead;
                 char    mcPath[256];
@@ -170,7 +171,7 @@ static int lua_dir(lua_State *L)
 
 		}
 		return 1;  // table is already on top
-        }
+    }
         //-----------------------------------------------------------------------------------------
         
         // else regular one using Dopen/Dread
@@ -179,12 +180,13 @@ static int lua_dir(lua_State *L)
 
 	DIR *d;
 	struct dirent *dir;
+	int ishddroot = ((!strcmp(path, "hdd0:/")) || (!strcmp(path, "hdd0:")));
 	d = opendir(path);
 	lua_newtable(L);
 	if (d) {
 		while ((dir = readdir(d)) != NULL) {
 			lua_pushnumber(L, i++);  // push key for file entry
-	    	printf("%s\n", dir->d_name);
+	    	printf("%s mode:%lx\n", dir->d_name, dir->d_stat.st_mode);
 			lua_newtable(L);
 			lua_pushstring(L, "name");
         	lua_pushstring(L, dir->d_name);
@@ -193,7 +195,11 @@ static int lua_dir(lua_State *L)
         	lua_pushstring(L, "size");
         	lua_pushnumber(L, dir->d_stat.st_size);
         	lua_settable(L, -3);
-        	        
+        	if (ishddroot) {     
+        		lua_pushstring(L, "PartitionType");
+        		lua_pushnumber(L, dir->d_stat.st_mode);
+        		lua_settable(L, -3);
+			}    
         	lua_pushstring(L, "directory");
         	lua_pushboolean(L, S_ISDIR(dir->d_stat.st_mode));
         	lua_settable(L, -3);
@@ -754,6 +760,29 @@ err:
 	return 1;
 }
 
+static int getpartitionsizeKB(lua_State *L)
+{
+    char PFS[5+1] = "pfs0:";
+    int argc = lua_gettop(L);
+    unsigned int AvailableSpace = 0;
+    int pfs_index = 0;
+	if (argc != 1 && argc != 2) 
+        return luaL_error(L, "%s: wrong number of arguments, expected one or two argumments", __func__); 
+
+    const char* partition = luaL_checkstring(L, 1);
+    if (argc == 2) 
+        pfs_index = luaL_checkinteger(L, 2);
+    PFS[3] = '0' + pfs_index;
+
+	if (mnt(partition, pfs_index, FIO_MT_RDONLY) == 0) {
+        AvailableSpace = (unsigned int)(fileXioDevctl(PFS, PDIOC_ZONEFREE, NULL, 0, NULL, 0) * fileXioDevctl(PFS, PDIOC_ZONESZ, NULL, 0, NULL, 0));
+        umnt(pfs_index);
+        lua_pushinteger(L, AvailableSpace);
+    } else {
+        lua_pushinteger(L, -ENOENT);
+    }
+    return 1;
+}
 
 static const luaL_Reg System_functions[] = {
 	{"openFile",                   lua_openfile},
@@ -789,6 +818,7 @@ static const luaL_Reg System_functions[] = {
 	{"checkDiscTray",         lua_checkDiscTray},
   	{"MountHDDPartition",             MountPart},
   	{"UnMountHDDPartition",          UmountPart},
+	{"GetPFSPartitionFreeSpace", getpartitionsizeKB},
 	{0, 0}
 };
 
