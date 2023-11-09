@@ -126,7 +126,7 @@ Notif_queue = {
 }
 
 function LoadHDD_Stuff()
-  if GSTATE.HDD_LOADED <0 then return end
+  if GSTATE.HDD_LOADED ~= 0 then return end
   local ret, str = IOP.LoadHDDModules()
   if ret ~= 1 then
     local msg
@@ -139,7 +139,7 @@ function LoadHDD_Stuff()
 end
 
 function LoadMX4_Stuff()
-  if GSTATE.MX4SIO_LOADED <0 then return end
+  if GSTATE.MX4SIO_LOADED ~= 0 then return end
   local id, result = IOP.load_MX4SIO_Module()
   if id < 0 or result ~= 0 then
     table.insert(Notif_queue.msg, ("%sMX4SIO_BD.IRX (ID:%d, ret:%d)"):format(LNG.MSG_IRX_LOAD_FAIL, id, result))
