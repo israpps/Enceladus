@@ -867,6 +867,7 @@ refreshFileList = function (directory, tempmode)
 		OFM.ofmSelectedItem=1
 		listdir = nil
 		listdir = System.listDirectory(directory)
+    if listdir == nil then table.insert(Notif_queue.msg, string.format(LNG.OFM_ERROR_LISTING_FILES, directory)) return end
 		ofmItemTotal = #listdir
 		ofmItem = nil;
 		ofmItem = {};
