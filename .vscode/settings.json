@@ -17,6 +17,8 @@
     "END",
     "FCREATE",
     "FIELD",
+    "FIO_MT_RDONLY",
+    "FIO_MT_RDWR",
     "FRAME",
     "FRDWR",
     "FREAD",

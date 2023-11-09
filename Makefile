@@ -87,7 +87,7 @@ IOP_MODULES = iomanX.o fileXio.o \
 			  sio2man.o mcman.o mcserv.o padman.o \
 			  usbd.o bdm.o bdmfs_fatfs.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o mx4sio_bd.o \
-			  ps2dev9.o ps2atad.o ps2hdd.o ps2fs.o
+			  ps2dev9.o ps2atad.o ps2hdd-osd.o ps2fs.o
 
 EMBEDDED_RSC = boot.o \
 	BG.o circle.o cross.o down.o L1.o L2.o L3.o left.o R1.o R2.o R3.o right.o select.o square.o start.o triangle.o up.o \
@@ -156,10 +156,11 @@ $(EE_ASM_DIR)%.s: EMBED/%.otf
 #-------------------- Embedded IOP Modules ------------------------#
 vpath %.irx iop/
 vpath %.irx $(PS2SDK)/iop/irx/
-IRXTAG = $(notdir $(addsuffix _irx, $(basename $<)))
+IRXTAG = $(subst -,_,$(notdir $(addsuffix _irx, $(basename $<))))
 
 $(EE_ASM_DIR)%.s: $(PS2SDK)/iop/irx/%.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ $(IRXTAG)
+	echo '$(IRXTAG)'
 
 modules/ds34bt/ee/libds34bt.a: modules/ds34bt/ee
 	$(MAKE) -C $<

@@ -100,12 +100,14 @@ LNG = {
   WARN_EMPTY_CONF_SAVE = "Warning\nYou are trying to save blank config to file\ncontinue?";
   ERROR_PART_MOUNT_FAIL = "Failed to mount partition: ";
   ERROR_LUA_EXT_SCRIPT = "ERROR AT EXTERNAL SCRIPT";
+  OFM_ERROR_LISTING_FILES = "Error while browsing:\n%s"
 }
 
 GSTATE = {
   HDD_LOADED = 0;--0: not loaded, 1: loaded, -1: failed to load
   MX4SIO_LOADED = 0;--0: not loaded, 1: loaded, -1: failed to load
   CONFIG_LOADSTATE = -1;--if <0: no config loaded, >0: config loaded
+  ALLOW_HDD_BROWSING = true
 }
 
 Notif_queue = {
@@ -819,7 +821,7 @@ refreshFileList = function (directory, tempmode)
 		end
 
 		-- HDD
-		if System.doesDirectoryExist("hdd0:/") then
+		if System.doesDirectoryExist("hdd0:/") and GSTATE.ALLOW_HDD_BROWSING then
 			ofmItemTotal=ofmItemTotal+1
 			ofmItem[ofmItemTotal] = {};
 			ofmItem[ofmItemTotal].Name = "hdd0:/"
@@ -840,7 +842,7 @@ refreshFileList = function (directory, tempmode)
 
 		-- MASS
 		for i = 0, 10, 1 do
-			bdbd = string.format("mass%d:/", i)
+			local bdbd = string.format("mass%d:/", i)
 			if System.doesDirectoryExist(bdbd) then
 				ofmItemTotal=ofmItemTotal+1
 				ofmItem[ofmItemTotal] = {};
@@ -849,7 +851,6 @@ refreshFileList = function (directory, tempmode)
 				ofmItem[ofmItemTotal].Dir = bdbd
 				ofmItem[ofmItemTotal].Size = ""
 			end
-			
 		end
 
 		-- HOST
@@ -862,7 +863,6 @@ refreshFileList = function (directory, tempmode)
 			ofmItem[ofmItemTotal].Size = ""
 		end
 	else
-    local isHDDRoot = (directory == "hdd0:/")
 		ofmItemTotal=1
 		OFM.ofmSelectedItem=1
 		listdir = nil
@@ -890,9 +890,13 @@ refreshFileList = function (directory, tempmode)
             ofmItem[nr].Size = ofmItem[nr].Size.." MB"
           end
         end
-				if directory == "mc0:/" or directory == "mc1:/" or directory == "hdd0:/" then
+				if directory == "mc0:/" or directory == "mc1:/" then
 					ofmItem[nr].Type = "folder"
 					ofmItem[nr].Dir = ofmItem[nr].Name.."/"
+					ofmItem[nr].Name = ofmItem[nr].Dir
+        elseif directory == "hdd0:/" then
+					ofmItem[nr].Type = "folder"
+					ofmItem[nr].Dir = ofmItem[nr].Name
 					ofmItem[nr].Name = ofmItem[nr].Dir
 				else
 					if doesFileExist(directory..ofmItem[nr].Name) then
@@ -1000,7 +1004,7 @@ listFiles = function ()
 end;
 -- entering selected directory
 enterSelectedDirectory = function ()
-	if ofmItem[OFM.ofmSelectedItem].Name ~= "." and ofmItem[OFM.ofmSelectedItem].Name ~= ".." and ofmItem[OFM.ofmSelectedItem].Name ~= "hdd0:/"then
+	if ofmItem[OFM.ofmSelectedItem].Name ~= "." and ofmItem[OFM.ofmSelectedItem].Name ~= ".." and OFM.ofmCurrentPath ~= "hdd0:/" then
 		if System.doesDirectoryExist(OFM.ofmCurrentPath..ofmItem[OFM.ofmSelectedItem].Dir) then
 			OFM.ofmFolder[0] = OFM.ofmFolder[0]+1
 			OFM.ofmFolder[OFM.ofmFolder[0]] = ofmItem[OFM.ofmSelectedItem].Dir
@@ -1010,14 +1014,26 @@ enterSelectedDirectory = function ()
 			end
 			OFM.refreshFileList(OFM.ofmCurrentPath, true)
 		end
-  elseif ofmItem[OFM.ofmSelectedItem].Name == "hdd0:/" then
-    if System.MountHDDPartition("hdd0:"..ofmItem[OFM.ofmSelectedItem].Dir, 0) == 0 then
-      OFM.refreshFileList("pfs0:/", true)
+  elseif OFM.ofmCurrentPath == "hdd0:/" then
+    if System.MountHDDPartition("hdd0:"..ofmItem[OFM.ofmSelectedItem].Dir, 0, FIO_MT_RDONLY) == 0 then
+			OFM.lastMountedPartition = ofmItem[OFM.ofmSelectedItem].Dir
+      OFM.ofmCurrentPath = "pfs:/"
+      OFM.ofmFolder[0] = 1
+      OFM.ofmFolder[1] = "pfs:/"
+      OFM.enterSelectedDirectory()
+			OFM.refreshFileList(OFM.ofmCurrentPath, true)
+    else
+			OFM.lastMountedPartition = nil
+      table.insert(Notif_queue, LNG.ERROR_PART_MOUNT_FAIL..ofmItem[OFM.ofmSelectedItem].Dir)
     end
 	end
 end;
 -- go back from selected directory
 goBackFromDirectory = function ()
+  if OFM.ofmCurrentPath == "pfs:/" then
+    System.UnMountHDDPartition(0)
+    OFM.lastMountedPartition = nil
+  end
 	if OFM.ofmFolder[0] == 1 then
 		OFM.ofmFolder[0] = 0
 		OFM.ofmFolder[1] = ""
@@ -1044,6 +1060,7 @@ drawOFMoverlay = function ()
     Graphics.drawRect(0, 71, SCR_X, 1, Color.new(255, 255, 255, 0x80))
 end;
 _start = function ()
+  OFM.lastMountedPartition = nil
   OFM.ofmScrollDelay=4
   OFM.ofmWaitBeforeScroll=14
   OFM.COLOR_LIST=Color.new(255,255,255,128)
@@ -1075,6 +1092,9 @@ _start = function ()
               OFM.enterSelectedDirectory()
           elseif ofmItem[OFM.ofmSelectedItem].Name ~= "." and ofmItem[OFM.ofmSelectedItem].Name ~= ".." then
             ret = OFM.ofmCurrentPath..ofmItem[OFM.ofmSelectedItem].Name
+            if OFM.lastMountedPartition ~= nil and string.sub(OFM.ofmCurrentPath, 1, 5) == "pfs:/" then
+              ret = string.format("hdd0:%s:%s", OFM.lastMountedPartition, ret)
+            end
             goto GETLOST
           end
       end

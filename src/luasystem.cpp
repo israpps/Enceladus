@@ -182,8 +182,8 @@ static int lua_dir(lua_State *L)
 	struct dirent *dir;
 	int ishddroot = ((!strcmp(path, "hdd0:/")) || (!strcmp(path, "hdd0:")));
 	d = opendir(path);
-	lua_newtable(L);
-	if (d) {
+	if (d != NULL) {
+		lua_newtable(L);
 		while ((dir = readdir(d)) != NULL) {
 			lua_pushnumber(L, i++);  // push key for file entry
 	    	printf("%s mode:%lx\n", dir->d_name, dir->d_stat.st_mode);
@@ -209,6 +209,7 @@ static int lua_dir(lua_State *L)
 	}
 	else
 	{
+		printf("cannot dopen '%s' errno:%d\n", path, errno);
 		lua_pushnil(L);  // return nil
 		return 1;
 	}
@@ -672,7 +673,7 @@ static int lua_direxists(lua_State *L)
         return luaL_error(L, "Argument error: lua_direxists takes one argument.");
     const char *folder = luaL_checkstring(L, 1);
     DIR *d = opendir(folder);
-    bool ret = false;
+	bool ret = false;
 	if (d) 
     {
         ret = true;
@@ -739,7 +740,7 @@ static int MountPart(lua_State *L)
 #ifdef RESERVE_PFS0
     if (indx == 0 && bootpath_is_on_HDD) luaL_error(L, "%s: pfs0:/ is reserved\n", __func__);
 #endif
-    printf("%s: %s %d %d\n", __func__, mount, indx, openmod);
+    //printf("%s: %s %d %d\n", __func__, mount, indx, openmod);
     lua_pushinteger(L, mnt(mount, indx, openmod));
     return 1;
 err:
@@ -911,7 +912,7 @@ static int CheckHDD(void) {
 
 EXTERN_IRX(ps2dev9_irx);
 EXTERN_IRX(ps2atad_irx);
-EXTERN_IRX(ps2hdd_irx);
+EXTERN_IRX(ps2hdd_osd_irx);
 EXTERN_IRX(ps2fs_irx);
 
 static int lua_loadHDDDrivers(lua_State *L) 
@@ -942,7 +943,7 @@ static int lua_loadHDDDrivers(lua_State *L)
 	}
 
     /* PS2HDD.IRX */
-    ID = SifExecModuleBuffer(&ps2hdd_irx, size_ps2hdd_irx, sizeof(hddarg), hddarg, &RET);
+    ID = SifExecModuleBuffer(&ps2hdd_osd_irx, size_ps2hdd_osd_irx, sizeof(hddarg), hddarg, &RET);
     printf(" [PS2HDD]: ret=%d, ID=%d\n", RET, ID);
     if (ID < 0 || RET == 1) {
 		retval = 0;
