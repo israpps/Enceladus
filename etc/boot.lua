@@ -111,20 +111,20 @@ GSTATE = {
 }
 
 Notif_queue = {
-	display = function ()
+  display = function ()
     local Q
-		if #Notif_queue.msg < 1 then return end
+    if #Notif_queue.msg < 1 then return end
     if #Notif_queue.msg > 1 then Q = 0x50 elseif Notif_queue.ALFA > 0x50 then Q = 0x50 else Q = math.floor(Notif_queue.ALFA) end
-		Graphics.drawRect(30, 30, X_MID-30, 40, Color.new(0, 0, 0, Q))
-		Font.ftPrint(_FNT2_, 32, 32, 0, X_MID-30, 32, Notif_queue.msg[1], Color.new(0, 100, 255, math.floor(Notif_queue.ALFA)))
-		Notif_queue.ALFA = Notif_queue.ALFA-.5
-		if Notif_queue.ALFA < 1 then
-			Notif_queue.ALFA = 0x90
-			table.remove(Notif_queue.msg, 1)
-		end
-	end;
-	ALFA = 0x80;
-	msg = {};
+    Graphics.drawRect(30, 30, X_MID-30, 40, Color.new(0, 0, 0, Q))
+    Font.ftPrint(_FNT2_, 32, 32, 0, X_MID-30, 32, Notif_queue.msg[1], Color.new(0, 100, 255, math.floor(Notif_queue.ALFA)))
+    Notif_queue.ALFA = Notif_queue.ALFA-.5
+    if Notif_queue.ALFA < 1 then
+      Notif_queue.ALFA = 0x90
+      table.remove(Notif_queue.msg, 1)
+    end
+  end;
+  ALFA = 0x80;
+  msg = {};
 }
 
 function LoadHDD_Stuff()
@@ -157,19 +157,19 @@ function Check_device_ld(sret)
 end
 
 function Screen.SpecialFlip(notif)
-	if notif ~= nil then
-		Notif_queue.display()
-	end
-	Screen.flip()
+  if notif ~= nil then
+    Notif_queue.display()
+  end
+  Screen.flip()
 end
 
 function BDM.GetDeviceAlias(indx)
-	local A = BDM.GetDeviceType(indx)
-	if A == BD_USB then return string.format("usb%d:/", indx)
-	elseif A == BD_MX4SIO then return string.format("mx4sio%d:/", indx)
-	elseif A == BD_ILINK then return string.format("ilink%d:/", indx)
-	elseif A == BD_UDPBD then return string.format("udpbd%d:/", indx)
-	else return string.format("mass%d:/", indx) end
+  local A = BDM.GetDeviceType(indx)
+  if A == BD_USB then return string.format("usb%d:/", indx)
+  elseif A == BD_MX4SIO then return string.format("mx4sio%d:/", indx)
+  elseif A == BD_ILINK then return string.format("ilink%d:/", indx)
+  elseif A == BD_UDPBD then return string.format("udpbd%d:/", indx)
+  else return string.format("mass%d:/", indx) end
 end
 
 function Special_tostring(VAL)
@@ -181,11 +181,11 @@ function Special_tostring(VAL)
 end
 
 function Font.ftPrintMultiLineAligned(font, x, y, spacing, width, height, text, color)
-	local internal_y = y
-	for line in text:gmatch("([^\n]*)\n?") do
-	  Font.ftPrint(font, x, internal_y, 8, width, height, line, color)
-	  internal_y = internal_y+spacing
-	end
+  local internal_y = y
+  for line in text:gmatch("([^\n]*)\n?") do
+    Font.ftPrint(font, x, internal_y, 8, width, height, line, color)
+    internal_y = internal_y+spacing
+  end
 end
 
 function OnScreenError(STR)
@@ -267,7 +267,7 @@ end
 function CheckPath(PATH)
   local pos = string.find(PATH, ":", 1, true)
   local DEV = PATH:sub(1, pos)
-	local NEWPATH = PATH
+  local NEWPATH = PATH
   if DEV == "mx4sio:" then
     local indx = BDM.GetDeviceByType(BD_MX4SIO)
     if indx >= 0 then NEWPATH = replace_device(PATH, ("mass%d"):format(indx)) end
@@ -284,7 +284,7 @@ function CheckPath(PATH)
     end
   --elseif DEV == "mc?:" then
   end
-	return NEWPATH
+  return NEWPATH
 end
 
 
@@ -297,20 +297,20 @@ LIP = {
 ---@return table|nil data the table containing all data from the INI file. nil if an error ocurred
 ---@return integer error the error code in case an issue arised while reading
 load = function (fileName)
-	local data = new_config_struct()
+  local data = new_config_struct()
   local ret = 0
-	local FD = System.openFile(fileName, FREAD);
+  local FD = System.openFile(fileName, FREAD);
   local file
   if FD < 0 then
     print("LIP.load: Cannot open"..fileName)
     ret = -5
   else
     file = System.readFile(FD, System.sizeFile(FD));
-	  for line in file:gmatch('[^\n]+') do
-	  	local param, value = line:match('^([%w|_]+)%s-=[ ]?%s-(.+)[\r\n]');
+    for line in file:gmatch('[^\n]+') do
+      local param, value = line:match('^([%w|_]+)%s-=[ ]?%s-(.+)[\r\n]');
       -- TODO: CLEANUP --print(string.format("- '%s' = '%s'", param, value))
-	  	if(param ~= nil and value ~= nil)then
-	  		if param:find("^LK_.*_E[123]")then --Launch keys are special case. handle them as a structure, not as data pairs....
+      if(param ~= nil and value ~= nil)then
+        if param:find("^LK_.*_E[123]")then --Launch keys are special case. handle them as a structure, not as data pairs....
           for i = 1, #PADBUTTONS do
             if param:find("^LK_"..PADBUTTONS[i]) then
               for x = 1, 3, 1 do
@@ -324,68 +324,68 @@ load = function (fileName)
           print(string.format("Unknown Launch KEY ('%s' = '%s')", param, value))
           ::BRK::
         else
-	  		  if(tonumber(value))then
-	  		  	value = tonumber(value);
-	  		  elseif(value == 'true')then
-	  		  	value = true;
-	  		  elseif(value == 'false')then
-	  		  	value = false;
-	  		  end
+          if(tonumber(value))then
+            value = tonumber(value);
+          elseif(value == 'true')then
+            value = true;
+          elseif(value == 'false')then
+            value = false;
+          end
           data.config[param] = value;
-	  		end
-	  	end
-	  end
+        end
+      end
+    end
   end
-	if FD >= 0 then System.closeFile(FD) end
+  if FD >= 0 then System.closeFile(FD) end
   if ret < 0 then
     data = nil
     table.insert(Notif_queue.msg, string.format("Failed to read '%s'\nerror code: %d", fileName, ret))
   else
     table.insert(Notif_queue.msg, string.format("Successfully loaded from\n%s", fileName))
   end
-	return data, ret
+  return data, ret
 end;
 --- Saves all the data from a table to an INI file.
 ---@param fileName string The name of the INI file to fill.
 ---@param data table|nil The table containing all the data to store.
 save = function (fileName, data)
   if data == nil or data.config == nil or data.keys == nil then table.insert(Notif_queue.msg, "Config Save aborted: Config structure is NIL") end
-	local FD = System.openFile(fileName, FCREATE);
-	local contents = "";
-	if (FD >= 0) then
+  local FD = System.openFile(fileName, FCREATE);
+  local contents = "";
+  if (FD >= 0) then
     local subtbl = {}
-		for key, value in pairs(data.config) do
+    for key, value in pairs(data.config) do
       if not(key ~= nil and key ~= "") and (value ~= nil and value ~= "") then goto continue end
-			if (key:sub(1,9) ~= "LOAD_IRX_") then
+      if (key:sub(1,9) ~= "LOAD_IRX_") then
         contents = contents .. ('%s = %s\n'):format(key, Special_tostring(value))
       else
         table.insert(subtbl, key)
       end
-		    ::continue::
-		end
+        ::continue::
+    end
     if #subtbl > 0 then
       table.sort(subtbl)
-  		contents = contents.."\n"
+      contents = contents.."\n"
       for _, k in ipairs(subtbl) do
         if data.config[k] ~= nil and data.config[k] ~= "" then
           contents = contents .. ('%s = %s\n'):format(k, Special_tostring(data.config[k]))
         end
       end
     end
-  		contents = contents.."\n"
-  		for i = 1, #PADBUTTONS do
-  		  for x = 1, 3, 1 do
-  		    if data.keys[i][x] ~= nil then
-  		      contents = contents .. ('LK_%s_E%d = %s\n'):format(PADBUTTONS[i], x, data.keys[i][x])
-  		    end
-  		  end
-  		end
-		System.writeFile(FD, contents, string.len(contents));
-		System.closeFile(FD);
+      contents = contents.."\n"
+      for i = 1, #PADBUTTONS do
+        for x = 1, 3, 1 do
+          if data.keys[i][x] ~= nil then
+            contents = contents .. ('LK_%s_E%d = %s\n'):format(PADBUTTONS[i], x, data.keys[i][x])
+          end
+        end
+      end
+    System.writeFile(FD, contents, string.len(contents));
+    System.closeFile(FD);
     table.insert(Notif_queue.msg, string.format("Successfully saved to\n%s", fileName))
-	else
+  else
     table.insert(Notif_queue.msg, string.format("Failed to save config to '%s'\nerr %d", fileName, FD))
-	end
+  end
 end;
 }
 --#region DrawUsableKeys
@@ -399,47 +399,47 @@ DUK_INTSLIDER = (1 << 6)
 DUK_SELECT_CLEAR = (1 << 7)
 DUK_START_SAVE = (1 << 8)
 function DrawUsableKeys(FLAGS, alfa)
-	if alfa == nil then alfa = 0x80 end
+  if alfa == nil then alfa = 0x80 end
   local txcol, pngcol
   txcol = Color.new(255, 255, 255, alfa)
   pngcol = Color.new(128, 128, 129, alfa)
-	if (FLAGS & DUK_CROSS) ~= 0 then
-		Graphics.drawScaleImage(RES.cross, 30, SCR_Y-35, 32, 32, pngcol)
-		Font.ftPrint(_FNT2_, 60, SCR_Y-30, 0, 630, 16, "OK", txcol)
-	end
-	if (FLAGS & DUK_CIRCLE) ~= 0 then
-		local MSG = FLAGS & DUK_CIRCLE_GOBACK and "Cancel" or "Go Back"
-		Graphics.drawScaleImage(RES.circle, 30, SCR_Y-60, 32, 32, pngcol)
-		Font.ftPrint(_FNT2_, 60, SCR_Y-55, 0, 630, 16, MSG, txcol)
-	end
-	if (FLAGS & DUK_TRIANGLE) ~= 0 then
-		local MSG = FLAGS & DUK_TRIANGLE_CMD and "Assign command" or "Quit"
-		Graphics.drawScaleImage(RES.triangle, SCR_X-30, SCR_Y-60, 32, 32, pngcol)
-		Font.ftPrint(_FNT2_, SCR_X-60-(MSG:len()*5), SCR_Y-55, 4, 630, 16, MSG, txcol)
-	end
-	if (FLAGS & DUK_SQUARE) ~= 0 then
-		local MSG = "Map to mc?:"
-		Graphics.drawScaleImage(RES.square, SCR_X-30, SCR_Y-35, 32, 32, pngcol)
-		Font.ftPrint(_FNT2_, SCR_X-60-(MSG:len()*5), SCR_Y-30, 4, 630, 16, MSG, txcol)
-	end
-	if (FLAGS & DUK_INTSLIDER) ~= 0 then
-		Graphics.drawScaleImage(RES.L1, 190, SCR_Y-60, 32, 32, pngcol)
-		Font.ftPrint(_FNT2_, 220, SCR_Y-55, 0, 630, 16, "-1000", txcol)
+  if (FLAGS & DUK_CROSS) ~= 0 then
+    Graphics.drawScaleImage(RES.cross, 30, SCR_Y-35, 32, 32, pngcol)
+    Font.ftPrint(_FNT2_, 60, SCR_Y-30, 0, 630, 16, "OK", txcol)
+  end
+  if (FLAGS & DUK_CIRCLE) ~= 0 then
+    local MSG = FLAGS & DUK_CIRCLE_GOBACK and "Cancel" or "Go Back"
+    Graphics.drawScaleImage(RES.circle, 30, SCR_Y-60, 32, 32, pngcol)
+    Font.ftPrint(_FNT2_, 60, SCR_Y-55, 0, 630, 16, MSG, txcol)
+  end
+  if (FLAGS & DUK_TRIANGLE) ~= 0 then
+    local MSG = FLAGS & DUK_TRIANGLE_CMD and "Assign command" or "Quit"
+    Graphics.drawScaleImage(RES.triangle, SCR_X-30, SCR_Y-60, 32, 32, pngcol)
+    Font.ftPrint(_FNT2_, SCR_X-60-(MSG:len()*5), SCR_Y-55, 4, 630, 16, MSG, txcol)
+  end
+  if (FLAGS & DUK_SQUARE) ~= 0 then
+    local MSG = "Map to mc?:"
+    Graphics.drawScaleImage(RES.square, SCR_X-30, SCR_Y-35, 32, 32, pngcol)
+    Font.ftPrint(_FNT2_, SCR_X-60-(MSG:len()*5), SCR_Y-30, 4, 630, 16, MSG, txcol)
+  end
+  if (FLAGS & DUK_INTSLIDER) ~= 0 then
+    Graphics.drawScaleImage(RES.L1, 190, SCR_Y-60, 32, 32, pngcol)
+    Font.ftPrint(_FNT2_, 220, SCR_Y-55, 0, 630, 16, "-1000", txcol)
 
-		Graphics.drawScaleImage(RES.R1, SCR_X-230, SCR_Y-60, 32, 32, pngcol)
-		Font.ftPrint(_FNT2_, SCR_X-270, SCR_Y-55, 4, 630, 16, "+1000", txcol)
+    Graphics.drawScaleImage(RES.R1, SCR_X-230, SCR_Y-60, 32, 32, pngcol)
+    Font.ftPrint(_FNT2_, SCR_X-270, SCR_Y-55, 4, 630, 16, "+1000", txcol)
 
-		Graphics.drawScaleImage(RES.L2, 190, SCR_Y-35, 32, 32, pngcol)
-		Font.ftPrint(_FNT2_, 220, SCR_Y-30, 0, 630, 16, "-100", txcol)
+    Graphics.drawScaleImage(RES.L2, 190, SCR_Y-35, 32, 32, pngcol)
+    Font.ftPrint(_FNT2_, 220, SCR_Y-30, 0, 630, 16, "-100", txcol)
 
-		Graphics.drawScaleImage(RES.R2, SCR_X-230, SCR_Y-35, 32, 32, pngcol)
-		Font.ftPrint(_FNT2_, SCR_X-270, SCR_Y-30, 4, 630, 16, "+100", txcol)
-	end
-	if (FLAGS & DUK_SELECT_CLEAR) ~= 0 then
-		Graphics.drawScaleImage(RES.select, 190, SCR_Y-60, 32, 32, pngcol)
-		Font.ftPrint(_FNT2_, 225, SCR_Y-55, 0, 630, 16, "clear", txcol)
-	end
-	if (FLAGS & DUK_START_SAVE) ~= 0 then
+    Graphics.drawScaleImage(RES.R2, SCR_X-230, SCR_Y-35, 32, 32, pngcol)
+    Font.ftPrint(_FNT2_, SCR_X-270, SCR_Y-30, 4, 630, 16, "+100", txcol)
+  end
+  if (FLAGS & DUK_SELECT_CLEAR) ~= 0 then
+    Graphics.drawScaleImage(RES.select, 190, SCR_Y-60, 32, 32, pngcol)
+    Font.ftPrint(_FNT2_, 225, SCR_Y-55, 0, 630, 16, "clear", txcol)
+  end
+  if (FLAGS & DUK_START_SAVE) ~= 0 then
     Graphics.drawScaleImage(RES.start, SCR_X-230, SCR_Y-60, 32, 32, pngcol)
     Font.ftPrint(_FNT2_, SCR_X-265, SCR_Y-55, 4, 630, 16, "Save", txcol)
   end
@@ -447,7 +447,7 @@ end
 --#endregion
 
 MAIN_MENU = {
-	item = {
+  item = {
     LNG.MAIN_MENU_LAB_LOAD_CONF,
     LNG.MAIN_MENU_LAB_SAVE_CONF,
     LNG.MAIN_MENU_LAB_LOAD_DEFS,
@@ -455,8 +455,8 @@ MAIN_MENU = {
     LNG.MAIN_MENU_LAB_ABOUT,
     LNG.MAIN_MENU_LAB_LAUNCHELF,
     LNG.MAIN_MENU_LAB_LAUNCHOSD,
-	},
-	desc = {
+  },
+  desc = {
     LNG.MAIN_MENU_STR_LOAD_CONF,
     LNG.MAIN_MENU_STR_SAVE_CONF,
     LNG.MAIN_MENU_STR_LOAD_DEFS,
@@ -464,70 +464,70 @@ MAIN_MENU = {
     LNG.MAIN_MENU_STR_ABOUT,
     LNG.MAIN_MENU_STR_LAUNCHELF,
     LNG.MAIN_MENU_STR_LAUNCHOSD,
-	},
+  },
 }
 
 LOAD_CONF = {
-	item = {
-		"mc0:/PS2BBL/CONFIG.INI",
-		"mc1:/PS2BBL/CONFIG.INI",
-		"mass:/PS2BBL/CONFIG.INI",
-		"mx4sio:/PS2BBL/CONFIG.INI",
-		"hdd0:__sysconf:pfs:/PS2BBL/CONFIG.INI",
-	},
-	desc = {
-		LNG.READ_CONF_FROM_MC0,
-		LNG.READ_CONF_FROM_MC1,
-		LNG.READ_CONF_FROM_USB,
-		LNG.READ_CONF_FROM_MX4SIO,
-		LNG.READ_CONF_FROM_IHDD,
-	},
+  item = {
+    "mc0:/PS2BBL/CONFIG.INI",
+    "mc1:/PS2BBL/CONFIG.INI",
+    "mass:/PS2BBL/CONFIG.INI",
+    "mx4sio:/PS2BBL/CONFIG.INI",
+    "hdd0:__sysconf:pfs:/PS2BBL/CONFIG.INI",
+  },
+  desc = {
+    LNG.READ_CONF_FROM_MC0,
+    LNG.READ_CONF_FROM_MC1,
+    LNG.READ_CONF_FROM_USB,
+    LNG.READ_CONF_FROM_MX4SIO,
+    LNG.READ_CONF_FROM_IHDD,
+  },
 }
 SAVE_CONF = {
-	item = {
-		"mc0:/PS2BBL/CONFIG.INI",
-		"mc1:/PS2BBL/CONFIG.INI",
-		"mass:/PS2BBL/CONFIG.INI",
-		"mx4sio:/PS2BBL/CONFIG.INI",
-		"hdd0:__sysconf/PS2BBL/CONFIG.INI",
-	},
-	desc = {
-		LNG.SAVE_CONF_INTO_MC0,
-		LNG.SAVE_CONF_INTO_MC1,
-		LNG.SAVE_CONF_INTO_USB,
-		LNG.SAVE_CONF_INTO_MX4SIO,
-		LNG.SAVE_CONF_INTO_IHDD,
-	},
+  item = {
+    "mc0:/PS2BBL/CONFIG.INI",
+    "mc1:/PS2BBL/CONFIG.INI",
+    "mass:/PS2BBL/CONFIG.INI",
+    "mx4sio:/PS2BBL/CONFIG.INI",
+    "hdd0:__sysconf/PS2BBL/CONFIG.INI",
+  },
+  desc = {
+    LNG.SAVE_CONF_INTO_MC0,
+    LNG.SAVE_CONF_INTO_MC1,
+    LNG.SAVE_CONF_INTO_USB,
+    LNG.SAVE_CONF_INTO_MX4SIO,
+    LNG.SAVE_CONF_INTO_IHDD,
+  },
 }
 PS2BBL_CMDS = {
-	item = {
-		"$CDVD",
-		"$CDVD_NO_PS2LOGO",
-		"$CREDITS",
-		"$OSDSYS",
+  item = {
+    "$CDVD",
+    "$CDVD_NO_PS2LOGO",
+    "$CREDITS",
+    "$OSDSYS",
     "$HDDCHECKER",
-	},
-	desc = {
+  },
+  desc = {
     LNG.PS2BBLCMD_STR_CDVD,
     LNG.PS2BBLCMD_STR_CDVD_NO_PS2LOGO,
     LNG.PS2BBLCMD_STR_CREDITS,
     LNG.PS2BBLCMD_STR_OSDSYS,
     LNG.PS2BBLCMD_STR_HDDCHECKER,
-	},
+  },
 }
 MAIN_CONFIG_DLG = {
-	item = {
-		LNG.MAINCONFD_LAB_MNCONF,
-		LNG.MAINCONFD_LAB_LKCONF,
-	},
-	desc = {
-		LNG.MAINCONFD_STR_MNCONF,
-		LNG.MAINCONFD_STR_LKCONF,
-	},
+  item = {
+    LNG.MAINCONFD_LAB_MNCONF,
+    LNG.MAINCONFD_LAB_LKCONF,
+  },
+  desc = {
+    LNG.MAINCONFD_STR_MNCONF,
+    LNG.MAINCONFD_STR_LKCONF,
+  },
 }
 --#region uicommon
 function Drawbar(x, y, prog, col)
-	Graphics.drawRect(x-(prog*2), y, prog*4, 5, col)
+  Graphics.drawRect(x-(prog*2), y, prog*4, 5, col)
 end
 --0, 0xde, 0xf
 function DisplayGenerictMOptPrompt(options_t, heading)
@@ -552,7 +552,7 @@ function DisplayGenerictMOptPrompt(options_t, heading)
     if options_t.desc ~= nil then
       Font.ftPrint(_FNT2_, 80, 350, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
     end
-	DrawUsableKeys(DUK_CIRCLE|DUK_CROSS)
+  DrawUsableKeys(DUK_CIRCLE|DUK_CROSS)
     if A > 0 then A = A - 1 end
     Screen.SpecialFlip(true)
     pad = Pads.get()
@@ -592,7 +592,7 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback, AVAILP
   while true do
     Screen.clear()
     Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
-	  if draw_callback ~= nil then draw_callback(0) end
+    if draw_callback ~= nil then draw_callback(0) end
     Graphics.drawRect(0, 81, SCR_X, 379-81, Color.new(0, 0, 0, 50-A))
     Font.ftPrint(_FNT_, 40, 60, 0, 630, 32, heading, Color.new(220, 220, 220, 0x80 - A))
     Graphics.drawRect(0, 80, SCR_X, 1, Color.new(255, 255, 255, 0x80-A))
@@ -607,21 +607,21 @@ function DisplayGenerictMOptPromptDiag(options_t, heading, draw_callback, AVAILP
     if options_t.desc ~= nil then
       Font.ftPrint(_FNT2_, 80, 370, 0, 600, 32, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
     end
-	  DrawUsableKeys(AVAILPADS)
+    DrawUsableKeys(AVAILPADS)
     if A > 0 then
-		  A = A - 1
-	  else
-		  pad = Pads.get()
-	  end
+      A = A - 1
+    else
+      pad = Pads.get()
+    end
     Screen.SpecialFlip(true)
 
     if D == 0 then
       if (Pads.check(pad, PAD_CROSS) or
-		  (Pads.check(pad, PAD_TRIANGLE) and AVAILPADS&DUK_TRIANGLE) or
-		  (Pads.check(pad, PAD_SELECT) and AVAILPADS&DUK_SELECT_CLEAR) or
-		  (Pads.check(pad, PAD_SELECT) and AVAILPADS&DUK_TRIANGLE) or
-		  (Pads.check(pad, PAD_SQUARE) and AVAILPADS&DUK_SQUARE))
-	    then
+      (Pads.check(pad, PAD_TRIANGLE) and AVAILPADS&DUK_TRIANGLE) or
+      (Pads.check(pad, PAD_SELECT) and AVAILPADS&DUK_SELECT_CLEAR) or
+      (Pads.check(pad, PAD_SELECT) and AVAILPADS&DUK_TRIANGLE) or
+      (Pads.check(pad, PAD_SQUARE) and AVAILPADS&DUK_SQUARE))
+      then
         D = 1
         Screen.clear()
         break
@@ -661,7 +661,7 @@ function DisplayGenericYES_NO_Prompt(MESSAGE)
     Graphics.drawRect(0, Y_MID-60, SCR_X, 2, Color.new(255, 255, 255, 0x80-A))
     Graphics.drawRect(0, Y_MID+60, SCR_X, 2, Color.new(0xff, 0xff, 0xff, 0x80-A))
 
-	  DrawUsableKeys(DUK_CIRCLE|DUK_CROSS)
+    DrawUsableKeys(DUK_CIRCLE|DUK_CROSS)
     if A > 0 then A = A - 1 end
     Screen.SpecialFlip(true)
     pad = Pads.get()
@@ -686,201 +686,201 @@ end
 
 function IntSlider(is_milisecond, VAL, heading)
   local origval = VAL
-	local QUIT = false
-	if heading == nil then heading = "" end
-	local D = 1
-	while not QUIT do
-	  Screen.clear()
-	  Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
-	  Graphics.drawRect(0, Y_MID-30, SCR_X, 60, Color.new(0, 0, 0, 50))
-	  Font.ftPrint(_FNT_, X_MID, Y_MID-60, 8, 630, 32, heading, Color.new(220, 220, 220, 0x80))
-	  Graphics.drawRect(0, Y_MID-30, SCR_X, 1, Color.new(255, 255, 255, 0x80))
-	  Graphics.drawRect(0, Y_MID+30, SCR_X, 1, Color.new(255, 255, 255, 0x80))
-	  Font.ftPrint(_FNT_, X_MID, Y_MID, 8, 630, 32, VAL, Color.new(220, 220, 220, 0x80))
+  local QUIT = false
+  if heading == nil then heading = "" end
+  local D = 1
+  while not QUIT do
+    Screen.clear()
+    Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y)
+    Graphics.drawRect(0, Y_MID-30, SCR_X, 60, Color.new(0, 0, 0, 50))
+    Font.ftPrint(_FNT_, X_MID, Y_MID-60, 8, 630, 32, heading, Color.new(220, 220, 220, 0x80))
+    Graphics.drawRect(0, Y_MID-30, SCR_X, 1, Color.new(255, 255, 255, 0x80))
+    Graphics.drawRect(0, Y_MID+30, SCR_X, 1, Color.new(255, 255, 255, 0x80))
+    Font.ftPrint(_FNT_, X_MID, Y_MID, 8, 630, 32, VAL, Color.new(220, 220, 220, 0x80))
 
-	  DrawUsableKeys(DUK_INTSLIDER|DUK_CIRCLE|DUK_CROSS)
-	  Screen.SpecialFlip(true)
-	  pad = Pads.get()
-	  if Pads.check(pad, PAD_CROSS) and D==0 then
-	    return VAL
-	  end
-	  if Pads.check(pad, PAD_CIRCLE) and D==0 then
+    DrawUsableKeys(DUK_INTSLIDER|DUK_CIRCLE|DUK_CROSS)
+    Screen.SpecialFlip(true)
+    pad = Pads.get()
+    if Pads.check(pad, PAD_CROSS) and D==0 then
+      return VAL
+    end
+    if Pads.check(pad, PAD_CIRCLE) and D==0 then
       return origval
-	  end
-	  if Pads.check(pad, PAD_R1) and D==0 then
-	    D=1
-	    VAL = VAL+1000
-	  end
-	  if Pads.check(pad, PAD_R2) and D==0 then
-	    D=1
-	    VAL = VAL+100
-	  end
-	  if Pads.check(pad, PAD_L1) and D==0 then
-	    D=1
-	    VAL = VAL-1000
-	  end
-	  if Pads.check(pad, PAD_L2) and D==0 then
-	    D=1
-	    VAL = VAL-100
-	  end
-	  if D >= 10 then D=0 else D = D+1 end
-	  if VAL < 0 then VAL = 0 end
-	  if VAL > 10000 then VAL = 10000 end
-	end
+    end
+    if Pads.check(pad, PAD_R1) and D==0 then
+      D=1
+      VAL = VAL+1000
+    end
+    if Pads.check(pad, PAD_R2) and D==0 then
+      D=1
+      VAL = VAL+100
+    end
+    if Pads.check(pad, PAD_L1) and D==0 then
+      D=1
+      VAL = VAL-1000
+    end
+    if Pads.check(pad, PAD_L2) and D==0 then
+      D=1
+      VAL = VAL-100
+    end
+    if D >= 10 then D=0 else D = D+1 end
+    if VAL < 0 then VAL = 0 end
+    if VAL > 10000 then VAL = 10000 end
+  end
 end
 
 function GenericBGFade(fadein, allow_notif)
-	local A = 0x79
-	if fadein then A = 1 end
-	while A < 0x80 and A > 0 do
-	  Screen.clear()
-	  Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, A))
-	  Screen.SpecialFlip(allow_notif)
-	  if fadein then A = A+1 else A = A-1 end
-	end
+  local A = 0x79
+  if fadein then A = 1 end
+  while A < 0x80 and A > 0 do
+    Screen.clear()
+    Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, A))
+    Screen.SpecialFlip(allow_notif)
+    if fadein then A = A+1 else A = A-1 end
+  end
 end
 --#endregion
 
 -----------
 OFM = {
 ofmRoundSize = function (inputValue)
-	roundValue=inputValue*10
-	roundTempValueA,roundTempValueB = math.modf(roundValue/1)
-	roundValue= 1 * (roundTempValueA + (roundTempValueB > 0.5 and 1 or 0))
-	roundValue=roundValue/10
-	return roundValue
+  roundValue=inputValue*10
+  roundTempValueA,roundTempValueB = math.modf(roundValue/1)
+  roundValue= 1 * (roundTempValueA + (roundTempValueB > 0.5 and 1 or 0))
+  roundValue=roundValue/10
+  return roundValue
 end;
 -- check pad up/down
 checkPadUpDown = function ()
-	if Pads.check(OFM.paad, PAD_UP) then
-		PadUpHolding=PadUpHolding+1
-	else
-		PadUpHolding=0
-	end
-	if Pads.check(OFM.paad, PAD_DOWN) then
-		PadDownHolding=PadDownHolding+1
-	else
-		PadDownHolding=0
-	end
-	if PadUpHolding == 1 then
-		OFM.ofmSelectedItem = OFM.ofmSelectedItem - 1
-	elseif PadUpHolding >= OFM.ofmWaitBeforeScroll then
-		for nr = 2, 512 do
-			nra = nr*OFM.ofmScrollDelay
-			if PadUpHolding == nra then
-				OFM.ofmSelectedItem = OFM.ofmSelectedItem - 1
-			end
-		end
-	end
-	if PadDownHolding == 1 then
-		OFM.ofmSelectedItem = OFM.ofmSelectedItem + 1
-	elseif PadDownHolding >= OFM.ofmWaitBeforeScroll then
-		for nr = 2, 512 do
-			nra = nr*OFM.ofmScrollDelay
-			if PadDownHolding == nra then
-				OFM.ofmSelectedItem = OFM.ofmSelectedItem + 1
-			end
-		end
-	end
+  if Pads.check(OFM.paad, PAD_UP) then
+    PadUpHolding=PadUpHolding+1
+  else
+    PadUpHolding=0
+  end
+  if Pads.check(OFM.paad, PAD_DOWN) then
+    PadDownHolding=PadDownHolding+1
+  else
+    PadDownHolding=0
+  end
+  if PadUpHolding == 1 then
+    OFM.ofmSelectedItem = OFM.ofmSelectedItem - 1
+  elseif PadUpHolding >= OFM.ofmWaitBeforeScroll then
+    for nr = 2, 512 do
+      nra = nr*OFM.ofmScrollDelay
+      if PadUpHolding == nra then
+        OFM.ofmSelectedItem = OFM.ofmSelectedItem - 1
+      end
+    end
+  end
+  if PadDownHolding == 1 then
+    OFM.ofmSelectedItem = OFM.ofmSelectedItem + 1
+  elseif PadDownHolding >= OFM.ofmWaitBeforeScroll then
+    for nr = 2, 512 do
+      nra = nr*OFM.ofmScrollDelay
+      if PadDownHolding == nra then
+        OFM.ofmSelectedItem = OFM.ofmSelectedItem + 1
+      end
+    end
+  end
 
-	if OFM.ofmSelectedItem <= 0 then
-		OFM.ofmSelectedItem = 1
-	end
-	if OFM.ofmSelectedItem > ofmItemTotal then
-		OFM.ofmSelectedItem = ofmItemTotal
-	end
+  if OFM.ofmSelectedItem <= 0 then
+    OFM.ofmSelectedItem = 1
+  end
+  if OFM.ofmSelectedItem > ofmItemTotal then
+    OFM.ofmSelectedItem = ofmItemTotal
+  end
 end;
 -- refresh files list -- directory to list / list files in directory (true) or mount paths (false)
 refreshFileList = function (directory, tempmode)
-	if tempmode == false then
-		ofmItemTotal = 0
-		OFM.ofmSelectedItem = 1
-		ofmItem = nil;
-		ofmItem = {};
+  if tempmode == false then
+    ofmItemTotal = 0
+    OFM.ofmSelectedItem = 1
+    ofmItem = nil;
+    ofmItem = {};
 
-		-- MEMORY CARD 1
-		mctypea = System.getMCInfo(0)
-		if mctypea.type == 2 and mctypea.format == 1 then
-			ofmItemTotal=ofmItemTotal+1
-			ofmItem[ofmItemTotal] = {};
-			ofmItem[ofmItemTotal].Name = "mc0:/" -- displayed name
-			ofmItem[ofmItemTotal].Type = "folder" -- "file" or "folder"
-			ofmItem[ofmItemTotal].Dir = "mc0:/" -- directory (path)
-			ofmItem[ofmItemTotal].Size = string.format("%.1fMb Free", mctypea.freemem/1024)
-		end
+    -- MEMORY CARD 1
+    mctypea = System.getMCInfo(0)
+    if mctypea.type == 2 and mctypea.format == 1 then
+      ofmItemTotal=ofmItemTotal+1
+      ofmItem[ofmItemTotal] = {};
+      ofmItem[ofmItemTotal].Name = "mc0:/" -- displayed name
+      ofmItem[ofmItemTotal].Type = "folder" -- "file" or "folder"
+      ofmItem[ofmItemTotal].Dir = "mc0:/" -- directory (path)
+      ofmItem[ofmItemTotal].Size = string.format("%.1fMb Free", mctypea.freemem/1024)
+    end
 
-		-- MEMORY CARD 2
-		mctypeb = System.getMCInfo(1)
-		if mctypeb.type == 2 and mctypeb.format == 1 then
-			ofmItemTotal=ofmItemTotal+1
-			ofmItem[ofmItemTotal] = {};
-			ofmItem[ofmItemTotal].Name = "mc1:/"
-			ofmItem[ofmItemTotal].Type = "folder"
-			ofmItem[ofmItemTotal].Dir = "mc1:/"
-			ofmItem[ofmItemTotal].Size = string.format("%.1fMb Free", mctypeb.freemem/1024)
-		end
+    -- MEMORY CARD 2
+    mctypeb = System.getMCInfo(1)
+    if mctypeb.type == 2 and mctypeb.format == 1 then
+      ofmItemTotal=ofmItemTotal+1
+      ofmItem[ofmItemTotal] = {};
+      ofmItem[ofmItemTotal].Name = "mc1:/"
+      ofmItem[ofmItemTotal].Type = "folder"
+      ofmItem[ofmItemTotal].Dir = "mc1:/"
+      ofmItem[ofmItemTotal].Size = string.format("%.1fMb Free", mctypeb.freemem/1024)
+    end
 
-		-- HDD
-		if System.doesDirectoryExist("hdd0:/") and GSTATE.ALLOW_HDD_BROWSING then
-			ofmItemTotal=ofmItemTotal+1
-			ofmItem[ofmItemTotal] = {};
-			ofmItem[ofmItemTotal].Name = "hdd0:/"
-			ofmItem[ofmItemTotal].Type = "folder"
-			ofmItem[ofmItemTotal].Dir = "hdd0:/"
-			ofmItem[ofmItemTotal].Size = ""
-		end
+    -- HDD
+    if System.doesDirectoryExist("hdd0:/") and GSTATE.ALLOW_HDD_BROWSING then
+      ofmItemTotal=ofmItemTotal+1
+      ofmItem[ofmItemTotal] = {};
+      ofmItem[ofmItemTotal].Name = "hdd0:/"
+      ofmItem[ofmItemTotal].Type = "folder"
+      ofmItem[ofmItemTotal].Dir = "hdd0:/"
+      ofmItem[ofmItemTotal].Size = ""
+    end
 
-		-- CD/DVD
-		if System.doesDirectoryExist("cdfs:/") then
-			ofmItemTotal=ofmItemTotal+1
-			ofmItem[ofmItemTotal] = {};
-			ofmItem[ofmItemTotal].Name = "cdfs:/"
-			ofmItem[ofmItemTotal].Type = "folder"
-			ofmItem[ofmItemTotal].Dir = "cdfs:/"
-			ofmItem[ofmItemTotal].Size = ""
-		end
+    -- CD/DVD
+    if System.doesDirectoryExist("cdfs:/") then
+      ofmItemTotal=ofmItemTotal+1
+      ofmItem[ofmItemTotal] = {};
+      ofmItem[ofmItemTotal].Name = "cdfs:/"
+      ofmItem[ofmItemTotal].Type = "folder"
+      ofmItem[ofmItemTotal].Dir = "cdfs:/"
+      ofmItem[ofmItemTotal].Size = ""
+    end
 
-		-- MASS
-		for i = 0, 10, 1 do
-			local bdbd = string.format("mass%d:/", i)
-			if System.doesDirectoryExist(bdbd) then
-				ofmItemTotal=ofmItemTotal+1
-				ofmItem[ofmItemTotal] = {};
-				ofmItem[ofmItemTotal].Name = BDM.GetDeviceAlias(i)
-				ofmItem[ofmItemTotal].Type = "folder"
-				ofmItem[ofmItemTotal].Dir = bdbd
-				ofmItem[ofmItemTotal].Size = ""
-			end
-		end
+    -- MASS
+    for i = 0, 10, 1 do
+      local bdbd = string.format("mass%d:/", i)
+      if System.doesDirectoryExist(bdbd) then
+        ofmItemTotal=ofmItemTotal+1
+        ofmItem[ofmItemTotal] = {};
+        ofmItem[ofmItemTotal].Name = BDM.GetDeviceAlias(i)
+        ofmItem[ofmItemTotal].Type = "folder"
+        ofmItem[ofmItemTotal].Dir = bdbd
+        ofmItem[ofmItemTotal].Size = ""
+      end
+    end
 
-		-- HOST
-		if System.doesDirectoryExist("host:/") then
-			ofmItemTotal=ofmItemTotal+1
-			ofmItem[ofmItemTotal] = {};
-			ofmItem[ofmItemTotal].Name = "host:/"
-			ofmItem[ofmItemTotal].Type = "folder"
-			ofmItem[ofmItemTotal].Dir = "host:/"
-			ofmItem[ofmItemTotal].Size = ""
-		end
-	else
-		ofmItemTotal=1
-		OFM.ofmSelectedItem=1
-		listdir = nil
-		listdir = System.listDirectory(directory)
+    -- HOST
+    if System.doesDirectoryExist("host:/") then
+      ofmItemTotal=ofmItemTotal+1
+      ofmItem[ofmItemTotal] = {};
+      ofmItem[ofmItemTotal].Name = "host:/"
+      ofmItem[ofmItemTotal].Type = "folder"
+      ofmItem[ofmItemTotal].Dir = "host:/"
+      ofmItem[ofmItemTotal].Size = ""
+    end
+  else
+    ofmItemTotal=1
+    OFM.ofmSelectedItem=1
+    listdir = nil
+    listdir = System.listDirectory(directory)
     if listdir == nil then table.insert(Notif_queue.msg, string.format(LNG.OFM_ERROR_LISTING_FILES, directory)) return end
-		ofmItemTotal = #listdir
-		ofmItem = nil;
-		ofmItem = {};
-		if not System.doesDirectoryExist(directory) then
-			ofmItem[1] = {};
-			ofmItem[1].Name = ".."
-			ofmItem[1].Type = ""
-			ofmItem[1].Size = ""
-		else
-			for nr = 1, ofmItemTotal do
-				ofmItem[nr] = {};
-				ofmItem[nr].Name = listdir[nr].name
-				ofmItem[nr].Size = ""
+    ofmItemTotal = #listdir
+    ofmItem = nil;
+    ofmItem = {};
+    if not System.doesDirectoryExist(directory) then
+      ofmItem[1] = {};
+      ofmItem[1].Name = ".."
+      ofmItem[1].Type = ""
+      ofmItem[1].Size = ""
+    else
+      for nr = 1, ofmItemTotal do
+        ofmItem[nr] = {};
+        ofmItem[nr].Name = listdir[nr].name
+        ofmItem[nr].Size = ""
         if listdir[nr].PartitionType ~= nil then --if enceladus has update from El_isra for partition type...
           if listdir[nr].PartitionType ~= 0x0100 then -- check for PFS Partition ONLY
             ofmItem[nr].Name = "."
@@ -890,143 +890,143 @@ refreshFileList = function (directory, tempmode)
             ofmItem[nr].Size = ofmItem[nr].Size.." MB"
           end
         end
-				if directory == "mc0:/" or directory == "mc1:/" then
-					ofmItem[nr].Type = "folder"
-					ofmItem[nr].Dir = ofmItem[nr].Name.."/"
-					ofmItem[nr].Name = ofmItem[nr].Dir
+        if directory == "mc0:/" or directory == "mc1:/" then
+          ofmItem[nr].Type = "folder"
+          ofmItem[nr].Dir = ofmItem[nr].Name.."/"
+          ofmItem[nr].Name = ofmItem[nr].Dir
         elseif directory == "hdd0:/" then
-					ofmItem[nr].Type = "folder"
-					ofmItem[nr].Dir = ofmItem[nr].Name
-					ofmItem[nr].Name = ofmItem[nr].Dir
-				else
-					if doesFileExist(directory..ofmItem[nr].Name) then
-						ofmItem[nr].Type = "file"
-						ofmItem[nr].Size = listdir[nr].size
-						if ofmItem[nr].Size <= 4096 then
-							ofmItem[nr].Size = OFM.ofmRoundSize(ofmItem[nr].Size)
-							ofmItem[nr].Size = ofmItem[nr].Size.." B"
-						elseif ofmItem[nr].Size >= 4096 and ofmItem[nr].Size <= 1048576 then
-							ofmItem[nr].Size = ofmItem[nr].Size / 1024
-							ofmItem[nr].Size = OFM.ofmRoundSize(ofmItem[nr].Size)
-							ofmItem[nr].Size = ofmItem[nr].Size.." KB"
-						elseif ofmItem[nr].Size >= 1048576 then
-							ofmItem[nr].Size = ofmItem[nr].Size / 1048576
-							ofmItem[nr].Size = OFM.ofmRoundSize(ofmItem[nr].Size)
-							ofmItem[nr].Size = ofmItem[nr].Size.." MB"
-						end
-					else
-						ofmItem[nr].Type = "folder"
-						ofmItem[nr].Dir = ofmItem[nr].Name.."/"
-						ofmItem[nr].Name = ofmItem[nr].Dir
-					end
-				end
-			end
-
-			-- removing ".", ".." and "" items:
-			ofmItemOld=ofmItem
-			ofmItem=nil
-			ofmItem={}
-			tempItemCount=0
-			for i = 1, #ofmItemOld do
-				if ofmItemOld[i].Name ~= "." and ofmItemOld[i].Name ~= ".." and ofmItemOld[i].Name ~= "" and ofmItemOld[i].Name ~= "./" and ofmItemOld[i].Name ~= "../" and ofmItemOld[i].Name ~= "/" then
-					tempItemCount=tempItemCount+1
-					ofmItem[tempItemCount]={}
-					ofmItem[tempItemCount].Name = ofmItemOld[i].Name
-					ofmItem[tempItemCount].Type = ofmItemOld[i].Type
-					ofmItem[tempItemCount].Dir = ofmItemOld[i].Dir
-					ofmItem[tempItemCount].Size = ofmItemOld[i].Size
+          ofmItem[nr].Type = "folder"
+          ofmItem[nr].Dir = ofmItem[nr].Name
+          ofmItem[nr].Name = ofmItem[nr].Dir
+        else
+          if doesFileExist(directory..ofmItem[nr].Name) then
+            ofmItem[nr].Type = "file"
+            ofmItem[nr].Size = listdir[nr].size
+            if ofmItem[nr].Size <= 4096 then
+              ofmItem[nr].Size = OFM.ofmRoundSize(ofmItem[nr].Size)
+              ofmItem[nr].Size = ofmItem[nr].Size.." B"
+            elseif ofmItem[nr].Size >= 4096 and ofmItem[nr].Size <= 1048576 then
+              ofmItem[nr].Size = ofmItem[nr].Size / 1024
+              ofmItem[nr].Size = OFM.ofmRoundSize(ofmItem[nr].Size)
+              ofmItem[nr].Size = ofmItem[nr].Size.." KB"
+            elseif ofmItem[nr].Size >= 1048576 then
+              ofmItem[nr].Size = ofmItem[nr].Size / 1048576
+              ofmItem[nr].Size = OFM.ofmRoundSize(ofmItem[nr].Size)
+              ofmItem[nr].Size = ofmItem[nr].Size.." MB"
+            end
+          else
+            ofmItem[nr].Type = "folder"
+            ofmItem[nr].Dir = ofmItem[nr].Name.."/"
+            ofmItem[nr].Name = ofmItem[nr].Dir
+          end
         end
-			end
-			ofmItemOld=nil
-			ofmItemTotal = tempItemCount
-			if ofmItemTotal == 0 then
-				ofmItem[1] = {};
-				ofmItem[1].Name = ".."
-				ofmItem[1].Type = ""
-				ofmItem[1].Size = ""
-			end
+      end
 
-			-- sorting items
-			if ofmItemTotal >= 2 then
-				for i = 1, ofmItemTotal do
-					if ofmItem[i].Type == "file" then
-						ofmItem[i].TypeAndName = "F"..ofmItem[i].Name
-					else
-						ofmItem[i].TypeAndName = "D"..ofmItem[i].Name
-					end
-				end
-			end
-			table.sort(ofmItem, function (TempTabA, TempTabB) return TempTabA.TypeAndName < TempTabB.TypeAndName end)
-		end
-	end
+      -- removing ".", ".." and "" items:
+      ofmItemOld=ofmItem
+      ofmItem=nil
+      ofmItem={}
+      tempItemCount=0
+      for i = 1, #ofmItemOld do
+        if ofmItemOld[i].Name ~= "." and ofmItemOld[i].Name ~= ".." and ofmItemOld[i].Name ~= "" and ofmItemOld[i].Name ~= "./" and ofmItemOld[i].Name ~= "../" and ofmItemOld[i].Name ~= "/" then
+          tempItemCount=tempItemCount+1
+          ofmItem[tempItemCount]={}
+          ofmItem[tempItemCount].Name = ofmItemOld[i].Name
+          ofmItem[tempItemCount].Type = ofmItemOld[i].Type
+          ofmItem[tempItemCount].Dir = ofmItemOld[i].Dir
+          ofmItem[tempItemCount].Size = ofmItemOld[i].Size
+        end
+      end
+      ofmItemOld=nil
+      ofmItemTotal = tempItemCount
+      if ofmItemTotal == 0 then
+        ofmItem[1] = {};
+        ofmItem[1].Name = ".."
+        ofmItem[1].Type = ""
+        ofmItem[1].Size = ""
+      end
+
+      -- sorting items
+      if ofmItemTotal >= 2 then
+        for i = 1, ofmItemTotal do
+          if ofmItem[i].Type == "file" then
+            ofmItem[i].TypeAndName = "F"..ofmItem[i].Name
+          else
+            ofmItem[i].TypeAndName = "D"..ofmItem[i].Name
+          end
+        end
+      end
+      table.sort(ofmItem, function (TempTabA, TempTabB) return TempTabA.TypeAndName < TempTabB.TypeAndName end)
+    end
+  end
 end;
 -- displaying list of files
 listFiles = function ()
-	OFM.AdjustY = 0
-	if OFM.ofmSelectedItem < 15 then
-		ofmItemTotalB=OFM.ofmSelectedItem+24
-		if ofmItemTotalB > ofmItemTotal then
-			ofmItemTotalB = ofmItemTotal
-		end
-	else
-		ofmItemTotalB=OFM.ofmSelectedItem+6
-		if ofmItemTotalB > ofmItemTotal then
-			ofmItemTotalB = ofmItemTotal
-		end
-	end
-	if ofmItemTotal > 15 then
-		if OFM.ofmSelectedItem >= 14 then
-			TempA = OFM.ofmSelectedItem - 14
-			TempB = -25
-			OFM.AdjustY = TempA*TempB
-		end
-		if OFM.ofmSelectedItem >= 14 and OFM.ofmSelectedItem == ofmItemTotal then
-			TempA = OFM.ofmSelectedItem - 15
-			TempB = -25
-			OFM.AdjustY = TempA*TempB
-		end
-	end
-	TempC = 1
-	if ofmItemTotal > 15 then
-		if OFM.ofmSelectedItem == ofmItemTotal and OFM.ofmSelectedItem > 14 then
-			TempC = OFM.ofmSelectedItem-14
-		elseif OFM.ofmSelectedItem > 13 then
-			TempC = OFM.ofmSelectedItem-13
-		end
-	end
-	for nr = TempC, ofmItemTotalB do
-		TempY=OFM.AdjustY+60+nr*25
-		local TMPCOL
-		if nr ~= OFM.ofmSelectedItem then TMPCOL = OFM.COLOR_SELECTIONBAR else TMPCOL = OFM.COLOR_LIST end
-		Font.ftPrint(fontBig, 16, TempY, 0, 500, 64, ofmItem[nr].Name, TMPCOL)
-		Font.ftPrint(fontBig, 548, TempY, 0, 500, 64, ofmItem[nr].Size, TMPCOL)
-	end
+  OFM.AdjustY = 0
+  if OFM.ofmSelectedItem < 15 then
+    ofmItemTotalB=OFM.ofmSelectedItem+24
+    if ofmItemTotalB > ofmItemTotal then
+      ofmItemTotalB = ofmItemTotal
+    end
+  else
+    ofmItemTotalB=OFM.ofmSelectedItem+6
+    if ofmItemTotalB > ofmItemTotal then
+      ofmItemTotalB = ofmItemTotal
+    end
+  end
+  if ofmItemTotal > 15 then
+    if OFM.ofmSelectedItem >= 14 then
+      TempA = OFM.ofmSelectedItem - 14
+      TempB = -25
+      OFM.AdjustY = TempA*TempB
+    end
+    if OFM.ofmSelectedItem >= 14 and OFM.ofmSelectedItem == ofmItemTotal then
+      TempA = OFM.ofmSelectedItem - 15
+      TempB = -25
+      OFM.AdjustY = TempA*TempB
+    end
+  end
+  TempC = 1
+  if ofmItemTotal > 15 then
+    if OFM.ofmSelectedItem == ofmItemTotal and OFM.ofmSelectedItem > 14 then
+      TempC = OFM.ofmSelectedItem-14
+    elseif OFM.ofmSelectedItem > 13 then
+      TempC = OFM.ofmSelectedItem-13
+    end
+  end
+  for nr = TempC, ofmItemTotalB do
+    TempY=OFM.AdjustY+60+nr*25
+    local TMPCOL
+    if nr ~= OFM.ofmSelectedItem then TMPCOL = OFM.COLOR_SELECTIONBAR else TMPCOL = OFM.COLOR_LIST end
+    Font.ftPrint(fontBig, 16, TempY, 0, 500, 64, ofmItem[nr].Name, TMPCOL)
+    Font.ftPrint(fontBig, 548, TempY, 0, 500, 64, ofmItem[nr].Size, TMPCOL)
+  end
 end;
 -- entering selected directory
 enterSelectedDirectory = function ()
-	if ofmItem[OFM.ofmSelectedItem].Name ~= "." and ofmItem[OFM.ofmSelectedItem].Name ~= ".." and OFM.ofmCurrentPath ~= "hdd0:/" then
-		if System.doesDirectoryExist(OFM.ofmCurrentPath..ofmItem[OFM.ofmSelectedItem].Dir) then
-			OFM.ofmFolder[0] = OFM.ofmFolder[0]+1
-			OFM.ofmFolder[OFM.ofmFolder[0]] = ofmItem[OFM.ofmSelectedItem].Dir
-			OFM.ofmCurrentPath = ""
-			for i = 1, OFM.ofmFolder[0] do
-				OFM.ofmCurrentPath=OFM.ofmCurrentPath..OFM.ofmFolder[i]
-			end
-			OFM.refreshFileList(OFM.ofmCurrentPath, true)
-		end
+  if ofmItem[OFM.ofmSelectedItem].Name ~= "." and ofmItem[OFM.ofmSelectedItem].Name ~= ".." and OFM.ofmCurrentPath ~= "hdd0:/" then
+    if System.doesDirectoryExist(OFM.ofmCurrentPath..ofmItem[OFM.ofmSelectedItem].Dir) then
+      OFM.ofmFolder[0] = OFM.ofmFolder[0]+1
+      OFM.ofmFolder[OFM.ofmFolder[0]] = ofmItem[OFM.ofmSelectedItem].Dir
+      OFM.ofmCurrentPath = ""
+      for i = 1, OFM.ofmFolder[0] do
+        OFM.ofmCurrentPath=OFM.ofmCurrentPath..OFM.ofmFolder[i]
+      end
+      OFM.refreshFileList(OFM.ofmCurrentPath, true)
+    end
   elseif OFM.ofmCurrentPath == "hdd0:/" then
     if System.MountHDDPartition("hdd0:"..ofmItem[OFM.ofmSelectedItem].Dir, 0, FIO_MT_RDONLY) == 0 then
-			OFM.lastMountedPartition = ofmItem[OFM.ofmSelectedItem].Dir
+      OFM.lastMountedPartition = ofmItem[OFM.ofmSelectedItem].Dir
       OFM.ofmCurrentPath = "pfs:/"
       OFM.ofmFolder[0] = 1
       OFM.ofmFolder[1] = "pfs:/"
       OFM.enterSelectedDirectory()
-			OFM.refreshFileList(OFM.ofmCurrentPath, true)
+      OFM.refreshFileList(OFM.ofmCurrentPath, true)
     else
-			OFM.lastMountedPartition = nil
+      OFM.lastMountedPartition = nil
       table.insert(Notif_queue, LNG.ERROR_PART_MOUNT_FAIL..ofmItem[OFM.ofmSelectedItem].Dir)
     end
-	end
+  end
 end;
 -- go back from selected directory
 goBackFromDirectory = function ()
@@ -1034,29 +1034,29 @@ goBackFromDirectory = function ()
     System.UnMountHDDPartition(0)
     OFM.lastMountedPartition = nil
   end
-	if OFM.ofmFolder[0] == 1 then
-		OFM.ofmFolder[0] = 0
-		OFM.ofmFolder[1] = ""
-		OFM.ofmCurrentPath=""
-		OFM.refreshFileList(OFM.ofmCurrentPath, false)
-	else
-		OFM.ofmFolder[OFM.ofmFolder[0]] = ""
-		OFM.ofmFolder[0] = OFM.ofmFolder[0]-1
-		OFM.ofmCurrentPath = ""
+  if OFM.ofmFolder[0] == 1 then
+    OFM.ofmFolder[0] = 0
+    OFM.ofmFolder[1] = ""
+    OFM.ofmCurrentPath=""
+    OFM.refreshFileList(OFM.ofmCurrentPath, false)
+  else
+    OFM.ofmFolder[OFM.ofmFolder[0]] = ""
+    OFM.ofmFolder[0] = OFM.ofmFolder[0]-1
+    OFM.ofmCurrentPath = ""
         for i = 1, OFM.ofmFolder[0] do
             OFM.ofmCurrentPath=OFM.ofmCurrentPath..OFM.ofmFolder[i]
         end
-		OFM.refreshFileList(OFM.ofmCurrentPath, true)
-		for i = 1, #ofmItem do
-			if ofmItem[i].Dir == OFM.ofmFolder[OFM.ofmFolder[0]] then
-				OFM.ofmSelectedItem = i
-			end
-		end
+    OFM.refreshFileList(OFM.ofmCurrentPath, true)
+    for i = 1, #ofmItem do
+      if ofmItem[i].Dir == OFM.ofmFolder[OFM.ofmFolder[0]] then
+        OFM.ofmSelectedItem = i
+      end
+    end
     end
 end;
 -- draw overlay
 drawOFMoverlay = function ()
-	Font.ftPrint(fontSmall, 16, plusYValue+51, 0, 704, 64, OFM.ofmCurrentPath, OFM.COLOR_LIST)
+  Font.ftPrint(fontSmall, 16, plusYValue+51, 0, 704, 64, OFM.ofmCurrentPath, OFM.COLOR_LIST)
     Graphics.drawRect(0, 71, SCR_X, 1, Color.new(255, 255, 255, 0x80))
 end;
 _start = function ()
@@ -1078,14 +1078,14 @@ _start = function ()
   OFM.oldpad = 0
   OFM.first_roll = true
   while OFM.keepInOFMApp do
-	if not OFM.first_roll then OFM.paad = Pads.get() else OFM.first_roll = false end
+  if not OFM.first_roll then OFM.paad = Pads.get() else OFM.first_roll = false end
     Screen.clear()
-  	Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, 0x80))
+    Graphics.drawScaleImage(RES.BG, 0.0, 0.0, SCR_X, SCR_Y, Color.new(0x80, 0x80, 0x80, 0x80))
     OFM.drawOFMoverlay() -- draws overlay
       if ofmItemTotal >= 1 then
-  		  OFM.checkPadUpDown() -- check up/down buttons
+        OFM.checkPadUpDown() -- check up/down buttons
       end
-  	OFM.listFiles() -- print list of items
+    OFM.listFiles() -- print list of items
       if Pads.check(OFM.paad, PAD_CROSS) and not Pads.check(OFM.oldpad, PAD_CROSS) then
           -- enter directory
           if ofmItem[OFM.ofmSelectedItem].Type == "folder" then
@@ -1125,7 +1125,7 @@ end
 
 function call_script(SCRIPT)
     local A, ERR = dofile_protected(SCRIPT);
-	if not A then OnScreenError(ERR) end
+  if not A then OnScreenError(ERR) end
 end
 
 function Configure_PS2BBL_opts()
@@ -1199,21 +1199,21 @@ function Configure_PS2BBL_opts()
     if options_t.desc ~= nil then
       Font.ftPrint(_FNT2_, 80, 350, 0, 600, 64, options_t.desc[T], Color.new(0x70, 0x70, 0x70, 0x70 - A))
     end
-	  DrawUsableKeys(T > 5 and (DUK_CIRCLE_GOBACK|DUK_CROSS|DUK_SQUARE|DUK_SELECT_CLEAR|DUK_START_SAVE) or (DUK_CIRCLE_GOBACK|DUK_CROSS|DUK_START_SAVE))
+    DrawUsableKeys(T > 5 and (DUK_CIRCLE_GOBACK|DUK_CROSS|DUK_SQUARE|DUK_SELECT_CLEAR|DUK_START_SAVE) or (DUK_CIRCLE_GOBACK|DUK_CROSS|DUK_START_SAVE))
     if A > 0 then A = A - 1 end
     Screen.SpecialFlip(true)
     pad = Pads.get()
 
     if Pads.check(pad, PAD_CROSS) and D == 0 then
       D = 1
-	    pad = 0
+      pad = 0
       if T == 1 then options_t.ptr[T] = not options_t.ptr[T]
       elseif T == 2 then local wololo = IntSlider(true, options_t.ptr[T], options_t.item[T]) if wololo ~= nil then options_t.ptr[T] = wololo end
       elseif T == 3 then options_t.ptr[T] = not options_t.ptr[T]
       elseif T == 4 then options_t.ptr[T] = not options_t.ptr[T]
       elseif T == 5 then options_t.ptr[T] = options_t.ptr[T]+1 if options_t.ptr[T] > 2 then options_t.ptr[T] = 0 end
       else
-		D = 1
+    D = 1
         local path = OFM._start()
         pad = 0
         if path ~= nil and path ~= "" then options_t.ptr[T] = path end
@@ -1303,45 +1303,45 @@ while true do
   local sret = 0
   aret = DisplayGenerictMOptPrompt(MAIN_MENU, LNG.MAIN_MENU_PROMPT.." - CLOSED BETA 1")
   if aret == 1 then
-	  sret = DisplayGenerictMOptPrompt(LOAD_CONF, MAIN_MENU.item[aret])
+    sret = DisplayGenerictMOptPrompt(LOAD_CONF, MAIN_MENU.item[aret])
     if sret ~= 0 then
       Check_device_ld(sret)
       local sub_PS2BBL_MAIN_CONFIG = LIP.load(CheckPath(LOAD_CONF.item[sret]))
       if sub_PS2BBL_MAIN_CONFIG ~= nil then
-		    PS2BBL_MAIN_CONFIG = sub_PS2BBL_MAIN_CONFIG
+        PS2BBL_MAIN_CONFIG = sub_PS2BBL_MAIN_CONFIG
         GSTATE.CONFIG_LOADSTATE = 0
-		  else
+      else
         GSTATE.CONFIG_LOADSTATE = -1
-		  end
+      end
     end
   elseif aret == 2 then
     if GSTATE.CONFIG_LOADSTATE < 0 then
-	    if not DisplayGenericYES_NO_Prompt(LNG.WARN_EMPTY_CONF_SAVE) then
+      if not DisplayGenericYES_NO_Prompt(LNG.WARN_EMPTY_CONF_SAVE) then
         goto BRK_C2
       end
     end
-		sret = DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[aret])
+    sret = DisplayGenerictMOptPrompt(SAVE_CONF, MAIN_MENU.item[aret])
     Check_device_ld(sret)
     if sret ~= 0 then
-  	  LIP.save(CheckPath(LOAD_CONF.item[sret]), PS2BBL_MAIN_CONFIG)
+      LIP.save(CheckPath(LOAD_CONF.item[sret]), PS2BBL_MAIN_CONFIG)
     end
     ::BRK_C2::
   elseif aret == 3 then
-	  PS2BBL_MAIN_CONFIG = new_config_struct()
-	  PS2BBL_MAIN_CONFIG.keys[16][1] = "mass:/APPS/OPNPS2LD.ELF"
-	  PS2BBL_MAIN_CONFIG.keys[16][2] = "mc?:/APPS/OPNPS2LD.ELF"
-	  PS2BBL_MAIN_CONFIG.keys[16][3] = "mc?:/OPL/OPNPS2LD.ELF"
-	  PS2BBL_MAIN_CONFIG.keys[16][3] = "mc?:/OPL/OPNPS2LD.ELF"
-	  PS2BBL_MAIN_CONFIG.keys[3][1]  = "mc?:/BOOT/ULE.ELF"
-	  PS2BBL_MAIN_CONFIG.keys[3][2]  = "mc?:/APPS/ULE.ELF"
-	  PS2BBL_MAIN_CONFIG.keys[3][3]  = "mc?:/BOOT/BOOT.ELF"
-	  PS2BBL_MAIN_CONFIG.keys[9][1]  = "rom0:TESTMODE"
-	  PS2BBL_MAIN_CONFIG.keys[10][1] = "$OSDSYS"
-	  PS2BBL_MAIN_CONFIG.config.SKIP_PS2LOGO = true
-	  PS2BBL_MAIN_CONFIG.config.KEY_READ_WAIT_TIME = 4000
-	  PS2BBL_MAIN_CONFIG.config.OSDHISTORY_READ = true
-	  PS2BBL_MAIN_CONFIG.config.EJECT_TRAY = true
-	  PS2BBL_MAIN_CONFIG.config.LOGO_DISPLAY = 2
+    PS2BBL_MAIN_CONFIG = new_config_struct()
+    PS2BBL_MAIN_CONFIG.keys[16][1] = "mass:/APPS/OPNPS2LD.ELF"
+    PS2BBL_MAIN_CONFIG.keys[16][2] = "mc?:/APPS/OPNPS2LD.ELF"
+    PS2BBL_MAIN_CONFIG.keys[16][3] = "mc?:/OPL/OPNPS2LD.ELF"
+    PS2BBL_MAIN_CONFIG.keys[16][3] = "mc?:/OPL/OPNPS2LD.ELF"
+    PS2BBL_MAIN_CONFIG.keys[3][1]  = "mc?:/BOOT/ULE.ELF"
+    PS2BBL_MAIN_CONFIG.keys[3][2]  = "mc?:/APPS/ULE.ELF"
+    PS2BBL_MAIN_CONFIG.keys[3][3]  = "mc?:/BOOT/BOOT.ELF"
+    PS2BBL_MAIN_CONFIG.keys[9][1]  = "rom0:TESTMODE"
+    PS2BBL_MAIN_CONFIG.keys[10][1] = "$OSDSYS"
+    PS2BBL_MAIN_CONFIG.config.SKIP_PS2LOGO = true
+    PS2BBL_MAIN_CONFIG.config.KEY_READ_WAIT_TIME = 4000
+    PS2BBL_MAIN_CONFIG.config.OSDHISTORY_READ = true
+    PS2BBL_MAIN_CONFIG.config.EJECT_TRAY = true
+    PS2BBL_MAIN_CONFIG.config.LOGO_DISPLAY = 2
     GSTATE.CONFIG_LOADSTATE = 0
   elseif aret == 4 then
     sret = DisplayGenerictMOptPrompt(MAIN_CONFIG_DLG, MAIN_MENU.item[aret])
