@@ -1301,7 +1301,7 @@ if doesFileExist("main.lua") then call_script("main.lua") end
 while true do
   local aret = 0
   local sret = 0
-  aret = DisplayGenerictMOptPrompt(MAIN_MENU, LNG.MAIN_MENU_PROMPT.." - CLOSED BETA 1")
+  aret = DisplayGenerictMOptPrompt(MAIN_MENU, LNG.MAIN_MENU_PROMPT.." - CLOSED BETA 2")
   if aret == 1 then
     sret = DisplayGenerictMOptPrompt(LOAD_CONF, MAIN_MENU.item[aret])
     if sret ~= 0 then
