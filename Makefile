@@ -160,7 +160,6 @@ IRXTAG = $(subst -,_,$(notdir $(addsuffix _irx, $(basename $<))))
 
 $(EE_ASM_DIR)%.s: $(PS2SDK)/iop/irx/%.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ $(IRXTAG)
-	echo '$(IRXTAG)'
 
 modules/ds34bt/ee/libds34bt.a: modules/ds34bt/ee
 	$(MAKE) -C $<

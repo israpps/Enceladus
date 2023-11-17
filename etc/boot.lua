@@ -303,7 +303,7 @@ load = function (fileName)
   local file
   if FD < 0 then
     print("LIP.load: Cannot open"..fileName)
-    ret = -5
+    ret = FD
   else
     file = System.readFile(FD, System.sizeFile(FD));
     for line in file:gmatch('[^\n]+') do
@@ -350,6 +350,8 @@ end;
 ---@param data table|nil The table containing all the data to store.
 save = function (fileName, data)
   if data == nil or data.config == nil or data.keys == nil then table.insert(Notif_queue.msg, "Config Save aborted: Config structure is NIL") end
+  local dirr = string.sub(fileName, 1, fileName:match'^.*()/'-1) -- -1 because leading '/' makes mkdir fail
+  if not System.doesDirectoryExist(dirr) then System.createDirectory(dirr) end
   local FD = System.openFile(fileName, FCREATE);
   local contents = "";
   if (FD >= 0) then
