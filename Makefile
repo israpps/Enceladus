@@ -39,7 +39,7 @@ PS2LINK_IP ?= 192.168.1.10
 #------------------------------------------------------------------#
 
 EE_BIN = bin/enceladus.elf
-EE_BIN_PKD = bin/enceladus_pkd.elf
+EE_BIN_PKD = bin/PS2BBLCFG.elf
 
 EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Lmodules/ds34bt/ee/ -Lmodules/ds34usb/ee/ -lpatches -lfileXio -lpad -ldebug -llua -lmath3d -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit -lpng -lz -lmc -laudsrv -lelf-loader -lds34bt -lds34usb
 

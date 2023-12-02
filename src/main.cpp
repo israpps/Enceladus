@@ -51,8 +51,8 @@ EXTERN_IRX(ds34usb_irx);
 EXTERN_IRX(ds34bt_irx);
 
 #ifdef F_Sound
-EXTERN_IRX(libsd_irx)
-EXTERN_IRX(audsrv_irx)
+EXTERN_IRX(libsd_irx);
+EXTERN_IRX(audsrv_irx);
 #endif
 
 char boot_path[255];
@@ -115,9 +115,14 @@ void initMC(void)
    mcSync(MC_WAIT, NULL, &ret);
 }
 
+#define IRX_REPORT(X) printf("%s: id=%d, ret=%d\n", X, irx_id, irx_ret)
+#define load_irx(_mod, X) irx_id = SifExecModuleBuffer(&_mod, size_##_mod, 0, NULL, &irx_ret); IRX_REPORT(X)
+#define load_irx_args(_mod, argc, argv, X) irx_id = SifExecModuleBuffer(&_mod, size_##_mod, argc, argv, &irx_ret); IRX_REPORT(X)
+
 int main(int argc, char * argv[])
 {
     const char * errMsg;
+    int irx_id, irx_ret;
 
     #ifdef RESET_IOP  
     SifInitRpc(0);
@@ -137,42 +142,43 @@ int main(int argc, char * argv[])
 #ifndef FORCE_FILEXIO_LOAD
     if(directorytoverify==NULL){
 #endif
-		SifExecModuleBuffer(&iomanX_irx, size_iomanX_irx, 0, NULL, NULL);
-		SifExecModuleBuffer(&fileXio_irx, size_fileXio_irx, 0, NULL, NULL);
+		load_irx(iomanX_irx, "IOMANX");
+		load_irx(fileXio_irx, "FILEXIO");
 		closedir(directorytoverify);
 #ifndef FORCE_FILEXIO_LOAD
 	}
 #endif
-	SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&mcman_irx, size_mcman_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&mcserv_irx, size_mcserv_irx, 0, NULL, NULL);
+	load_irx(sio2man_irx, "SIO2MAN");
+	load_irx(mcman_irx, "MCMAN");
+	load_irx(mcserv_irx, "MCSERV");
     initMC();
 
-    SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, NULL, NULL);
+	load_irx(padman_irx, "PADMAN");
 #ifdef F_Sound
+	load_irx(libsd_irx, "LIBSD");
     SifExecModuleBuffer(&libsd_irx, size_libsd_irx, 0, NULL, NULL);
 #endif
     // load pad & mc modules 
     printf("Installing Pad & MC modules...\n");
 
-    // load USB modules    
-    SifExecModuleBuffer(&usbd_irx, size_usbd_irx, 0, NULL, NULL);
+    // load USB modules
+	load_irx(usbd_irx, "USBD");
 
     
     int ds3pads = 1;
-    SifExecModuleBuffer(&ds34usb_irx, size_ds34usb_irx, 4, (char *)&ds3pads, NULL);
-    SifExecModuleBuffer(&ds34bt_irx, size_ds34bt_irx, 4, (char *)&ds3pads, NULL);
+	load_irx_args(ds34usb_irx, 4, (char *)&ds3pads, "DS34USB");
+	load_irx_args(ds34bt_irx,  4, (char *)&ds3pads, "DS32BT");
     ds34usb_init();
     ds34bt_init();
 
-    SifExecModuleBuffer(&bdm_irx, size_bdm_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&bdmfs_fatfs_irx, size_bdmfs_fatfs_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&usbmass_bd_irx, size_usbmass_bd_irx, 0, NULL, NULL);
+	load_irx(bdm_irx, "BDM");
+	load_irx(bdmfs_fatfs_irx, "BDMFS_FATFS");
+	load_irx(usbmass_bd_irx, "USBMASS_BD");
 
-    SifExecModuleBuffer(&cdfs_irx, size_cdfs_irx, 0, NULL, NULL);
+	load_irx(cdfs_irx, "CDFS");
 
 #ifdef F_Sound
-    SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, NULL);
+	load_irx(audsrv_irx, "AUDSRV");
 #endif
 
     //waitUntilDeviceIsReady by fjtrujy
@@ -215,7 +221,7 @@ int main(int argc, char * argv[])
     pad_init();
 
     // set base path luaplayer
-    chdir(boot_path); 
+    chdir(boot_path);
 
     printf("boot path : %s\n", boot_path);
 	dbgprintf("boot path : %s\n", boot_path);
@@ -225,10 +231,10 @@ int main(int argc, char * argv[])
     
         // if no parameters are specified, use the default boot
         if (argc < 2) {
-            errMsg = runScript(bootString, true); 
+            errMsg = runScript(bootString, true);
         } else {
             errMsg = runScript(argv[1], false);
-        }   
+        }
 
         init_scr();
 
