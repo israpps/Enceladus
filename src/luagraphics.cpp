@@ -89,7 +89,7 @@ extern unsigned char builtin_font[];
 extern unsigned int size_builtin_font;
 static int lua_ftloadDefault(lua_State *L){
 	int fntHandle = fntLoadbuff(builtin_font, size_builtin_font);
-    lua_pushinteger(L, fntHandle);
+	if (fntHandle == -1) lua_pushnil(L); else lua_pushinteger(L, fntHandle);
 	return 1;
 }
 

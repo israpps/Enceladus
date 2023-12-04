@@ -9,6 +9,7 @@
 #include "include/graphics.h"
 
 #include "include/system.h"
+#include "include/dprintf.h"
 
 #define MAX_DIR_FILES 512
 
@@ -62,7 +63,7 @@ static int lua_setCurrentDirectory(lua_State *L)
 	   }
         }
         
-        printf("changing directory to %s\n",__ps2_normalize_path(temp_path));
+        DPRINTF("changing directory to %s\n",__ps2_normalize_path(temp_path));
         chdir(__ps2_normalize_path(temp_path));
        
 	return 1;
@@ -85,7 +86,7 @@ static int lua_dir(lua_State *L)
 	char path[255];
 	
 	getcwd((char *)path, 256);
-	printf("current dir %s\n",(char *)path);
+	DPRINTF("current dir %s\n",(char *)path);
 	
 	if (argc != 0) 
 	{
@@ -103,7 +104,7 @@ static int lua_dir(lua_State *L)
 	}
 	
 	strcpy(path,__ps2_normalize_path(path));
-	printf("\nchecking path : %s\n",path);
+	DPRINTF("\nchecking path : %s\n",path);
 		
 
         
@@ -177,7 +178,7 @@ static int lua_dir(lua_State *L)
 	if (d) {
 		while ((dir = readdir(d)) != NULL) {
 			lua_pushnumber(L, i++);  // push key for file entry
-	    	printf("%s\n", dir->d_name);
+	    	DPRINTF("%s\n", dir->d_name);
 			lua_newtable(L);
 			lua_pushstring(L, "name");
         	lua_pushstring(L, dir->d_name);
@@ -492,9 +493,9 @@ static int lua_loadELF(lua_State *L)
 	int rebootIOP = luaL_checkinteger(L, 2);
 	char** p = (char**)malloc((argc-1) * sizeof(const char*));
 	p[0] = (char*)elftoload;
-	printf("# Loading ELF '%s' iop_reboot=%d, extra_args=%d\n", elftoload, rebootIOP, argc-2);
+	DPRINTF("# Loading ELF '%s' iop_reboot=%d, extra_args=%d\n", elftoload, rebootIOP, argc-2);
 	for (int x = 3; x <= argc; x++) {
-		printf("#  argv[%d] = '%s'\n", (x-2), luaL_checkstring(L, x));
+		DPRINTF("#  argv[%d] = '%s'\n", (x-2), luaL_checkstring(L, x));
 		p[x-2] = (char*)luaL_checkstring(L, x);
 	}
 	load_elf(elftoload, rebootIOP, p, (argc-1));
@@ -549,7 +550,7 @@ static int lua_checkValidDisc(lua_State *L)
 		case SCECdIllegalMedia:
 			result = 0;
 	}
-	printf("Valid Disc: %d\n",result);
+	DPRINTF("Valid Disc: %d\n",result);
 	lua_pushinteger(L, result); //return the value itself to Lua stack
     return 1; //return value quantity on stack
 }
@@ -577,7 +578,7 @@ static int lua_getDiscType(lua_State *L)
         for (iz = 0; DiscTypes[iz].name[0]; iz++)
             if (DiscTypes[iz].type == discType)
                 DiscType_ix = iz;
-    printf("getDiscType: %d\n",DiscTypes[DiscType_ix].value);
+    DPRINTF("getDiscType: %d\n",DiscTypes[DiscType_ix].value);
     lua_pushinteger(L, DiscTypes[DiscType_ix].value); //return the value itself to Lua stack
     return 1; //return value quantity on stack
 }

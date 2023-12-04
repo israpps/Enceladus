@@ -38,8 +38,9 @@ DEBUG = 0
 PS2LINK_IP = 192.168.1.10
 #------------------------------------------------------------------#
 
-EE_BIN = enceladus.elf
-EE_BIN_PKD = enceladus_pkd.elf
+BINDIR = bin/
+EE_BIN = $(BINDIR)enceladus.elf
+EE_BIN_PKD = $(BINDIR)enceladus_pkd.elf
 
 EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Lmodules/ds34bt/ee/ -Lmodules/ds34usb/ee/ -lpatches -lfileXio -lpad -ldebug -llua -lmath3d -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit -lpng -lz -lmc -laudsrv -lelf-loader -lds34bt -lds34usb
 
@@ -76,9 +77,9 @@ IOP_MODULES = iomanx.o filexio.o \
 			  usbd.o audsrv.o bdm.o bdmfs_fatfs.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o
 
-EMBEDDED_RSC = boot.o
+EMBEDDED_RSC = boot.o builtin_font.o
 
-EE_OBJS = $(IOP_MODULES) $(EMBEDDED_RSC) $(APP_CORE) $(LUA_LIBS)
+EE_OBJS = $(APP_CORE) $(LUA_LIBS) $(IOP_MODULES) $(EMBEDDED_RSC)
 
 EE_OBJS_DIR = obj/
 EE_SRC_DIR = src/
@@ -89,14 +90,10 @@ EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%) # remap all EE_OBJ to obj subdir
 all: $(EXT_LIBS) $(EE_BIN)
 	@echo "$$HEADER"
 
-	echo "Building $(EE_BIN)..."
 	$(EE_STRIP) $(EE_BIN)
 
-	echo "Compressing $(EE_BIN_PKD)...\n"
 	ps2-packer $(EE_BIN) $(EE_BIN_PKD) > /dev/null
-	
-	mv $(EE_BIN) bin/
-	mv $(EE_BIN_PKD) bin/
+
 #--------------------- Embedded ressources ------------------------#
 
 $(EE_ASM_DIR)boot.s: etc/boot.lua | $(EE_ASM_DIR)
@@ -104,9 +101,10 @@ $(EE_ASM_DIR)boot.s: etc/boot.lua | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ bootString
 
 # Images
-EMBED/%.s: EMBED/%.png
+$(EE_ASM_DIR)%.s: EMBED/%.png
 	$(BIN2S) $< $@ $(shell basename $< .png)
-	echo "Embedding $< Image..."
+$(EE_ASM_DIR)%.s: EMBED/%.ttf
+	$(BIN2S) $< $@ $(shell basename $< .ttf)
 #------------------------------------------------------------------#
 
 
@@ -192,23 +190,14 @@ debug: $(EE_BIN)
 	echo "Building $(EE_BIN) with debug symbols..."
 
 clean:
-
-	@echo "\nCleaning $(EE_BIN)..."
-	rm -f bin/$(EE_BIN)
-
-	@echo "\nCleaning $(EE_BIN_PKD)..."
-	rm -f bin/$(EE_BIN_PKD)
-
-	@echo "Cleaning obj dir"
-	@rm -rf $(EE_OBJS_DIR)
-	@echo "Cleaning asm dir"
-	@rm -rf $(EE_ASM_DIR)
+	rm -f $(EE_BIN)
+	rm -f $(EE_BIN_PKD)
+	rm -rf $(EE_OBJS_DIR)
+	rm -rf $(EE_ASM_DIR)
 	
 	$(MAKE) -C modules/ds34usb clean
 	$(MAKE) -C modules/ds34bt clean
-	
-	
-	echo "Cleaning embedded Resources..."
+
 	rm -f $(EMBEDDED_RSC)
 
 rebuild: clean all
@@ -218,6 +207,38 @@ run:
        
 reset:
 	ps2client -h $(PS2LINK_IP) reset   
+
+dummys:
+	touch $(BINDIR)A.vcd
+	touch $(BINDIR)B.VCD
+	touch $(BINDIR)C.vcd
+	touch $(BINDIR)D.VCD
+	touch $(BINDIR)E.vcd
+	touch $(BINDIR)F.VCD
+	touch $(BINDIR)G.vcd
+	touch $(BINDIR)H.VCD
+	touch $(BINDIR)I.vcd
+	touch $(BINDIR)J.VCD
+	touch $(BINDIR)K.vcd
+	touch $(BINDIR)L.VCD
+	touch $(BINDIR)M.vcd
+	touch $(BINDIR)N.VCD
+	touch $(BINDIR)O.vcd
+	touch $(BINDIR)P.VCD
+	touch $(BINDIR)Q.vcd
+	touch $(BINDIR)R.VCD
+	touch $(BINDIR)S.vcd
+	touch $(BINDIR)T.VCD
+	touch $(BINDIR)U.VCD
+	touch $(BINDIR)V.VCD
+	touch $(BINDIR)W.VCD
+	touch $(BINDIR)X.VCD
+	touch $(BINDIR)Y.VCD
+
+cleandummy:
+	rm -rf bin/*.vcd
+	rm -rf bin/*.VCD
+
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c | $(EE_OBJS_DIR)
 	@echo "  - $@"

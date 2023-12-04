@@ -1,14 +1,24 @@
+GPAD = 0
+Font.ftInit()
+BFONT = Font.LoadBuiltinFont()
+function RunScript(S)
+  local A, ERR = dofile_protected(S)
+  if not A then
+    print(ERR)
+    while true do end
+  end
+end
 
 if doesFileExist("System/index.lua") then
-	dofile("System/index.lua");
+	RunScript("System/index.lua");
   elseif doesFileExist("System/script.lua") then
-	dofile("System/script.lua");
+    RunScript("System/script.lua");
   elseif doesFileExist("System/system.lua") then
-	dofile("System/system.lua");
+    RunScript("System/system.lua");
   elseif doesFileExist("index.lua") then
-	dofile("index.lua");
+    RunScript("index.lua");
   elseif doesFileExist("script.lua") then
-	dofile("script.lua");
+    RunScript("script.lua");
   elseif doesFileExist("system.lua") then
-	dofile("system.lua");
+    RunScript("system.lua");
 end

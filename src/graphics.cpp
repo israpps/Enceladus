@@ -10,6 +10,7 @@
 #include <png.h>
 
 #include "include/graphics.h"
+#include "include/dprintf.h"
 
 #define DEG2RAD(x) ((x)*0.01745329251)
 
@@ -49,7 +50,7 @@ GSTEXTURE* loadpng(FILE* File, bool delayed)
 
 	if (File == NULL)
 	{
-		printf("Failed to load PNG file\n");
+		DPRINTF("Failed to load PNG file\n");
 		return NULL;
 	}
 
@@ -65,7 +66,7 @@ GSTEXTURE* loadpng(FILE* File, bool delayed)
 
 	if(!png_ptr)
 	{
-		printf("PNG Read Struct Init Failed\n");
+		DPRINTF("PNG Read Struct Init Failed\n");
 		fclose(File);
 		return NULL;
 	}
@@ -74,7 +75,7 @@ GSTEXTURE* loadpng(FILE* File, bool delayed)
 
 	if(!info_ptr)
 	{
-		printf("PNG Info Struct Init Failed\n");
+		DPRINTF("PNG Info Struct Init Failed\n");
 		fclose(File);
 		png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
 		return NULL;
@@ -82,7 +83,7 @@ GSTEXTURE* loadpng(FILE* File, bool delayed)
 
 	if(setjmp(png_jmpbuf(png_ptr)))
 	{
-		printf("Got PNG Error!\n");
+		DPRINTF("Got PNG Error!\n");
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 		fclose(File);
 		return NULL;
@@ -278,7 +279,7 @@ GSTEXTURE* loadpng(FILE* File, bool delayed)
 	}
 	else
 	{
-		printf("This texture depth is not supported yet!\n");
+		DPRINTF("This texture depth is not supported yet!\n");
 		return NULL;
 	}
 
@@ -292,7 +293,7 @@ GSTEXTURE* loadpng(FILE* File, bool delayed)
 		tex->Vram = gsKit_vram_alloc(gsGlobal, gsKit_texture_size(tex->Width, tex->Height, tex->PSM), GSKIT_ALLOC_USERBUFFER);
 		if(tex->Vram == GSKIT_ALLOC_ERROR)
 		{
-			printf("VRAM Allocation Failed. Will not upload texture.\n");
+			DPRINTF("VRAM Allocation Failed. Will not upload texture.\n");
 			return NULL;
 		}
 
@@ -305,7 +306,7 @@ GSTEXTURE* loadpng(FILE* File, bool delayed)
 
 			if(tex->VramClut == GSKIT_ALLOC_ERROR)
 			{
-				printf("VRAM CLUT Allocation Failed. Will not upload texture.\n");
+				DPRINTF("VRAM CLUT Allocation Failed. Will not upload texture.\n");
 				return NULL;
 			}
 		}
@@ -345,19 +346,19 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 
 	if (File == NULL)
 	{
-		printf("BMP: Failed to load bitmap\n");
+		DPRINTF("BMP: Failed to load bitmap\n");
 		return NULL;
 	}
 	if (fread(&Bitmap.FileHeader, sizeof(Bitmap.FileHeader), 1, File) <= 0)
 	{
-		printf("BMP: Could not load bitmap\n");
+		DPRINTF("BMP: Could not load bitmap\n");
 		fclose(File);
 		return NULL;
 	}
 
 	if (fread(&Bitmap.InfoHeader, sizeof(Bitmap.InfoHeader), 1, File) <= 0)
 	{
-		printf("BMP: Could not load bitmap\n");
+		DPRINTF("BMP: Could not load bitmap\n");
 		fclose(File);
 		return NULL;
 	}
@@ -380,7 +381,7 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 				free(tex->Clut);
 				tex->Clut = NULL;
 			}
-			printf("BMP: Could not load bitmap\n");
+			DPRINTF("BMP: Could not load bitmap\n");
 			fclose(File);
 			return NULL;
 		}
@@ -415,7 +416,7 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 				free(tex->Clut);
 				tex->Clut = NULL;
 			}
-			printf("BMP: Could not load bitmap\n");
+			DPRINTF("BMP: Could not load bitmap\n");
 			fclose(File);
 			return NULL;
 		}
@@ -473,7 +474,7 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 	{
 		image = (u8*)memalign(128, FTexSize);
 		if (image == NULL) {
-			printf("BMP: Failed to allocate memory\n");
+			DPRINTF("BMP: Failed to allocate memory\n");
 			if (tex->Mem) {
 				free(tex->Mem);
 				tex->Mem = NULL;
@@ -502,7 +503,7 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 	{
 		image = (u8*)memalign(128, FTexSize);
 		if (image == NULL) {
-			printf("BMP: Failed to allocate memory\n");
+			DPRINTF("BMP: Failed to allocate memory\n");
 			if (tex->Mem) {
 				free(tex->Mem);
 				tex->Mem = NULL;
@@ -535,7 +536,7 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 		char *text = (char *)((u32)tex->Mem);
 		image = (u8*)memalign(128,FTexSize);
 		if (image == NULL) {
-			printf("BMP: Failed to allocate memory\n");
+			DPRINTF("BMP: Failed to allocate memory\n");
 			if (tex->Mem) {
 				free(tex->Mem);
 				tex->Mem = NULL;
@@ -558,7 +559,7 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 				free(tex->Clut);
 				tex->Clut = NULL;
 			}
-			printf("BMP: Read failed!, Size %d\n", FTexSize);
+			DPRINTF("BMP: Read failed!, Size %d\n", FTexSize);
 			free(image);
 			image = NULL;
 			fclose(File);
@@ -588,7 +589,7 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 	}
 	else
 	{
-		printf("BMP: Unknown bit depth format %d\n", Bitmap.InfoHeader.BitCount);
+		DPRINTF("BMP: Unknown bit depth format %d\n", Bitmap.InfoHeader.BitCount);
 	}
 
 	fclose(File);
@@ -598,7 +599,7 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 		tex->Vram = gsKit_vram_alloc(gsGlobal, gsKit_texture_size(tex->Width, tex->Height, tex->PSM), GSKIT_ALLOC_USERBUFFER);
 		if(tex->Vram == GSKIT_ALLOC_ERROR)
 		{
-			printf("VRAM Allocation Failed. Will not upload texture.\n");
+			DPRINTF("VRAM Allocation Failed. Will not upload texture.\n");
 			return NULL;
 		}
 
@@ -611,7 +612,7 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 
 			if(tex->VramClut == GSKIT_ALLOC_ERROR)
 			{
-				printf("VRAM CLUT Allocation Failed. Will not upload texture.\n");
+				DPRINTF("VRAM CLUT Allocation Failed. Will not upload texture.\n");
 				return NULL;
 			}
 		}
@@ -683,7 +684,7 @@ static void  _ps2_load_JPEG_generic(GSTEXTURE *Texture, struct jpeg_decompress_s
 
 	textureSize = cinfo->output_width*cinfo->output_height*cinfo->out_color_components;
 	#ifdef DEBUG
-	printf("Texture Size = %i\n",textureSize);
+	DPRINTF("Texture Size = %i\n",textureSize);
 	#endif
 	Texture->Mem = (u32*)memalign(128, textureSize);
 
@@ -708,13 +709,13 @@ GSTEXTURE* loadjpeg(FILE* fp, bool scale_down, bool delayed)
 	struct my_error_mgr jerr;
 
 	if (tex == NULL) {
-		printf("jpeg: error Texture is NULL\n");
+		DPRINTF("jpeg: error Texture is NULL\n");
 		return NULL;
 	}
 
 	if (fp == NULL)
 	{
-		printf("jpeg: Failed to load file\n");
+		DPRINTF("jpeg: Failed to load file\n");
 		return NULL;
 	}
 
@@ -730,7 +731,7 @@ GSTEXTURE* loadjpeg(FILE* fp, bool scale_down, bool delayed)
 		fclose(fp);
 		if (tex->Mem)
 			free(tex->Mem);
-		printf("jpeg: error during processing file\n");
+		DPRINTF("jpeg: error during processing file\n");
 		return NULL;
 	}
 	jpeg_create_decompress(&cinfo);
@@ -748,7 +749,7 @@ GSTEXTURE* loadjpeg(FILE* fp, bool scale_down, bool delayed)
 		tex->Vram = gsKit_vram_alloc(gsGlobal, gsKit_texture_size(tex->Width, tex->Height, tex->PSM), GSKIT_ALLOC_USERBUFFER);
 		if(tex->Vram == GSKIT_ALLOC_ERROR)
 		{
-			printf("VRAM Allocation Failed. Will not upload texture.\n");
+			DPRINTF("VRAM Allocation Failed. Will not upload texture.\n");
 			return NULL;
 		}
 
@@ -761,7 +762,7 @@ GSTEXTURE* loadjpeg(FILE* fp, bool scale_down, bool delayed)
 
 			if(tex->VramClut == GSKIT_ALLOC_ERROR)
 			{
-				printf("VRAM CLUT Allocation Failed. Will not upload texture.\n");
+				DPRINTF("VRAM CLUT Allocation Failed. Will not upload texture.\n");
 				return NULL;
 			}
 		}
@@ -796,7 +797,7 @@ GSTEXTURE* load_image(const char* path, bool delayed){
 	if (magic == 0x4D42) image =      loadbmp(file, delayed);
 	else if (magic == 0xD8FF) image = loadjpeg(file, false, delayed);
 	else if (magic == 0x5089) image = loadpng(file, delayed);
-	if (image == NULL) printf("Failed to load image %s.", path);
+	if (image == NULL) DPRINTF("Failed to load image %s.", path);
 
 	return image;
 }
@@ -1054,7 +1055,7 @@ void setVideoMode(s16 mode, int width, int height, int psm, s16 interlace, s16 f
 
 	gsKit_set_primalpha(gsGlobal, GS_SETREG_ALPHA(0, 1, 0, 1, 0), 0);
 
-	printf("\nGraphics: created video surface of (%d, %d)\n",
+	DPRINTF("\nGraphics: created video surface of (%d, %d)\n",
 		gsGlobal->Width, gsGlobal->Height);
 
 	gsKit_set_clamp(gsGlobal, GS_CMODE_REPEAT);
@@ -1146,7 +1147,7 @@ void initGraphics()
 	dmaKit_init(D_CTRL_RELE_OFF, D_CTRL_MFD_OFF, D_CTRL_STS_UNSPEC, D_CTRL_STD_OFF, D_CTRL_RCYC_8, 1 << DMA_CHANNEL_GIF);
 	dmaKit_chan_init(DMA_CHANNEL_GIF);
 
-	printf("\nGraphics: created %ix%i video surface\n",
+	DPRINTF("\nGraphics: created %ix%i video surface\n",
 		gsGlobal->Width, gsGlobal->Height);
 
 	gsKit_set_clamp(gsGlobal, GS_CMODE_REPEAT);
@@ -1206,7 +1207,7 @@ static void PNGCBAPI pngtest_warning(png_structp png_ptr, png_const_charp messag
 {
    ++warning_count;
 
-   printf("%s: libpng warning: %s\n",__func__, message);
+   DPRINTF("%s: libpng warning: %s\n",__func__, message);
 }
 
 static void PNGCBAPI pngtest_error(png_structp png_ptr, png_const_charp message)
@@ -1248,7 +1249,7 @@ GSTEXTURE* loadEmbeddedPNG(uint8_t * data, size_t size, bool delayed)
 
 	if(!png_ptr)
 	{
-		printf("%s: PNG Read Struct Init Failed\n", __func__);
+		DPRINTF("%s: PNG Read Struct Init Failed\n", __func__);
 		return NULL;
 	}
 
@@ -1256,14 +1257,14 @@ GSTEXTURE* loadEmbeddedPNG(uint8_t * data, size_t size, bool delayed)
 
 	if(!info_ptr)
 	{
-		printf("%s: PNG Info Struct Init Failed\n", __func__);
+		DPRINTF("%s: PNG Info Struct Init Failed\n", __func__);
 		png_destroy_read_struct(&png_ptr, (png_infopp)NULL, (png_infopp)NULL);
 		return NULL;
 	}
 	png_set_error_fn(png_ptr, &error_parameters, pngtest_error, pngtest_warning);
 	if(setjmp(png_jmpbuf(png_ptr)))
 	{
-		printf("%s: Got PNG Error!\n", __func__);
+		DPRINTF("%s: Got PNG Error!\n", __func__);
 		png_destroy_read_struct(&png_ptr, &info_ptr, (png_infopp)NULL);
 		return NULL;
 	}
@@ -1273,7 +1274,7 @@ GSTEXTURE* loadEmbeddedPNG(uint8_t * data, size_t size, bool delayed)
 	d.size = size;
 	d.cur = 0;
 	//png_set_error_fn(png_ptr, &error_parameters, pngtest_error, pngtest_warning);
-	printf("%s: Info: %p %d \n",__func__, d.buf, d.size);
+	DPRINTF("%s: Info: %p %d \n",__func__, d.buf, d.size);
 	png_set_read_fn(png_ptr, (png_voidp)&d, (png_rw_ptr)PNG_read_data);
 
 	//png_init_io(png_ptr, hwc_credits_png);
@@ -1359,7 +1360,7 @@ GSTEXTURE* loadEmbeddedPNG(uint8_t * data, size_t size, bool delayed)
 	}
 	else
 	{
-		printf("%s: This texture depth is not supported yet!\n", __func__);
+		DPRINTF("%s: This texture depth is not supported yet!\n", __func__);
 		return NULL;
 	}
 	png_read_end(png_ptr, NULL);
@@ -1370,7 +1371,7 @@ GSTEXTURE* loadEmbeddedPNG(uint8_t * data, size_t size, bool delayed)
 		tex->Vram = gsKit_vram_alloc(gsGlobal, gsKit_texture_size(tex->Width, tex->Height, tex->PSM), GSKIT_ALLOC_USERBUFFER);
 		if(tex->Vram == GSKIT_ALLOC_ERROR)
 		{
-			printf("%s: VRAM Allocation Failed. Will not upload texture.\n", __func__);
+			DPRINTF("%s: VRAM Allocation Failed. Will not upload texture.\n", __func__);
 			return NULL;
 		}
 
@@ -1383,7 +1384,7 @@ GSTEXTURE* loadEmbeddedPNG(uint8_t * data, size_t size, bool delayed)
 
 			if(tex->VramClut == GSKIT_ALLOC_ERROR)
 			{
-				printf("%s: VRAM CLUT Allocation Failed. Will not upload texture.\n", __func__);
+				DPRINTF("%s: VRAM CLUT Allocation Failed. Will not upload texture.\n", __func__);
 				return NULL;
 			}
 		}

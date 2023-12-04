@@ -36,3 +36,4 @@ bin/System/noindex.lua
 
 obj/
 asm/
+*.VCD
