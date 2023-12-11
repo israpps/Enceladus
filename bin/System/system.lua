@@ -1,9 +1,12 @@
-package.path = "./?.lua;mass:/POPSLDR/?.lua;mc0:/POPSLDR/?.lua;mc1:/POPSLDR/?.lua"
+package.path = "./POPSLDR/?.lua;./?.lua;mass:/POPSLDR/?.lua;mc0:/POPSLDR/?.lua;mc1:/POPSLDR/?.lua"
 PLDR = {
   POPSTARTER_PATH = "mass:/POPS/POPSTARTER.ELF";
   GAMEPATH = ".";
   GAMES = {};
+  PROFILES = {}
 }
+dofile("System/pops_profiles.lua")
+
 
 function CLAMP(a, MIN, MAX)
   if a < MIN then return MIN end
@@ -35,7 +38,7 @@ UI = {
     Play = function()
       local ammount = #PLDR.GAMES
       local STARTUP = 1
-      if (UI.GameList.CURR > UI.GameList.MAXDRAW) then STARTUP = UI.GameList.CURR end
+      if (UI.GameList.CURR > UI.GameList.MAXDRAW) then STARTUP = (ammount-UI.GameList.MAXDRAW+1) end
       for i = STARTUP, ammount do
         if i >= (STARTUP+UI.GameList.MAXDRAW) then break end
         local Y = 20+((i-STARTUP)*21)
@@ -47,12 +50,27 @@ UI = {
       if Pads.check(GPAD, PAD_CROSS) then print("System.loadELF( ".. PLDR.POPSTARTER_PATH ..", 1,  ./".. PLDR.GAMES[UI.GameList.CURR]..")") end
     end;
   };
+  ProfileQuery = {
+    lastopt = 1;
+    curopt = 1;
+    Play = function ()
+      local profcnt = #PLDR.PROFILES
+      Font.ftPrint(BFONT, UI.SCR.X_MID, 30, 8, UI.SCR.X, 16, "Choose POPStarter Profile", Color.new(128,128,128))
+      Font.ftPrint(BFONT, UI.SCR.X_MID, 60, 8, UI.SCR.X, 16, "Profile "..UI.ProfileQuery.curopt, Color.new(128,128,128))
+      Font.ftPrint(BFONT, UI.SCR.X_MID, 190, 8, UI.SCR.X, 16, PLDR.PROFILES[UI.ProfileQuery.curopt].DESC, Color.new(128,128,128))
+      Font.ftPrint(BFONT, UI.SCR.X_MID, 210, 8, UI.SCR.X, 16, PLDR.PROFILES[UI.ProfileQuery.curopt].ELF, Color.new(128,128,128, 110))
+      UI.Pad.Listen()
+      if Pads.check(GPAD, PAD_DOWN) then UI.ProfileQuery.curopt = CLAMP(UI.ProfileQuery.curopt+1, 1, profcnt) GPAD = 0 end
+      if Pads.check(GPAD, PAD_UP) then UI.ProfileQuery.curopt = CLAMP(UI.ProfileQuery.curopt-1, 1, profcnt) GPAD = 0 end
+      if Pads.check(GPAD, PAD_CROSS) then print("Chose profile", UI.ProfileQuery.curopt) end
+    end;
+  };
   Pad = {
     PDELAY = 200;
     Listen = function ()
       if UI.Pad.Timer == nil then UI.Pad.Timer = Timer.new() end
       local T = Timer.getTime(UI.Pad.Timer)
-      while (T+200) > Timer.getTime(UI.Pad.Timer) do end
+      while (T+150) > Timer.getTime(UI.Pad.Timer) do end
       GPAD = Pads.get()
     end;
     Timer = nil;
@@ -106,6 +124,7 @@ end
 
 while true do
   Screen.clear(Color.new(128, 00, 80))
-  UI.GameList.Play()
+  --UI.GameList.Play()
+  UI.ProfileQuery.Play()
   UI.flip()
 end
