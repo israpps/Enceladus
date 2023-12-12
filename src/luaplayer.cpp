@@ -61,7 +61,7 @@ const char * runScript(const char* script, bool isStringBuffer )
 
   	L = luaL_newstate();
 	if (!L) return "Failed to create LUA STATE\n";
-    lua_atpanic(L, test_error);
+    //lua_atpanic(L, test_error);
 	
 	  // Init Standard libraries
 	  luaL_openlibs(L);

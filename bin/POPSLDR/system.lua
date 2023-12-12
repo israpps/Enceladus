@@ -1,11 +1,10 @@
-package.path = "./POPSLDR/?.lua;./?.lua;mass:/POPSLDR/?.lua;mc0:/POPSLDR/?.lua;mc1:/POPSLDR/?.lua"
 PLDR = {
   POPSTARTER_PATH = "mass:/POPS/POPSTARTER.ELF";
   GAMEPATH = ".";
   GAMES = {};
   PROFILES = {}
 }
-dofile("System/pops_profiles.lua")
+require("pops_profiles")
 
 
 function CLAMP(a, MIN, MAX)
@@ -21,11 +20,13 @@ function CYCLE_CLAMP(a, MIN, MAX)
 end
 
 UI = {
+  --- UI Constants
   SCR = {
     X = 702;
     X_MID = 702/2;
     Y = 480;
     Y_MID = 480/2;
+    VMODE = _480p;
   };
   --- wrapper for Screen.flip(), here you add UI draws that MUST be on top of everything (eg: error notifs)
   flip = function () Screen.flip() end;
@@ -62,22 +63,27 @@ UI = {
       UI.Pad.Listen()
       if Pads.check(GPAD, PAD_DOWN) then UI.ProfileQuery.curopt = CLAMP(UI.ProfileQuery.curopt+1, 1, profcnt) GPAD = 0 end
       if Pads.check(GPAD, PAD_UP) then UI.ProfileQuery.curopt = CLAMP(UI.ProfileQuery.curopt-1, 1, profcnt) GPAD = 0 end
-      if Pads.check(GPAD, PAD_CROSS) then print("Chose profile", UI.ProfileQuery.curopt) end
+      if Pads.check(GPAD, PAD_CROSS) then
+        print("Chose profile", UI.ProfileQuery.curopt)
+        if not doesFileExist(PLDR.PROFILES[UI.ProfileQuery.curopt].ELF) then
+          print("ERROR: POPStarter profile points to non existent ELF")
+        end
+      end
     end;
   };
   Pad = {
-    PDELAY = 200;
+    PDELAY = 150;
     Listen = function ()
       if UI.Pad.Timer == nil then UI.Pad.Timer = Timer.new() end
       local T = Timer.getTime(UI.Pad.Timer)
-      while (T+150) > Timer.getTime(UI.Pad.Timer) do end
+      while (T+UI.Pad.PDELAY) > Timer.getTime(UI.Pad.Timer) do end
       GPAD = Pads.get()
     end;
     Timer = nil;
   }
 }
 
-Screen.setMode(_480p, UI.SCR.X, UI.SCR.Y, CT24, INTERLACED, FIELD)
+Screen.setMode(UI.SCR.VMODE, UI.SCR.X, UI.SCR.Y, CT24, INTERLACED, FIELD)
 
 function Font.ftPrintMultiLineAligned(font, x, y, spacing, width, height, text, color)
   local internal_y = y
@@ -122,9 +128,14 @@ function PLDR.GetVCDGameID(path)
   return RET
 end
 
+function PLDR.RunPOPStarterGame(game)
+  System.loadELF(PLDR.POPSTARTER_PATH, true, game)
+  print(">>> UNHANDLED ERROR. Launching game ", game, " via ", PLDR.POPSTARTER_PATH, " Failed")
+end
+
 while true do
   Screen.clear(Color.new(128, 00, 80))
-  --UI.GameList.Play()
-  UI.ProfileQuery.Play()
+  UI.GameList.Play()
+  --UI.ProfileQuery.Play()
   UI.flip()
 end
