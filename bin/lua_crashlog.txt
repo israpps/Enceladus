@@ -1,0 +1,9 @@
+LUA ERR.
+1: (Nil)
+2: (Number) 4.000000
+3: (Bool)   false
+4: (Number) 0.000000
+5: (Number) 16384.000000
+6:  (field 'MainMenu')
+7: attempt to index a nil value (field 'MainMenu')
+8: POPSLDR/System.lua:168: attempt to index a nil value (field 'MainMenu')

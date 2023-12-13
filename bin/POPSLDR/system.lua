@@ -20,6 +20,9 @@ function CYCLE_CLAMP(a, MIN, MAX)
 end
 
 UI = {
+  UpdateVmode = function ()
+    Screen.setMode(UI.SCR.VMODE, UI.SCR.X, UI.SCR.Y, CT24, INTERLACED, FIELD)
+  end;
   --- UI Constants
   SCR = {
     X = 702;
@@ -28,8 +31,28 @@ UI = {
     Y_MID = 480/2;
     VMODE = _480p;
   };
+  --- Notifications queue handler
+  Notif_queue = {
+    display = function ()
+      local Q
+      if #UI.Notif_queue.msg < 1 then return end
+      if #UI.Notif_queue.msg > 1 then Q = 0x50 elseif UI.Notif_queue.ALFA > 0x50 then Q = 0x50 else Q = UI.Notif_queue.ALFA end
+      Graphics.drawRect(30, 30, UI.SCR.X_MID-30, 40, Color.new(0, 0, 0, Q))
+      Font.ftPrint(BFONT, 32, 32, 0, UI.SCR.X_MID-30, 32, UI.Notif_queue.msg[1], Color.new(0, 100, 255, UI.Notif_queue.ALFA))
+      UI.Notif_queue.ALFA = UI.Notif_queue.ALFA-3
+      if UI.Notif_queue.ALFA < 1 then
+        UI.Notif_queue.ALFA = 0x90
+        table.remove(UI.Notif_queue.msg, 1)
+      end
+    end;
+    ALFA = 0x80;
+    msg = {};
+  };
   --- wrapper for Screen.flip(), here you add UI draws that MUST be on top of everything (eg: error notifs)
-  flip = function () Screen.flip() end;
+  flip = function ()
+    UI.Notif_queue.display()
+    Screen.flip()
+  end;
   GameList = {
     MAXDRAW = 18;
     CURR = 1;
@@ -67,23 +90,49 @@ UI = {
         print("Chose profile", UI.ProfileQuery.curopt)
         if not doesFileExist(PLDR.PROFILES[UI.ProfileQuery.curopt].ELF) then
           print("ERROR: POPStarter profile points to non existent ELF")
+          table.insert(UI.Notif_queue.msg, "POPStarter ELF missing")
         end
       end
     end;
   };
+  MainMenu = {
+    OPT = 1;
+    Play = function ()
+      local profcnt = 3
+      Font.ftPrint(BFONT, UI.SCR.X_MID, 30, 8, UI.SCR.X, 16, "Welcome to POPStarter Loader", Color.new(128,128,128))
+      Font.ftPrint(BFONT, 30, 60, 0, UI.SCR.X, 16, "USB", Color.new(128,128,128))
+      Font.ftPrint(BFONT, 130, 60, 0, UI.SCR.X, 16, "SMB", Color.new(128,128,128))
+      Font.ftPrint(BFONT, 230, 60, 0, UI.SCR.X, 16, "HDD", Color.new(128,128,128))
+      Font.ftPrint(BFONT, UI.SCR.X_MID, 240, 8, UI.SCR.X, 16, UI.MainMenu.opts[UI.MainMenu.OPT], Color.new(128,128,128))
+      UI.Pad.Listen()
+      if Pads.check(GPAD, PAD_DOWN) then UI.MainMenu.OPT = CLAMP(UI.MainMenu.OPT+1, 1, profcnt) GPAD = 0 end
+      if Pads.check(GPAD, PAD_UP) then UI.MainMenu.OPT = CLAMP(UI.MainMenu.OPT-1, 1, profcnt) GPAD = 0 end
+      if Pads.check(GPAD, PAD_CROSS) then
+        print("Chose profile", UI.MainMenu.OPT)
+        if not doesFileExist(UI.MainMenu.opts[UI.MainMenu.OPT].ELF) then
+          print("ERROR: POPStarter profile points to non existent ELF")
+          table.insert(UI.Notif_queue.msg, "POPStarter ELF missing")
+        end
+      end
+    end
+  };
   Pad = {
     PDELAY = 150;
+    CLK = 0;
     Listen = function ()
       if UI.Pad.Timer == nil then UI.Pad.Timer = Timer.new() end
-      local T = Timer.getTime(UI.Pad.Timer)
-      while (T+UI.Pad.PDELAY) > Timer.getTime(UI.Pad.Timer) do end
-      GPAD = Pads.get()
+      UI.Pad.CLK = Timer.getTime(UI.Pad.Timer)
+      if (UI.Pad.CLK+UI.Pad.PDELAY) > Timer.getTime(UI.Pad.Timer) then
+        GPAD = Pads.get()
+      else
+        GPAD = 0
+      end
     end;
     Timer = nil;
   }
 }
 
-Screen.setMode(UI.SCR.VMODE, UI.SCR.X, UI.SCR.Y, CT24, INTERLACED, FIELD)
+
 
 function Font.ftPrintMultiLineAligned(font, x, y, spacing, width, height, text, color)
   local internal_y = y
@@ -136,6 +185,7 @@ end
 while true do
   Screen.clear(Color.new(128, 00, 80))
   UI.GameList.Play()
-  --UI.ProfileQuery.Play()
+  UI.ProfileQuery.Play()
+  UI.MainMenu.Play()
   UI.flip()
 end

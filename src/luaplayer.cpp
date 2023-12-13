@@ -4,53 +4,74 @@
 #include <unistd.h>
 #include <string.h>
 #include <malloc.h>
+#include <debug.h>
 
 #include "include/luaplayer.h"
+#include "include/graphics.h"
 #include "include/dprintf.h"
+
+#ifndef FORBID_LUA_ATPANIC_TEXTDUMP
+#define LOGDUMP(x...) if (LOG != NULL) fprintf(x)
+#else
+#define LOGDUMP(x...)
+#endif
+#define TPRINTF(arg, x...) \
+    DPRINTF(arg, ##x); \
+    scr_printf(arg, ##x); \
+    LOGDUMP(LOG, arg, ##x)
 
 static lua_State *L;
 
 int test_error(lua_State * L) {
+    //normalize video mode in case it was changed on lua script
+    setVideoMode(gsKit_check_rom(), 640, (gsKit_check_rom()==GS_MODE_PAL) ? 512 : 448, GS_PSM_CT24, GS_INTERLACED, GS_FIELD, GS_SETTING_OFF, GS_PSMZ_16S);
+    init_scr();
+    scr_clear();
+    scr_setCursor(0);
+#ifndef FORBID_LUA_ATPANIC_TEXTDUMP
+    FILE* LOG = fopen("lua_crashlog.txt", "w");
+#endif
     int n = lua_gettop(L);
     int i;
-
-    DPRINTF("Got LUA error.\n");
+    TPRINTF("LUA ERR.\n");
 
     if (n == 0) {
-        DPRINTF("Stack is empty.\n");
-        return 0;
+        TPRINTF("Stack is empty!!!!\n");
     }
 
     for (i = 1; i <= n; i++) {
-        DPRINTF("%i: ", i);
+        TPRINTF("%i: ", i);
         switch(lua_type(L, i)) {
         case LUA_TNONE:
-            DPRINTF("Invalid");
+            TPRINTF("Invalid");
             break;
         case LUA_TNIL:
-            DPRINTF("(Nil)");
+            TPRINTF("(Nil)");
             break;
         case LUA_TNUMBER:
-            DPRINTF("(Number) %f", lua_tonumber(L, i));
+            TPRINTF("(Number) %f", lua_tonumber(L, i));
             break;
         case LUA_TBOOLEAN:
-            DPRINTF("(Bool)   %s", (lua_toboolean(L, i) ? "true" : "false"));
+            TPRINTF("(Bool)   %s", (lua_toboolean(L, i) ? "true" : "false"));
             break;
         case LUA_TSTRING:
-            DPRINTF("(String) %s", lua_tostring(L, i));
+            TPRINTF("%s", lua_tostring(L, i));
             break;
         case LUA_TTABLE:
-            DPRINTF("(Table)");
+            TPRINTF("(Table)");
             break;
         case LUA_TFUNCTION:
-            DPRINTF("(Function)");
+            TPRINTF("(Function)");
             break;
         default:
-            DPRINTF("Unknown");
+            TPRINTF("Unknown");
         }
-
-        DPRINTF("\n");
+    TPRINTF("\n");
     }
+#ifndef FORBID_LUA_ATPANIC_TEXTDUMP
+    fflush(LOG);
+    fclose(LOG);
+#endif
 	SleepThread();
     return 0;
 }
@@ -61,7 +82,7 @@ const char * runScript(const char* script, bool isStringBuffer )
 
   	L = luaL_newstate();
 	if (!L) return "Failed to create LUA STATE\n";
-    //lua_atpanic(L, test_error);
+    lua_atpanic(L, test_error);
 	
 	  // Init Standard libraries
 	  luaL_openlibs(L);
