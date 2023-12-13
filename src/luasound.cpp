@@ -24,10 +24,14 @@ static int lua_setadpcmvolume(lua_State *L) {
 	return 0;
 }
 
+#define RPRINT() //printf("%s %d", __FUNCTION__, __LINE__)
 static int lua_loadadpcm(lua_State *L) {
 	int argc = lua_gettop(L);
+	RPRINT();
 	if (argc != 1) return luaL_error(L, "loadADPCM takes only 1 argument");
+	RPRINT();
 	lua_pushinteger(L, (uint32_t)sound_loadadpcm(luaL_checkstring(L, 1)));
+	RPRINT();
 	return 1;
 }
 

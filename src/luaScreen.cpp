@@ -1,6 +1,8 @@
 
 #include "include/luaplayer.h"
 #include "include/graphics.h"
+#include <debug.h>
+
 
 static int lua_flip(lua_State *L){
 	int argc = lua_gettop(L);
@@ -145,6 +147,33 @@ static const luaL_Reg Screen_functions[] = {
 	{"setMode",			lua_setvmode},
 	{0, 0}
 };
+static int __scr_print(lua_State *L) {
+	 const char* MSG = nullptr;
+	if (lua_gettop(L) > 0) MSG= luaL_checkstring(L, 1);
+	puts(MSG);
+	scr_printf("%s", MSG);
+	return 0;
+}
+static int __scr_clear(lua_State *L) {
+	scr_clear();
+	return 0;
+}
+static int __scr_fontcol(lua_State *L) {
+	if (lua_gettop(L) > 0) scr_setfontcolor(luaL_checkinteger(L, 1));
+	return 0;
+}
+static int __scr_init(lua_State *L) {
+	init_scr();
+	return 0;
+}
+
+static const luaL_Reg dbg_scr_func[] = {
+	{"write",              __scr_print  },
+	{"clear",              __scr_clear  },
+	{"fcol",               __scr_fontcol},
+	{"init",               __scr_init   },
+	{0, 0}
+};
 
 static int lua_color(lua_State *L) {
 	int argc = lua_gettop(L);
@@ -219,9 +248,14 @@ void luaScreen_init(lua_State *L) {
 	lua_newtable(L);
 	luaL_setfuncs(L, Screen_functions, 0);
 	lua_setglobal(L, "Screen");
+	
 	lua_newtable(L);
 	luaL_setfuncs(L, Color_functions, 0);
 	lua_setglobal(L, "Color");
+
+	lua_newtable(L);
+	luaL_setfuncs(L, dbg_scr_func, 0);
+	lua_setglobal(L, "dbgscr");
 
 	lua_pushinteger(L, GS_MODE_NTSC);
 	lua_setglobal (L, "NTSC");

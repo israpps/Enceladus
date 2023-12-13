@@ -102,30 +102,46 @@ void sound_setadpcmvolume(int slot, int volume) {
 
 	audsrv_adpcm_set_volume(slot, volume);
 }
-
+#define RPRINT() printf("%s %d", __FUNCTION__, __LINE__)
 audsrv_adpcm_t* sound_loadadpcm(const char* path){
+	RPRINT();
     if(!adpcm_started) {
+	RPRINT();
         audsrv_adpcm_init();
+	RPRINT();
         adpcm_started = true;
     }
+	RPRINT();
 
 	FILE* adpcm;
+	RPRINT();
 	audsrv_adpcm_t *sample = (audsrv_adpcm_t *)malloc(sizeof(audsrv_adpcm_t));
+	RPRINT();
 	int size;
 	u8* buffer;
 
+	RPRINT();
 	adpcm = fopen(path, "rb");
+	RPRINT();
 
+	RPRINT();
 	fseek(adpcm, 0, SEEK_END);
+	RPRINT();
 	size = ftell(adpcm);
+	RPRINT();
 	fseek(adpcm, 0, SEEK_SET);
+	RPRINT();
 
 	buffer = (u8*)malloc(size);
+	RPRINT();
 
 	fread(buffer, 1, size, adpcm);
+	RPRINT();
 	fclose(adpcm);
+	RPRINT();
 
 	audsrv_load_adpcm(sample, buffer, size);
+	RPRINT();
 
 	return sample;
 }

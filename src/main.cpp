@@ -224,10 +224,10 @@ int main(int argc, char * argv[])
             errMsg = runScript(argv[1], false);
         }   
 
-        init_scr();
 
         if (errMsg != NULL)
         {
+            init_scr();
             scr_setfontcolor(0x0000ff);
             sleep(1); //ensures message is printed no matter what
 		    scr_clear();
