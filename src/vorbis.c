@@ -15,7 +15,7 @@
 #include <stdio.h>
 
 int gEnableBGM = 1;
-#include "dbgprintf.h"
+#define DPRINTF(x...)
 
 // default sfx
 // Silence unused variable warnings from vorbisfile.h

@@ -3,7 +3,7 @@
 #include "include/sound.h"
 #include <stdlib.h>
 extern "C" {
-#include "vorbis.h"
+#include "include/vorbis.h"
 }
 
 static int lua_setformat(lua_State *L) {
@@ -93,11 +93,11 @@ static const luaL_Reg Sound_functions[] = {
 	{0, 0}
 };
 static const luaL_Reg BGM_functions[] = {
-	{"SetVolume",      							 lua_bgmUnMute},
-	{"Mute",      				   			 lua_bgmMute},
-	{"IsPlayIng",      				lua_isBgmPlaying},
-	{"Stop",      							 lua_bgmStop},
-	{"Start",      							 lua_bgmStart},
+	{"SetVolume", lua_bgmUnMute},
+	{"Mute", lua_bgmMute},
+	{"IsPlayIng", lua_isBgmPlaying},
+	{"Stop", lua_bgmStop},
+	{"Start", lua_bgmStart},
 	{0, 0}
 };
 
