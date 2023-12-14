@@ -225,7 +225,10 @@ static int lua_loadimg(lua_State *L) {
 	if (argc == 2) delayed = lua_toboolean(L, 2);
 	GSTEXTURE* image = load_image(text, delayed);
 
-	lua_pushinteger(L, (uint32_t)(image));
+	if (image != NULL)
+		lua_pushinteger(L, (uint32_t)(image));
+	else
+		lua_pushnil(L);
 	return 1;
 }
 

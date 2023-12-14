@@ -2,11 +2,13 @@ package.path = "./POPSLDR/?.lua;./?.lua;mass:/POPSLDR/?.lua;mc0:/POPSLDR/?.lua;m
 GPAD = 0
 Font.ftInit()
 BFONT = Font.LoadBuiltinFont()
+Font.ftSetCharSize(BFONT, 800, 800)
+function STOP() print("PROGRAM STOP") while true do end end
 function RunScript(S)
   local A, ERR = dofile_protected(S)
   if not A then
     print(ERR)
-    while true do end
+    STOP()
   end
 end
 

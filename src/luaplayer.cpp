@@ -16,16 +16,18 @@
 #define LOGDUMP(x...)
 #endif
 #define TPRINTF(arg, x...) \
-    DPRINTF(arg, ##x); \
+    printf(arg, ##x); \
     scr_printf(arg, ##x); \
     LOGDUMP(LOG, arg, ##x)
 
 static lua_State *L;
 
 int test_error(lua_State * L) {
+    scr_clear();
     //normalize video mode in case it was changed on lua script
     setVideoMode(gsKit_check_rom(), 640, (gsKit_check_rom()==GS_MODE_PAL) ? 512 : 448, GS_PSM_CT24, GS_INTERLACED, GS_FIELD, GS_SETTING_OFF, GS_PSMZ_16S);
     init_scr();
+    scr_clear();
     scr_clear();
     scr_setCursor(0);
 #ifndef FORBID_LUA_ATPANIC_TEXTDUMP
@@ -33,13 +35,16 @@ int test_error(lua_State * L) {
 #endif
     int n = lua_gettop(L);
     int i;
+        scr_printf("\t");
     TPRINTF("LUA ERR.\n");
 
     if (n == 0) {
+        scr_printf("\t");
         TPRINTF("Stack is empty!!!!\n");
     }
 
     for (i = 1; i <= n; i++) {
+        scr_printf("\t");
         TPRINTF("%i: ", i);
         switch(lua_type(L, i)) {
         case LUA_TNONE:
