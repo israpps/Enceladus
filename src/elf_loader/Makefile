@@ -6,16 +6,20 @@
 # Licenced under Academic Free License version 2.0
 # Review ps2sdk README & LICENSE files for further details.
 
-EE_OBJS = elf.o loader.o
-
 BIN2C = $(PS2SDK)/bin/bin2c
+EE_OBJS = src/elf.o loader.o
+EE_LIB = libcustom-elf-loader.a
 
-all:: prepareLoader $(EE_LIB)
+src/loader/bin/loader.elf:
+	$(MAKE) src/loader
 
-clean:: cleanLoader
+$(EE_OBJS_DIR)loader.c: src/loader/bin/loader.elf
+	$(BIN2C) $< $@ loader_elf
 
-prepareLoader:
-	$(BIN2C) src/loader/loader.elf src/loader.c loader_elf
+all: $(EE_LIB)
 
-cleanLoader:
-	$(MAKE) -C src/loader clean
+clean:
+	rm -f $(EE_LIB) $(EE_OBJS)
+
+include $(PS2SDK)/samples/Makefile.pref
+include $(PS2SDK)/samples/Makefile.eeglobal

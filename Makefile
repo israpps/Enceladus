@@ -42,7 +42,8 @@ BINDIR = bin/
 EE_BIN = $(BINDIR)enceladus.elf
 EE_BIN_PKD = $(BINDIR)POPSLOADER.ELF
 
-EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Lmodules/ds34bt/ee/ -Lmodules/ds34usb/ee/ -lpatches -lfileXio -lpad -ldebug -llua -lmath3d -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit -lpng -lz -lmc -laudsrv -lelf-loader -lds34bt -lds34usb
+EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Lmodules/ds34bt/ee/ -Lmodules/ds34usb/ee/ -lpatches -lfileXio -lpad -ldebug -llua -lmath3d -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit -lpng -lz -lmc -laudsrv  -lds34bt -lds34usb
+EE_LIBS += src/elf_loader/libcustom-elf-loader.a
 EE_INCS += -I$(PS2DEV)/gsKit/include -I$(PS2SDK)/ports/include -I$(PS2SDK)/ports/include/freetype2 -I$(PS2SDK)/ports/include/zlib
 EE_INCS += -Imodules/ds34bt/ee -Imodules/ds34usb/ee
 
@@ -178,6 +179,9 @@ $(EE_ASM_DIR)ds34usb.s: modules/ds34usb/iop/ds34usb.irx | $(EE_ASM_DIR)
 	
 #------------------------------------------------------------------#
 
+src/elf_loader/libcustom-elf-loader.a: src/elf_loader
+	$(MAKE) -C $<
+
 $(EE_OBJS_DIR):
 	@mkdir -p $@
 
@@ -187,9 +191,9 @@ $(EE_ASM_DIR):
 debug: $(EE_BIN)
 	echo "Building $(EE_BIN) with debug symbols..."
 
-clean:
-	rm -f $(EE_BIN)
-	rm -f $(EE_BIN_PKD)
+cleanbin:
+	rm -f $(EE_BIN) $(EE_BIN_PKD)
+clean: cleanbin
 	rm -rf $(EE_OBJS_DIR)
 	rm -rf $(EE_ASM_DIR)
 	

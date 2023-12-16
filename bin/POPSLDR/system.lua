@@ -9,21 +9,8 @@ PLDR = {
   GAMEPATH = ".";
   GAMES = {};
   PROFILES = {};
-  CheckPOPStarterDEPS = function ()
-    if UI.CURSCENE == UI.SCENES.GUSB then
-      return doesFileExist("mass:/POPS/POPS_IOX.PAK")
-    --[[
-    elseif UI.CURSCENE == UI.SCENES.GHDD then
-      HDD.MountPart("hdd0:__common")
-      return (doesFileExist("pfs0:/POPS/POPS.ELF") and doesFileExist("pfs0:/POPS/IOPRP252.IMG"))
-    --]]
-    end
-  end;
 }
 
-require("pops_profiles")
-require("ui")
-require("images")
 
 
 function CLAMP(a, MIN, MAX)
@@ -46,7 +33,19 @@ function Font.ftPrintMultiLineAligned(font, x, y, spacing, width, height, text, 
   end
 end
 
+function PLDR.CheckPOPStarterDEPS()
+  if UI.CURSCENE == UI.SCENES.GUSB then
+    return doesFileExist("mass:/POPS/POPS_IOX.PAK")
+  --[[
+  elseif UI.CURSCENE == UI.SCENES.GHDD then
+    HDD.MountPart("hdd0:__common")
+    return (doesFileExist("pfs0:/POPS/POPS.ELF") and doesFileExist("pfs0:/POPS/IOPRP252.IMG"))
+  --]]
+  end
+end
+
 function PLDR.GetPS1GameLists(path, tabl)
+  print("Listing games on ", path)
   local RET = {}
   local found_smth = false
   if type(tabl) == "table" then RET = tabl end
@@ -54,10 +53,12 @@ function PLDR.GetPS1GameLists(path, tabl)
   local DIR = System.listDirectory(PLDR.GAMEPATH)
   if DIR ~= nil then
     for i = 1, #DIR do
-      if string.lower(string.sub(DIR[i].name,-4)) == ".vcd" then
-        print("Found PS1 Game ", DIR[i].name)
-        found_smth = true
-        table.insert(RET, DIR[i].name)
+      if not DIR[i].directory then -- not a folder
+        if string.lower(string.sub(DIR[i].name,-4)) == ".vcd" then
+          print("Found", DIR[i].name)
+          found_smth = true
+          table.insert(RET, DIR[i].name)
+        end
       end
     end
   end
@@ -85,12 +86,32 @@ function PLDR.GetVCDGameID(path)
   return RET
 end
 
+function PLDR.replace_device(VAL, NEWDEV)
+  local FINAL
+  local niee = string.find(VAL, ":", 1, true)
+  FINAL = NEWDEV..VAL:sub(niee)
+    return FINAL
+end
+
+function PLDR.replace_extension(VAL, NEWEXT)
+  local FINAL = string.sub(VAL,1,-4)
+  FINAL = FINAL..NEWEXT
+  return FINAL 
+end
+
 ---DONT TOUCH ME
-function PLDR.RunPOPStarterGame(game)
-  System.loadELF(PLDR.POPSTARTER_PATH, 0, game)
+function PLDR.RunPOPStarterGame(gamelocation, game)
+  System.loadELF(PLDR.POPSTARTER_PATH, 
+    0, 
+    PLDR.replace_device(gamelocation, "isra").."XX."..PLDR.replace_extension(game, "ELF"), "--nr")
   print(">>> UNHANDLED ERROR at Launching game '", game, " via ", PLDR.POPSTARTER_PATH, " Failed")
   STOP()
 end
+
+require("pops_profiles")
+require("ui")
+require("images")
+
 ---MAIN PROGRAM BEHAVIOUR BEGINS
 UI.WelcomeDraw.Play()
 while true do

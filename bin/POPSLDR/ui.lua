@@ -43,6 +43,7 @@ UI = {
           Screen.clear(UI.SCR.BGCOL)
           Graphics.drawScaleImage(IMG[4], UI.SCR.X_MID-(Graphics.getImageWidth(IMG[4])),
           UI.SCR.Y_MID-(Graphics.getImageHeight(IMG[4])), Graphics.getImageWidth(IMG[4])*2, Graphics.getImageHeight(IMG[4])*2, Color.new(128,128,128,Q))
+          Font.ftPrint(BFONT, UI.SCR.X_MID, UI.SCR.Y_MID+100, 8, UI.SCR.X, 16, "Coded By El_isra", Color.new(128,128,128,Q))
           UI.flip()
           Q=Q+1
         end
@@ -55,9 +56,7 @@ UI = {
         Screen.clear(UI.SCR.BGCOL)
         Graphics.drawScaleImage(IMG[4], UI.SCR.X_MID-(Graphics.getImageWidth(IMG[4])),
         UI.SCR.Y_MID-(Graphics.getImageHeight(IMG[4])), Graphics.getImageWidth(IMG[4])*2, Graphics.getImageHeight(IMG[4])*2)
-        --if UI.CURSCENE <= UI.SCENES.GHDD or UI.CURSCENE == UI.SCENES.MPROFILE then
           Graphics.drawRect(20, 20, UI.SCR.X-100, 398, Color.new(0, 0, 0, 40))
-        --end
       end;
     };
     GameList = {
@@ -80,13 +79,13 @@ UI = {
         if Pads.check(GPAD, PAD_DOWN) then UI.GameList.CURR = CLAMP(UI.GameList.CURR+1, 1, ammount) GPAD = 0 end
         if Pads.check(GPAD, PAD_UP) then UI.GameList.CURR = CLAMP(UI.GameList.CURR-1, 1, ammount) GPAD = 0 end
         if Pads.check(GPAD, PAD_CROSS) then
-            print("System.loadELF('".. PLDR.POPSTARTER_PATH .."', 1, '"..PLDR.GAMEPATH .. PLDR.GAMES[UI.GameList.CURR].."')")
+            print("System.loadELF('".. PLDR.POPSTARTER_PATH .."', 0, '"..PLDR.GAMEPATH .. PLDR.GAMES[UI.GameList.CURR].."')")
             if not doesFileExist(PLDR.POPSTARTER_PATH) then
               table.insert(UI.Notif_queue.msg, "Cant find POPSTARTER ELF\n"..PLDR.POPSTARTER_PATH)
             elseif not doesFileExist(PLDR.GAMEPATH .. PLDR.GAMES[UI.GameList.CURR]) then
               table.insert(UI.Notif_queue.msg, "Cant find Game\n"..PLDR.GAMEPATH .. PLDR.GAMES[UI.GameList.CURR])
             else
-              PLDR.RunPOPStarterGame(PLDR.GAMEPATH .. PLDR.GAMES[UI.GameList.CURR])
+              PLDR.RunPOPStarterGame(PLDR.GAMEPATH, PLDR.GAMES[UI.GameList.CURR])
             end
         end
       end;
@@ -111,7 +110,7 @@ UI = {
             table.insert(UI.Notif_queue.msg, "POPStarter ELF missing")
           else
             PLDR.POPSTARTER_PATH = PLDR.PROFILES[UI.ProfileQuery.curopt].ELF
-            UI.CURSCENE = UI.MainMenu
+            UI.CURSCENE = UI.SCENES.MMAIN
           end
         end
       end;
@@ -133,7 +132,7 @@ UI = {
         if Pads.check(GPAD, PAD_CROSS) then
           print("Chose ", UI.MainMenu.OPT)
           if UI.MainMenu.OPT == 1 then
-            if PLDR.GetPS1GameLists(".", nil) ~= nil then
+            if PLDR.GetPS1GameLists("mass:/POPS/", nil) ~= nil then
               UI.CURSCENE = UI.MainMenu.OPT
             else
               table.insert(UI.Notif_queue.msg, "No games found on 'mass:/'")
@@ -160,4 +159,3 @@ UI = {
       Timer = nil;
     }
   }
- 

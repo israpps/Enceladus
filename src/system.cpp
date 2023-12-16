@@ -5,11 +5,9 @@
 #include <unistd.h>
 #include <string.h>
 #include <malloc.h>
-#include "elf_loader/src/loader.c"
 
 #include "include/system.h"
 
-extern u8 loader_elf[];
 //extern int size_loader_elf;
 
 void IOP_Reset(void);
@@ -135,7 +133,7 @@ void load_modules(void)
     sbv_patch_disable_prefix_check();
     
     SifLoadModule("rom0:SIO2MAN", 0, 0);
-	SifLoadModule("rom0:CDVDFSV", 0, 0);  
+	SifLoadModule("rom0:CDVDFSV", 0, 0);
     SifLoadModule("rom0:CDVDMAN", 0, 0);
     SifLoadModule("rom0:MCMAN", 0, 0);
     SifLoadModule("rom0:MCSERV", 0, 0);
@@ -161,7 +159,7 @@ void CleanUp(int iop_reset)
   	FlushCache(2);
 }
 
-
+/*
 void load_elf(const char *elf_path, int reboot_iop, char** Cargs, int Cargc)
 {   
 	u8 *boot_elf;
@@ -183,6 +181,7 @@ void load_elf(const char *elf_path, int reboot_iop, char** Cargs, int Cargc)
 	strcpy(elfpath, elf_path);
 	if (Cargs == NULL || Cargc < 1) {
 		args[0] = elfpath;
+		args[1] = elfpath;
 		final_argv = args;
 	} else {
 		final_argv = Cargs;
@@ -221,7 +220,7 @@ void load_elf(const char *elf_path, int reboot_iop, char** Cargs, int Cargc)
 	ExecPS2((void *)boot_header->entry, 0, final_argc, final_argv);	
 	
 }
-
+*/
 ///////////////////////////////////////////////
 
 void* AllocateLargestFreeBlock(size_t* Size)

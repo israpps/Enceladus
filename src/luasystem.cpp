@@ -483,7 +483,9 @@ static int lua_checkexist(lua_State *L){
 	}
 	return 1;
 }
-
+extern "C" {
+int LoadELFFromFile(const char *filename, int argc, char *argv[]);
+}
 static int lua_loadELF(lua_State *L)
 {
 	int argc = lua_gettop(L);
@@ -493,12 +495,13 @@ static int lua_loadELF(lua_State *L)
 	int rebootIOP = luaL_checkinteger(L, 2);
 	char** p = (char**)malloc((argc-1) * sizeof(const char*));
 	p[0] = (char*)elftoload;
-	DPRINTF("# Loading ELF '%s' iop_reboot=%d, extra_args=%d\n", elftoload, rebootIOP, argc-2);
+	printf("# Loading ELF '%s' iop_reboot=%d, extra_args=%d\n", elftoload, rebootIOP, argc-2);
 	for (int x = 3; x <= argc; x++) {
-		DPRINTF("#  argv[%d] = '%s'\n", (x-2), luaL_checkstring(L, x));
-		p[x-2] = (char*)luaL_checkstring(L, x);
+		printf("#  argv[%d] = '%s'\n", (x-2), luaL_checkstring(L, x));
+		p[x-3] = (char*)luaL_checkstring(L, x);
 	}
-	load_elf(elftoload, rebootIOP, p, (argc-1));
+	//load_elf(elftoload, rebootIOP, p, (argc-1));
+	LoadELFFromFile(elftoload, argc-2, p);
 	return 1;
 }
 

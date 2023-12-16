@@ -1,6 +1,10 @@
 LUA ERR.
-1: mass:/POPS/POPSTARTER.ELF
-2: (Bool)   true
-3: .A.vcd
-4: number expected, got boolean
-5: POPSLDR/System.lua:90: bad argument #2 to 'loadELF' (number expected, got boolean)
+1: mass:/POPS/
+2: (Nil)
+3: (Nil)
+4: (Number) 5.000000
+5: (Nil)
+6: :/POPS/
+7:  (local 'NEWDEV')
+8: attempt to concatenate a nil value (local 'NEWDEV')
+9: POPSLDR/System.lua:91: attempt to concatenate a nil value (local 'NEWDEV')
