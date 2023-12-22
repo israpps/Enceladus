@@ -17,7 +17,7 @@
 #include <sifrpc.h>
 #include <errno.h>
 #include <ps2sdkapi.h>
-#define DDPRINTF(x...) // printf(x)
+#define DPRINTF(x...) printf(x)
 
 #ifdef LOADER_ENABLE_DEBUG_COLORS
 #define SET_GS_BGCOLOUR(colour) {*((volatile unsigned long int *)0x120000E0) = colour;}
@@ -79,7 +79,6 @@ static void wipeUserMem(void)
 int main(int argc, char *argv[])
 {
 	SET_GS_BGCOLOUR(WHITE_BG);
-	//DPRINTF("VERGA\n");
 	static t_ExecData elfdata;
 	int ret, i;
 

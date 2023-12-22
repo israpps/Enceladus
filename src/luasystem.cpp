@@ -497,7 +497,7 @@ static int lua_loadELF(lua_State *L)
 	p[0] = (char*)elftoload;
 	printf("# Loading ELF '%s' iop_reboot=%d, extra_args=%d\n", elftoload, rebootIOP, argc-2);
 	for (int x = 3; x <= argc; x++) {
-		printf("#  argv[%d] = '%s'\n", (x-2), luaL_checkstring(L, x));
+		printf("#  argv[%d] = '%s'\n", (x-3), luaL_checkstring(L, x));
 		p[x-3] = (char*)luaL_checkstring(L, x);
 	}
 	//load_elf(elftoload, rebootIOP, p, (argc-1));
@@ -734,10 +734,11 @@ static int lua_sifloadmodulebuffer(lua_State *L){
 		arg_len = luaL_checkinteger(L, 3);
 		args = luaL_checkstring(L, 4);
 	}
-
-	int result = SifExecModuleBuffer((void*)ptr, size, arg_len, args, NULL);
-	lua_pushinteger(L, result);
-	return 1;
+	int RET;
+	int ID = SifExecModuleBuffer((void*)ptr, size, arg_len, args, &RET);
+	lua_pushinteger(L, ID);
+	lua_pushinteger(L, RET);
+	return 2;
 }
 
 static const luaL_Reg Sif_functions[] = {

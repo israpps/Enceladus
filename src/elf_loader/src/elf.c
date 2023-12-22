@@ -16,7 +16,7 @@
 #include <stdlib.h>
 
 #include "elf.h"
-#define DPRINTF(x...) // printf(x)
+#define DPRINTF(x...) printf(x)
 // Loader ELF variables
 extern u8 loader_elf[];
 extern int size_loader_elf;
@@ -70,7 +70,7 @@ int LoadELFFromFileWithPartition(const char *filename, int argc, char *argv[]) {
 	char *new_argv[new_argc];
 	DPRINTF("-- new_argv[0]: %s\n", filename);
 	new_argv[0] = filename;
-	for (i = 1; i < argc; i++) {
+	for (i = 1; i < new_argc; i++) {
 		new_argv[i] = argv[i-1];
 		DPRINTF("--- new_argv[%d] = argv[%d]: %s\n", i, i-1, new_argv[i]);
 	}

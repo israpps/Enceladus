@@ -49,7 +49,7 @@ EE_INCS += -Imodules/ds34bt/ee -Imodules/ds34usb/ee
 
 EE_CFLAGS   += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
 EE_CXXFLAGS += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
-
+EE_ASFLAGS += -call_shared
 ifeq ($(RESET_IOP),1)
 EE_CXXFLAGS += -DRESET_IOP
 endif
@@ -92,7 +92,6 @@ all: $(EXT_LIBS) $(EE_BIN)
 	$(EE_STRIP) $(EE_BIN)
 
 	ps2-packer $(EE_BIN) $(EE_BIN_PKD) > /dev/null
-
 #--------------------- Embedded ressources ------------------------#
 
 $(EE_ASM_DIR)boot.s: etc/boot.lua | $(EE_ASM_DIR)
@@ -178,9 +177,11 @@ $(EE_ASM_DIR)ds34usb.s: modules/ds34usb/iop/ds34usb.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ ds34usb_irx
 	
 #------------------------------------------------------------------#
+elf_loader: src/elf_loader/libcustom-elf-loader.a
 
 src/elf_loader/libcustom-elf-loader.a: src/elf_loader
-	$(MAKE) -C $<
+	@$(MAKE) -C $</src/loader/ clean all
+	@$(MAKE) -C $< clean all
 
 $(EE_OBJS_DIR):
 	@mkdir -p $@
