@@ -152,8 +152,8 @@ UI = {
           print("Chose ", UI.MainMenu.OPT)
           if UI.MainMenu.OPT == 1 then
             PLDR.CleanupGameList()
-            if PLDR.GetPS1GameLists("mass:/POPS/", true) == nil then
-              UI.Notif_queue.add("No games found on 'mass:/'")
+            if PLDR.GetPS1GameLists("mass"..PLDR.USB.MASSINDX..":/POPS/", true) == nil then
+              UI.Notif_queue.add("No games found on '"..PLDR.GAMEPATH.."'")
             end
           elseif UI.MainMenu.OPT == 3 then
             if UI.LASTSCENE == UI.SCENES.GHDD then
@@ -214,10 +214,10 @@ UI = {
         local currcol = Color.new(128, 128, 128, UI.Credits.Q)
         UI.Credits.Q = CLAMP(UI.Credits.Q-UI.Credits.INCR, 0, 128)
         Font.ftPrintMultiLineAligned(BFONT, UI.SCR.X_MID, 040, 20, UI.SCR.X, 40, "POPStarter Loader", currcol)
-        Graphics.drawRect(0, 60, UI.SCR.X, 2, currcol)
+        Graphics.drawRect(0, 20, UI.SCR.X, 2, currcol)
         Font.ftPrintMultiLineAligned(BFONT, UI.SCR.X_MID, 100, 20, UI.SCR.X, 40, "Coded By El_isra", currcol)
         Font.ftPrintMultiLineAligned(BFONT, UI.SCR.X_MID, 120, 20, UI.SCR.X, UI.SCR.Y, "Based on Enceladus by Daniel santos\n\nSpecial thanks to:\nkrHACKen: for making POPStarter\nuyjulian, fjtrujy, HWC and others for always helping me\n\nThis program is free and open source\nif you bought it you've been scammed", currcol)
-        Graphics.drawRect(0, UI.SCR.Y-40, UI.SCR.X, 2, currcol)
+        Graphics.drawRect(0, UI.SCR.Y-60, UI.SCR.X, 2, currcol)
         UI.Pad.Listen()
         if GPAD ~= 0 then UI.Credits.INCR = 1 end
       end
