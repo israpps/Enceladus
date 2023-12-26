@@ -1,10 +1,11 @@
 LUA ERR.
-1: mass:/POPS/
-2: (Nil)
-3: (Nil)
-4: (Number) 5.000000
-5: (Nil)
-6: :/POPS/
-7:  (local 'NEWDEV')
-8: attempt to concatenate a nil value (local 'NEWDEV')
-9: POPSLDR/System.lua:91: attempt to concatenate a nil value (local 'NEWDEV')
+1: (Number) 0.000000
+2: (Number) 351.000000
+3: (Number) 40.000000
+4: (Number) 8.000000
+5: (Number) 702.000000
+6: (Number) 40.000000
+7: POPStarter Loader
+8: (Nil)
+9: number expected, got nil
+10: POPSLDR/System.lua:47: bad argument #8 to 'ftPrint' (number expected, got nil)

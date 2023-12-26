@@ -37,3 +37,5 @@ bin/System/noindex.lua
 obj/
 asm/
 *.VCD
+*.vcd
+bin/lua_crashlog.txt

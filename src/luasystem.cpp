@@ -24,10 +24,10 @@ static int lua_getCurrentDirectory(lua_State *L)
 
 static int lua_setCurrentDirectory(lua_State *L)
 {
-        static char temp_path[256];
+    static char temp_path[256];
 	const char *path = luaL_checkstring(L, 1);
 	if(!path) return luaL_error(L, "Argument error: System.currentDirectory(file) takes a filename as string as argument.");
-
+	DPRINTF("Setting CWD to %s\n", path);
 	lua_getCurrentDirectory(L);
 	
 	// let's do what the ps2sdk should do, 
@@ -53,15 +53,15 @@ static int lua_setCurrentDirectory(lua_State *L)
 	           temp_path[idx] = '\0';
 	        }
 	        
-           }
+        }
            // add given directory to the existing path
            else
-           {
+        {
 	      getcwd(temp_path, 256);
 	      strcat(temp_path,"/");
 	      strcat(temp_path,path);
-	   }
-        }
+	    }
+    }
         
         DPRINTF("changing directory to %s\n",__ps2_normalize_path(temp_path));
         chdir(__ps2_normalize_path(temp_path));
@@ -475,6 +475,7 @@ static int lua_checkexist(lua_State *L){
 	int argc = lua_gettop(L);
 	if (argc != 1) return luaL_error(L, "wrong number of arguments");
 	const char *file_tbo = luaL_checkstring(L, 1);
+	//printf("opening %s\n", file_tbo);
 	int fileHandle = open(file_tbo, O_RDONLY, 0777);
 	if (fileHandle < 0) lua_pushboolean(L, false);
 	else{
@@ -670,6 +671,34 @@ static int lua_getfileprogress(lua_State *L) {
 	return 1;
 }
 
+static int lua_direxists(lua_State *L)
+{
+    int argc = lua_gettop(L);
+    if (argc != 1)
+        return luaL_error(L, "Argument error: lua_direxists takes one argument.");
+    const char *folder = luaL_checkstring(L, 1);
+    DIR *d = opendir(folder);
+    bool ret = false;
+	if (d)
+    {
+        ret = true;
+        closedir(d);
+    } else {
+        ret = false;
+    }
+    lua_pushboolean(L, ret);
+    return 1;
+}
+extern char* GetArgv0(void);
+static int lua_popargv0(lua_State *L) {
+	const char* A = GetArgv0();
+	if (A == NULL)
+		lua_pushnil(L);
+	else
+		lua_pushstring(L, A);
+	return 1;
+}
+
 static const luaL_Reg System_functions[] = {
 	{"openFile",                   lua_openfile},
 	{"readFile",                   lua_readfile},
@@ -697,6 +726,7 @@ static const luaL_Reg System_functions[] = {
 	{"checkValidDisc",       lua_checkValidDisc},
 	{"getDiscType",             lua_getDiscType},
 	{"checkDiscTray",         lua_checkDiscTray},
+	{"GetArgv0",                   lua_popargv0},
 	{0, 0}
 };
 
@@ -751,6 +781,7 @@ static const luaL_Reg Sif_functions[] = {
 void luaSystem_init(lua_State *L) {
 
 	lua_register(L, "doesFileExist", lua_checkexist);
+	lua_register(L, "doesFolderExist", lua_direxists);
 
 	setModulePath();
 	lua_newtable(L);

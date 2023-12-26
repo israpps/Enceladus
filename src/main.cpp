@@ -139,9 +139,20 @@ void initMC(void)
    mcGetInfo(0, 0, &mc_Type, &mc_Free, &mc_Format); 
    mcSync(MC_WAIT, NULL, &ret);
 }
+static char* ARGV0 = NULL;
+char* GetArgv0(void) {
+    return ARGV0;
+}
+
+#define LOAD_IRX(_irx, argc, arglist) \
+    ID = SifExecModuleBuffer(&_irx, size_##_irx, argc, arglist, &RET); \
+    printf("%s: id:%d, ret:%d\n", #_irx, ID, RET)
+#define LOAD_IRX_NARG(_irx) LOAD_IRX(_irx, 0, NULL)
 
 int main(int argc, char * argv[])
 {
+    int ID, RET;
+    if (argc > 0) ARGV0 = argv[0];
     const char * errMsg;
 
     #ifdef RESET_IOP  
@@ -162,8 +173,8 @@ int main(int argc, char * argv[])
 	directorytoverify = opendir("host:.");
 #endif
 	if(directorytoverify==NULL){
-		SifExecModuleBuffer(&iomanX_irx, size_iomanX_irx, 0, NULL, NULL);
-		SifExecModuleBuffer(&fileXio_irx, size_fileXio_irx, 0, NULL, NULL);
+		LOAD_IRX_NARG(iomanX_irx);
+		LOAD_IRX_NARG(fileXio_irx);
 	}
 	SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, NULL, NULL);
 	if(directorytoverify==NULL){
@@ -172,33 +183,33 @@ int main(int argc, char * argv[])
 	if(directorytoverify!=NULL){
 		closedir(directorytoverify);
 	}
-    SifExecModuleBuffer(&mcman_irx, size_mcman_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&mcserv_irx, size_mcserv_irx, 0, NULL, NULL);
+    LOAD_IRX_NARG(mcman_irx);
+    LOAD_IRX_NARG(mcserv_irx);
     initMC();
 
-    SifExecModuleBuffer(&padman_irx, size_padman_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&libsd_irx, size_libsd_irx, 0, NULL, NULL);
+    LOAD_IRX_NARG(padman_irx);
+    LOAD_IRX_NARG(libsd_irx);
 
     // load pad & mc modules 
     DPRINTF("Installing Pad & MC modules...\n");
 
     // load USB modules    
-    SifExecModuleBuffer(&usbd_irx, size_usbd_irx, 0, NULL, NULL);
+    LOAD_IRX_NARG(usbd_irx);
 
     
     int ds3pads = 1;
-    SifExecModuleBuffer(&ds34usb_irx, size_ds34usb_irx, 4, (char *)&ds3pads, NULL);
-    SifExecModuleBuffer(&ds34bt_irx, size_ds34bt_irx, 4, (char *)&ds3pads, NULL);
+    LOAD_IRX(ds34usb_irx, 4, (char *)&ds3pads);
+    LOAD_IRX(ds34bt_irx, 4, (char *)&ds3pads);
     ds34usb_init();
     ds34bt_init();
 
-    SifExecModuleBuffer(&bdm_irx, size_bdm_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&bdmfs_fatfs_irx, size_bdmfs_fatfs_irx, 0, NULL, NULL);
-    SifExecModuleBuffer(&usbmass_bd_irx, size_usbmass_bd_irx, 0, NULL, NULL);
+    LOAD_IRX_NARG(bdm_irx);
+    LOAD_IRX_NARG(bdmfs_fatfs_irx);
+    LOAD_IRX_NARG(usbmass_bd_irx);
 
-    SifExecModuleBuffer(&cdfs_irx, size_cdfs_irx, 0, NULL, NULL);
+    LOAD_IRX_NARG(cdfs_irx);
 
-    SifExecModuleBuffer(&audsrv_irx, size_audsrv_irx, 0, NULL, NULL);
+    LOAD_IRX_NARG(audsrv_irx);
 
     //waitUntilDeviceIsReady by fjtrujy
 

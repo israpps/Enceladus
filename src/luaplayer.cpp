@@ -102,6 +102,7 @@ const char * runScript(const char* script, bool isStringBuffer )
     luaSystem_init(L);
     luaSound_init(L);
     luaRender_init(L);
+	luaHDD_init(L);
     	
     DPRINTF("done !\n");
      

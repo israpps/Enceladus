@@ -20,6 +20,7 @@ char* __ps2_normalize_path(char *path_name)
 	int first, next;
 	static char out[255];
 	
+	bool skip_leading_slash = (!strncmp(path_name, "pfs", 3));
 	/* First copy the path into our temp buffer */
 	strcpy(out, path_name);
         /* Then append "/" to make the rest easier */
@@ -67,7 +68,7 @@ char* __ps2_normalize_path(char *path_name)
 	/* Remove trailing "/" */
 	for(i=1; out[i]; i++)
 		continue;
-	if(i >= 1 && out[i-1] == '/') 
+	if(i >= 1 && out[i-1] == '/'  && !skip_leading_slash) // pfs:? filesystem driver expects trailing slash...
 		out[i-1] = 0;
 
 	return (char*)out;

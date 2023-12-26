@@ -65,16 +65,17 @@ EXT_LIBS = modules/ds34usb/ee/libds34usb.a modules/ds34bt/ee/libds34bt.a
 
 APP_CORE = main.o system.o pad.o graphics.o render.o \
 		   calc_3d.o gsKit3d_sup.o atlas.o fntsys.o md5.o \
-		   sound.o
+		   sound.o #strUtils.o
 
 LUA_LIBS =	luaplayer.o luasound.o luacontrols.o \
 			luatimer.o luaScreen.o luagraphics.o \
-			luasystem.o luaRender.o
+			luasystem.o luaRender.o luaHDD.o
 
-IOP_MODULES = iomanx.o filexio.o \
+IOP_MODULES = iomanX.o fileXio.o \
 			  sio2man.o mcman.o mcserv.o padman.o libsd.o \
 			  usbd.o audsrv.o bdm.o bdmfs_fatfs.o \
-			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o
+			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o \
+			  ps2dev9.o ps2atad.o ps2hdd-osd.o ps2fs.o
 
 EMBEDDED_RSC = boot.o builtin_font.o
 
@@ -107,56 +108,14 @@ $(EE_ASM_DIR)%.s: EMBED/%.ttf
 
 
 #-------------------- Embedded IOP Modules ------------------------#
-$(EE_ASM_DIR)iomanx.s: $(PS2SDK)/iop/irx/iomanX.irx | $(EE_ASM_DIR)
-	echo "Embedding iomanX Driver..."
-	$(BIN2S) $< $@ iomanX_irx
 
-$(EE_ASM_DIR)filexio.s: $(PS2SDK)/iop/irx/fileXio.irx | $(EE_ASM_DIR)
-	echo "Embedding fileXio Driver..."
-	$(BIN2S) $< $@ fileXio_irx
+vpath %.irx iop/
+vpath %.irx $(PS2SDK)/iop/irx/
+IRXTAG = $(subst -,_,$(notdir $(addsuffix _irx, $(basename $<))))
 
-$(EE_ASM_DIR)sio2man.s: $(PS2SDK)/iop/irx/sio2man.irx | $(EE_ASM_DIR)
-	echo "Embedding SIO2MAN Driver..."
-	$(BIN2S) $< $@ sio2man_irx
-	
-$(EE_ASM_DIR)mcman.s: $(PS2SDK)/iop/irx/mcman.irx | $(EE_ASM_DIR)
-	echo "Embedding MCMAN Driver..."
-	$(BIN2S) $< $@ mcman_irx
+$(EE_ASM_DIR)%.s: $(PS2SDK)/iop/irx/%.irx | $(EE_ASM_DIR)
+	$(BIN2S) $< $@ $(IRXTAG)
 
-$(EE_ASM_DIR)mcserv.s: $(PS2SDK)/iop/irx/mcserv.irx | $(EE_ASM_DIR)
-	echo "Embedding MCSERV Driver..."
-	$(BIN2S) $< $@ mcserv_irx
-
-$(EE_ASM_DIR)padman.s: $(PS2SDK)/iop/irx/padman.irx | $(EE_ASM_DIR)
-	echo "Embedding PADMAN Driver..."
-	$(BIN2S) $< $@ padman_irx
-	
-$(EE_ASM_DIR)libsd.s: $(PS2SDK)/iop/irx/libsd.irx | $(EE_ASM_DIR)
-	echo "Embedding LIBSD Driver..."
-	$(BIN2S) $< $@ libsd_irx
-
-$(EE_ASM_DIR)usbd.s: $(PS2SDK)/iop/irx/usbd.irx | $(EE_ASM_DIR)
-	echo "Embedding USB Driver..."
-	$(BIN2S) $< $@ usbd_irx
-
-$(EE_ASM_DIR)audsrv.s: $(PS2SDK)/iop/irx/audsrv.irx | $(EE_ASM_DIR)
-	echo "Embedding AUDSRV Driver..."
-	$(BIN2S) $< $@ audsrv_irx
-
-$(EE_ASM_DIR)bdm.s: $(PS2SDK)/iop/irx/bdm.irx | $(EE_ASM_DIR)
-	echo "Embedding Block Device Manager(BDM)..."
-	$(BIN2S) $< $@ bdm_irx
-
-$(EE_ASM_DIR)bdmfs_fatfs.s: $(PS2SDK)/iop/irx/bdmfs_fatfs.irx | $(EE_ASM_DIR)
-	echo "Embedding BDM FATFS Driver..."
-	$(BIN2S) $< $@ bdmfs_fatfs_irx
-
-$(EE_ASM_DIR)usbmass_bd.s: $(PS2SDK)/iop/irx/usbmass_bd.irx | $(EE_ASM_DIR)
-	echo "Embedding BD USB Mass Driver..."
-	$(BIN2S) $< $@ usbmass_bd_irx
-
-$(EE_ASM_DIR)cdfs.s: $(PS2SDK)/iop/irx/cdfs.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ cdfs_irx
 
 modules/ds34bt/ee/libds34bt.a: modules/ds34bt/ee
 	$(MAKE) -C $<
@@ -175,7 +134,7 @@ modules/ds34usb/iop/ds34usb.irx: modules/ds34usb/iop
 
 $(EE_ASM_DIR)ds34usb.s: modules/ds34usb/iop/ds34usb.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ ds34usb_irx
-	
+
 #------------------------------------------------------------------#
 elf_loader: src/elf_loader/libcustom-elf-loader.a
 

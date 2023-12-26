@@ -3,14 +3,28 @@
   to do cosmetic changes, please check the `ui.lua` and `images.lua` files
   to add custom popstarter profiles check `pops_profiles.lua`
 ]]
-
 PLDR = {
-  POPSTARTER_PATH = "mass:/POPS/POPSTARTER.ELF";
+  REBOOT_IOP_WHILE_LOADING_POPSTARTER = 0;
+  POPSTARTER_PATH = "host:/POPSLDR/PROFILES/DEBUG/POPSTARTER.ELF";--"mass:/POPS/POPSTARTER.ELF";
+  CHECK_POPSTARTER_FILES = false;
   GAMEPATH = ".";
   GAMES = {};
   PROFILES = {};
+  HDD = {
+    LOADSTATE = 0; -- 0:NOT_LOADED, 1:LOADED, -1:LOADED_BUT_FAILED
+    EXTRAPARTS = {false, false, false, false, false, false, false, false, false};
+    MAINPART = false;
+    FOUNDANY = false;
+    HAS_CHECKED = false;
+    HAS_CHECKED_DEPS = false;
+    STATUS = 3
+  };
 }
+if BOOTPATH ~= nil then PLDR.HDD.LOADSTATE = 1 end
 
+require("pops_profiles")
+require("ui")
+require("images")
 
 
 function CLAMP(a, MIN, MAX)
@@ -27,45 +41,57 @@ end
 
 function Font.ftPrintMultiLineAligned(font, x, y, spacing, width, height, text, color)
   local internal_y = y
+  local COL = 128
+  if type(color) == "number" then COL = color end
   for line in text:gmatch("([^\n]*)\n?") do
-    Font.ftPrint(font, x, internal_y, 8, width, height, line, color)
+    Font.ftPrint(font, x, internal_y, 8, width, height, line, COL)
     internal_y = internal_y+spacing
   end
 end
 
-function PLDR.CheckPOPStarterDEPS()
-  if UI.CURSCENE == UI.SCENES.GUSB then
+function PLDR.CheckPOPStarterDEPS(device)
+  if not PLDR.CHECK_POPSTARTER_FILES then return true, true, true end
+  if device == UI.SCENES.GUSB then
     return doesFileExist("mass:/POPS/POPS_IOX.PAK")
-  --[[
-  elseif UI.CURSCENE == UI.SCENES.GHDD then
-    HDD.MountPart("hdd0:__common")
-    return (doesFileExist("pfs0:/POPS/POPS.ELF") and doesFileExist("pfs0:/POPS/IOPRP252.IMG"))
-  --]]
+  elseif device == UI.SCENES.GHDD then
+    local a = HDD.MountPartition("hdd0:__common", 1)
+    if a then
+      return a, doesFileExist("pfs1:/POPS/POPS.ELF"), doesFileExist("pfs1:/POPS/IOPRP252.IMG")
+    else
+      return a, false, false
+    end
   end
 end
 
-function PLDR.GetPS1GameLists(path, tabl)
+function PLDR.GetPS1GameLists(path, updating)
   print("Listing games on ", path)
   local RET = {}
   local found_smth = false
-  if type(tabl) == "table" then RET = tabl end
   if path ~= nil then PLDR.GAMEPATH = path end
   local DIR = System.listDirectory(PLDR.GAMEPATH)
   if DIR ~= nil then
     for i = 1, #DIR do
       if not DIR[i].directory then -- not a folder
         if string.lower(string.sub(DIR[i].name,-4)) == ".vcd" then
-          print("Found", DIR[i].name)
+          print(" Found", DIR[i].name)
           found_smth = true
-          table.insert(RET, DIR[i].name)
+          if updating then
+            table.insert(PLDR.GAMES, DIR[i].name)
+          else
+            table.insert(RET, DIR[i].name)
+          end
         end
       end
     end
+  else
+    print("cannot opendir")
   end
   if found_smth then
-    table.sort(RET)
-    PLDR.GAMES = RET
-    return RET
+    if not updating then
+      PLDR.GAMES = RET
+    end
+    table.sort(PLDR.GAMES)
+    return PLDR.GAMES
   else
     return nil
   end
@@ -99,18 +125,91 @@ function PLDR.replace_extension(VAL, NEWEXT)
   return FINAL 
 end
 
+function PLDR.HDD.CheckAvailableHddPopsParts()
+  if not PLDR.HDD.HAS_CHECKED then --HDD is checked only once since it cannot be removed/replaced without damaging the console
+    print("Checking available __.POPS Partitions")
+    PLDR.HDD.MAINPART = doesFileExist("hdd0:__.POPS")
+    PLDR.HDD.FOUNDANY = PLDR.HDD.MAINPART
+    print("__.POPS", PLDR.HDD.MAINPART)
+    for i=1, 9 do
+      if doesFileExist(("hdd0:__.POPS%d"):format(i)) then
+        PLDR.HDD.EXTRAPARTS[i] = true
+        PLDR.HDD.FOUNDANY = true
+      end
+      print("__.POPS"..i, PLDR.HDD.EXTRAPARTS[i])
+    end
+    PLDR.HDD.HAS_CHECKED = true
+  end
+end
+
+function PLDR.HDD.BuildGameList()
+  PLDR.GAMES = {}
+  if not PLDR.HDD.FOUNDANY then return end
+  if PLDR.HDD.MAINPART then
+    if HDD.MountPartition("hdd0:__.POPS", 1, FIO_MT_RDONLY) then
+      PLDR.GetPS1GameLists("pfs1:/", true)
+      HDD.UMountPartition(1)
+    end
+  end
+  for i=1, 9 do
+    if PLDR.HDD.EXTRAPARTS[i] then
+      if HDD.MountPartition("hdd0:__.POPS"..i, 1, FIO_MT_RDONLY) then
+        PLDR.GetPS1GameLists("pfs1:/", true)
+        HDD.UMountPartition(1)
+      end
+    end
+  end
+end
+
+function PLDR.LoadHDDModules()
+  local ID, RET, SUCCESS, MODULE
+  if PLDR.HDD.LOADSTATE == 0 then
+    SUCCESS, MODULE, ID, RET = HDD.Initialize()
+    if not SUCCESS then
+      PLDR.HDD.LOADSTATE = -1
+      UI.Notif_queue.add(string.format("failed to load %s.IRX\nid:%d, ret:%d", MODULE, ID, RET))
+      return
+    end
+    SUCCESS = HDD.GetHDDStatus()
+    PLDR.HDD.STATUS = SUCCESS
+    if SUCCESS ~= 0 then
+      PLDR.HDD.LOADSTATE = -1
+      if SUCCESS == 1 then
+        UI.Notif_queue.add(string.format("ERROR: HDD has no APA format", MODULE, ID, RET))
+      elseif SUCCESS == 2 then
+        UI.Notif_queue.add(string.format("ERROR: HDD is not accessible", MODULE, ID, RET))
+      elseif SUCCESS == 3 then
+        UI.Notif_queue.add(string.format("WARNING: No HDD detected", MODULE, ID, RET))
+      elseif SUCCESS == -19 then
+        UI.Notif_queue.add(string.format("ERROR: Hardware issue detected\nCheck your HDD, network adapter and connection", MODULE, ID, RET))
+      end
+    end
+    PLDR.HDD.LOADSTATE = 1
+    PLDR.HDD.CheckAvailableHddPopsParts()
+  end
+end
+
+function PLDR.CleanupGameList()
+  print("gamelist cleanup")
+  local count = #PLDR.GAMES
+  for i=0, count do PLDR.GAMES[i]=nil end
+end
+
 ---DONT TOUCH ME
 function PLDR.RunPOPStarterGame(gamelocation, game)
-  System.loadELF(PLDR.POPSTARTER_PATH, 
-    0, 
-    PLDR.replace_device(gamelocation, "isra").."XX."..PLDR.replace_extension(game, "ELF"), "--nr")
+  local PREFIX = ""
+  if UI.CURSCENE == UI.SCENES.GUSB then PREFIX = "XX." 
+  elseif UI.CURSCENE == UI.SCENES.GSMB then PREFIX = "SB." end
+  System.loadELF(PLDR.POPSTARTER_PATH,
+    PLDR.REBOOT_IOP_WHILE_LOADING_POPSTARTER,
+    PLDR.replace_device(gamelocation, "isra")..PREFIX..PLDR.replace_extension(game, "ELF"), "--nr")
   print(">>> UNHANDLED ERROR at Launching game '", game, " via ", PLDR.POPSTARTER_PATH, " Failed")
   STOP()
 end
 
-require("pops_profiles")
-require("ui")
-require("images")
+PLDR.LoadHDDModules()
+
+
 
 ---MAIN PROGRAM BEHAVIOUR BEGINS
 UI.WelcomeDraw.Play()
@@ -122,6 +221,8 @@ while true do
     UI.ProfileQuery.Play()
   elseif UI.CURSCENE <= UI.SCENES.GHDD then
     UI.GameList.Play()
+  elseif UI.CURSCENE == UI.SCENES.CREDITS then
+    UI.Credits.Play()
   end
   UI.flip()
 end
