@@ -744,10 +744,11 @@ static int lua_sifloadmodule(lua_State *L){
 		args = luaL_checkstring(L, 3);
 	}
 	
-
-	int result = SifLoadModule(path, arg_len, args);
-	lua_pushinteger(L, result);
-	return 1;
+	int ret = 1;
+	int id = SifLoadStartModule(path, arg_len, args, &ret);
+	lua_pushinteger(L, id);
+	lua_pushinteger(L, ret);
+	return 2;
 }
 
 
@@ -777,11 +778,32 @@ static const luaL_Reg Sif_functions[] = {
 
 	{0, 0}
 };
+#include <sio.h>
+static bool init_sio = false;
 
+static int lua_sio_print(lua_State *L) {
+	int argc = lua_gettop(L);
+	if (!init_sio) {
+		sio_init(38400,0,0,0,0);
+		init_sio = true;
+		sio_puts("EE UART Initialized at 38400 BAUD");
+	}
+	
+	for (int i = 1; i <= argc; i++)
+	{
+		const char* A = luaL_checkstring(L, i);
+		if (i != 1) sio_putc('\t');
+		sio_putsn((A != NULL) ? A : "(NULL)");
+		
+	}
+	if (argc > 0) sio_putc('\n');
+	return 0;
+}
 void luaSystem_init(lua_State *L) {
 
 	lua_register(L, "doesFileExist", lua_checkexist);
 	lua_register(L, "doesFolderExist", lua_direxists);
+	lua_register(L, "print_uart", lua_sio_print);
 
 	setModulePath();
 	lua_newtable(L);

@@ -129,9 +129,9 @@ void initMC(void)
    ret = mcInit(MC_TYPE_XMC);
    
    if( ret < 0 ) {
-	DPRINTF("initMC: failed to initialize memcard server.\n");
+	DPRINTF("initMC: failed to initialize memcard RPC.\n");
    } else {
-       DPRINTF("initMC: memcard server started successfully.\n");
+       DPRINTF("initMC: memcard RPC started successfully.\n");
    }
    
    // Since this is the first call, -1 should be returned.
@@ -168,30 +168,18 @@ int main(int argc, char * argv[])
     sbv_patch_disable_prefix_check(); 
     sbv_patch_fileio(); 
 
-	DIR *directorytoverify;
-#ifdef SKIP_FILEXIO_ON_HOST
-	directorytoverify = opendir("host:.");
-#endif
-	if(directorytoverify==NULL){
-		LOAD_IRX_NARG(iomanX_irx);
-		LOAD_IRX_NARG(fileXio_irx);
-	}
-	SifExecModuleBuffer(&sio2man_irx, size_sio2man_irx, 0, NULL, NULL);
-	if(directorytoverify==NULL){
-		fileXioInit();
-	}
-	if(directorytoverify!=NULL){
-		closedir(directorytoverify);
-	}
+	LOAD_IRX_NARG(iomanX_irx);
+	LOAD_IRX_NARG(fileXio_irx);
+	fileXioInit();
+
+	LOAD_IRX_NARG(sio2man_irx);
     LOAD_IRX_NARG(mcman_irx);
     LOAD_IRX_NARG(mcserv_irx);
     initMC();
-
     LOAD_IRX_NARG(padman_irx);
+
     LOAD_IRX_NARG(libsd_irx);
 
-    // load pad & mc modules 
-    DPRINTF("Installing Pad & MC modules...\n");
 
     // load USB modules    
     LOAD_IRX_NARG(usbd_irx);

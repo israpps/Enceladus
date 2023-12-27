@@ -1,11 +1,6 @@
 LUA ERR.
-1: (Number) 0.000000
-2: (Number) 351.000000
-3: (Number) 40.000000
-4: (Number) 8.000000
-5: (Number) 702.000000
-6: (Number) 40.000000
-7: POPStarter Loader
-8: (Nil)
-9: number expected, got nil
-10: POPSLDR/System.lua:47: bad argument #8 to 'ftPrint' (number expected, got nil)
+1: (Nil)
+2: (Number) 20.000000
+3: (Number) 415.000000
+4: number expected, got nil
+5: ./POPSLDR/ui.lua:144: bad argument #1 to 'drawImage' (number expected, got nil)

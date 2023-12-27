@@ -3,6 +3,18 @@
   to do cosmetic changes, please check the `ui.lua` and `images.lua` files
   to add custom popstarter profiles check `pops_profiles.lua`
 ]]
+if doesFolderExist("POPSLDR/IRX/") then
+  local IRXDIR = System.listDirectory("POPSLDR/IRX/")
+  if IRXDIR ~= nil then
+    LOG("Found IRX folder")
+    for x=1, #IRXDIR do
+      if string.lower(string.sub(IRXDIR[i].name,-4)) == ".irx" then
+        local ID, RET = IOP.loadModule(IRXDIR[x])
+        LOG(IRXDIR[x], ID, RET)
+      end
+    end
+  end
+end
 PLDR = {
   REBOOT_IOP_WHILE_LOADING_POPSTARTER = 0;
   POPSTARTER_PATH = "mass:/POPS/POPSTARTER.ELF";--"mass:/POPS/POPSTARTER.ELF";
@@ -67,7 +79,7 @@ function PLDR.CheckPOPStarterDEPS(device)
 end
 
 function PLDR.GetPS1GameLists(path, updating)
-  print("Listing games on ", path)
+  LOG("Listing games on ", path)
   local RET = {}
   local found_smth = false
   if path ~= nil then PLDR.GAMEPATH = path end
@@ -76,7 +88,7 @@ function PLDR.GetPS1GameLists(path, updating)
     for i = 1, #DIR do
       if not DIR[i].directory then -- not a folder
         if string.lower(string.sub(DIR[i].name,-4)) == ".vcd" then
-          print(" Found", DIR[i].name)
+          LOG(" Found", DIR[i].name)
           found_smth = true
           if updating then
             table.insert(PLDR.GAMES, DIR[i].name)
@@ -87,7 +99,7 @@ function PLDR.GetPS1GameLists(path, updating)
       end
     end
   else
-    print("cannot opendir")
+    LOG("cannot opendir")
   end
   if found_smth then
     if not updating then
@@ -105,7 +117,7 @@ function PLDR.GetVCDGameID(path)
   local RET = nil
   local fd = System.openFile(path, FREAD)
   if System.sizeFile(fd) < 0x10d900 then
-    print("ERROR: VCD Size is not big enough to pull ID")
+    LOG("ERROR: VCD Size is not big enough to pull ID")
   else
     System.seekFile(fd, 0x10c900, SET)
     local buffer = System.readFile(fd, 4096)
@@ -130,16 +142,16 @@ end
 
 function PLDR.HDD.CheckAvailableHddPopsParts()
   if not PLDR.HDD.HAS_CHECKED then --HDD is checked only once since it cannot be removed/replaced without damaging the console
-    print("Checking available __.POPS Partitions")
+    LOG("Checking available __.POPS Partitions")
     PLDR.HDD.MAINPART = doesFileExist("hdd0:__.POPS")
     PLDR.HDD.FOUNDANY = PLDR.HDD.MAINPART
-    print("__.POPS", PLDR.HDD.MAINPART)
+    LOG("__.POPS", PLDR.HDD.MAINPART)
     for i=1, 9 do
       if doesFileExist(("hdd0:__.POPS%d"):format(i)) then
         PLDR.HDD.EXTRAPARTS[i] = true
         PLDR.HDD.FOUNDANY = true
       end
-      print("__.POPS"..i, PLDR.HDD.EXTRAPARTS[i])
+      LOG("__.POPS"..i, PLDR.HDD.EXTRAPARTS[i])
     end
     PLDR.HDD.HAS_CHECKED = true
   end
@@ -193,7 +205,7 @@ function PLDR.LoadHDDModules()
 end
 
 function PLDR.CleanupGameList()
-  print("gamelist cleanup")
+  LOG("gamelist cleanup")
   local count = #PLDR.GAMES
   for i=0, count do PLDR.GAMES[i]=nil end
 end
@@ -201,16 +213,16 @@ end
 ---DONT TOUCH ME
 function PLDR.RunPOPStarterGame(gamelocation, game)
   local PREFIX = ""
-  if UI.CURSCENE == UI.SCENES.GUSB then PREFIX = "XX." 
+  if UI.CURSCENE == UI.SCENES.GUSB then PREFIX = "XX."
   elseif UI.CURSCENE == UI.SCENES.GSMB then PREFIX = "SB." end
+  local BOOTPARAM = PLDR.replace_device(gamelocation, "isra")..PREFIX..PLDR.replace_extension(game, "ELF")
+  LOG("Loading", PLDR.POPSTARTER_PATH, BOOTPARAM)
   System.loadELF(PLDR.POPSTARTER_PATH,
     PLDR.REBOOT_IOP_WHILE_LOADING_POPSTARTER,
-    PLDR.replace_device(gamelocation, "isra")..PREFIX..PLDR.replace_extension(game, "ELF"), "--nr")
-  print(">>> UNHANDLED ERROR at Launching game '", game, " via ", PLDR.POPSTARTER_PATH, " Failed")
-  STOP()
+    BOOTPARAM, "--nr")
+    LOG(">>> UNHANDLED ERROR at Launching game '", game, " via ", PLDR.POPSTARTER_PATH, " Failed")
+  error("ERROR: ELF loading failure")
 end
-
-PLDR.LoadHDDModules()
 
 
 

@@ -1,6 +1,10 @@
 package.path = "./POPSLDR/?.lua;./?.lua;mass:/POPSLDR/?.lua;mc0:/POPSLDR/?.lua;mc1:/POPSLDR/?.lua"
-
-
+function LOG(...)
+  print_uart(...)
+end
+function LOGF(S, ...)
+  print_uart(string.format(S, ...))
+end
 --- Processes a HDD full path into its components. (eg: `hdd0:__system:pfs:/osd110/hosdsys.elf`)
 ---@param PATH string
 ---@return string mountpart: will return partition path for mounting (`hdd0:__system`)
@@ -27,20 +31,20 @@ end
 
 local ARGV0 = System.GetArgv0()
 if string.find(ARGV0, "^hdd0:") then
-  print("Booting from HDD!")
+  LOG("Booting from HDD!")
   local MNTPART
   BOOTPATH = nil
   MNTPART, _, BOOTPATH = GetMountData(ARGV0)
   if string.find(BOOTPATH, "^pfs") then
     SUCCESS, MODULE, ID, RET = HDD.Initialize()
     if not SUCCESS then
-      print("ERROR", MODULE..".IRX", ID, RET)
+      LOG("ERROR", MODULE..".IRX", ID, RET)
     else
       System.sleep(2) -- lets give it time to get ready
       if HDD.MountPartition(MNTPART, 0) then -- mount to "pfs3:" and NEVER USE IT FOR ANYTHING ELSE
         BOOTPATH, _, _ = string.match(BOOTPATH, "(.-)([^/]-([^%.]+))$")
         System.currentDirectory(BOOTPATH)
-        print("new bootpath:", BOOTPATH)
+        LOG("new bootpath:", BOOTPATH)
       end
     end
   end
@@ -48,12 +52,14 @@ end
 GPAD = 0
 Font.ftInit()
 BFONT = Font.LoadBuiltinFont()
+SFONT = Font.LoadBuiltinFont()
 Font.ftSetCharSize(BFONT, 800, 800)
-function STOP() print("PROGRAM STOP") while true do end end
+Font.ftSetCharSize(SFONT, 600, 600)
+function STOP() LOG("PROGRAM STOP") Screen.clear(Color.new(255,0,0)) Screen.flip() while true do end end
 function RunScript(S)
   local A, ERR = dofile_protected(S)
   if not A then
-    print(ERR)
+    LOG(ERR)
     STOP()
   end
 end
@@ -61,5 +67,5 @@ end
 if doesFileExist("POPSLDR/System.lua") then
 	RunScript("POPSLDR/System.lua");
 else
-  error("Cant access POPSLDR/System.lua\n\ncurrent_bootpath: "..System.currentDirectory())
+  error("Cant access POPSLDR/System.lua\n\n\tcurrent_bootpath: "..System.currentDirectory())
 end

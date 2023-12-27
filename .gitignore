@@ -39,3 +39,4 @@ asm/
 *.VCD
 *.vcd
 bin/lua_crashlog.txt
+*.7z

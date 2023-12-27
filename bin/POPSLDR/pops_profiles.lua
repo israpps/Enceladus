@@ -1,5 +1,5 @@
-print("Registering POPStarter profiles...")
-local DEFAULT_PROFILE = 0 -- change this to your default profile. list starts counting from 1
+LOG("Registering POPStarter profiles...")
+local DEFAULT_PROFILE = 0 -- change this if you want a default profile. list starts counting from 1
 PLDR.PROFILES = {
   {
     ELF="mass:/POPSLDR/PROFILES/MAIN/POPSTARTER.ELF";

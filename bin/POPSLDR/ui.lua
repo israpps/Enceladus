@@ -1,4 +1,4 @@
-print("Registering POPSLoader UI")
+LOG("Registering POPSLoader UI")
 UI = {
     LASTSCENE = 4;
     CURSCENE = 4;
@@ -41,7 +41,7 @@ UI = {
       end;
       ALFA = 0x80;
       add = function (NOTIF)
-        print(NOTIF)
+        LOG(NOTIF)
         table.insert(UI.Notif_queue.msg, NOTIF)
       end;
       msg = {};
@@ -56,8 +56,8 @@ UI = {
         local Q=0
         while Q<128 do
           Screen.clear(UI.SCR.BGCOL)
-          Graphics.drawScaleImage(IMG[4], UI.SCR.X_MID-(Graphics.getImageWidth(IMG[4])),
-          UI.SCR.Y_MID-(Graphics.getImageHeight(IMG[4])), Graphics.getImageWidth(IMG[4])*2, Graphics.getImageHeight(IMG[4])*2, Color.new(128,128,128,Q))
+          Graphics.drawScaleImage(IMG.PSL, UI.SCR.X_MID-(Graphics.getImageWidth(IMG.PSL)),
+          UI.SCR.Y_MID-(Graphics.getImageHeight(IMG.PSL)), Graphics.getImageWidth(IMG.PSL)*2, Graphics.getImageHeight(IMG.PSL)*2, Color.new(128,128,128,Q))
           Font.ftPrint(BFONT, UI.SCR.X_MID, UI.SCR.Y_MID+100, 8, UI.SCR.X, 16, "Coded By El_isra", Color.new(128,128,128,Q))
           Screen.flip() -- we dont use UI.flip here because we dont want notifications on the welcome screen
           Q=Q+1
@@ -69,9 +69,9 @@ UI = {
     BottomDraw = {
       Play = function ()
         Screen.clear(UI.SCR.BGCOL)
-        Graphics.drawScaleImage(IMG[4], UI.SCR.X_MID-(Graphics.getImageWidth(IMG[4])),
-        UI.SCR.Y_MID-(Graphics.getImageHeight(IMG[4])), Graphics.getImageWidth(IMG[4])*2, Graphics.getImageHeight(IMG[4])*2)
-          Graphics.drawRect(20, 20, UI.SCR.X-100, 398, Color.new(0, 0, 0, 40))
+        Graphics.drawScaleImage(IMG.PSL, UI.SCR.X_MID-(Graphics.getImageWidth(IMG.PSL)),
+        UI.SCR.Y_MID-(Graphics.getImageHeight(IMG.PSL)), Graphics.getImageWidth(IMG.PSL)*2, Graphics.getImageHeight(IMG.PSL)*2)
+          Graphics.drawRect(0, 20, UI.SCR.X, 398, Color.new(0, 0, 0, 40))
       end;
     };
     GameList = {
@@ -94,7 +94,6 @@ UI = {
         if Pads.check(GPAD, PAD_DOWN) then UI.GameList.CURR = CLAMP(UI.GameList.CURR+1, 1, ammount) GPAD = 0 end
         if Pads.check(GPAD, PAD_UP) then UI.GameList.CURR = CLAMP(UI.GameList.CURR-1, 1, ammount) GPAD = 0 end
         if Pads.check(GPAD, PAD_CROSS) then
-          print("System.loadELF('".. PLDR.POPSTARTER_PATH .."', 0, '"..PLDR.GAMEPATH .. PLDR.GAMES[UI.GameList.CURR].."')")
           if not doesFileExist(PLDR.POPSTARTER_PATH) then
             UI.Notif_queue.add("Cant find POPSTARTER ELF\n"..PLDR.POPSTARTER_PATH)
           else
@@ -122,7 +121,6 @@ UI = {
         if Pads.check(GPAD, PAD_UP) then UI.ProfileQuery.curopt = CLAMP(UI.ProfileQuery.curopt-1, 1, profcnt) GPAD = 0 end
         if Pads.check(GPAD, PAD_CIRCLE) then UI.SceneChange(UI.SCENES.MMAIN) end
         if Pads.check(GPAD, PAD_CROSS) then
-          print("Chose profile", UI.ProfileQuery.curopt)
           if not doesFileExist(PLDR.PROFILES[UI.ProfileQuery.curopt].ELF) then
             UI.Notif_queue.add("POPStarter ELF missing")
           else
@@ -139,17 +137,18 @@ UI = {
         local profcnt = 3
         Font.ftPrint(BFONT, UI.SCR.X_MID, 30, 8, UI.SCR.X, 16, "Welcome to POPStarter Loader", Color.new(128,128,128))
         for x = 1, #UI.MainMenu.opts do
-          Graphics.drawImage(IMG[x], 256+(110*(x-1))-64, x == UI.MainMenu.OPT and (UI.SCR.Y_MID-65) or (UI.SCR.Y_MID-64),
+          Graphics.drawImage(IMG[UI.MainMenu.opts[x]], 256+(110*(x-1))-64, x == UI.MainMenu.OPT and (UI.SCR.Y_MID-65) or (UI.SCR.Y_MID-64),
             x == UI.MainMenu.OPT and Color.new(128, 128, 0) or Color.new(128,128,128))
         end
+        Graphics.drawImage(IMG["start"], 20, UI.SCR.Y-65) Font.ftPrint(SFONT, 55, UI.SCR.Y-60, 0, UI.SCR.X, 16, "POPStarter profiles")
+        Graphics.drawImage(IMG["select"], 20, UI.SCR.Y-85) Font.ftPrint(SFONT, 55, UI.SCR.Y-80, 0, UI.SCR.X, 16, "About")
         if UI.MainMenu.OPT == 2 then Font.ftPrint(BFONT, UI.SCR.X_MID, UI.SCR.Y_MID+UI.SCR.Y_MID/2, 8, UI.SCR.X, 16, "COMMING SOON", Color.new(128,0,0)) end
         UI.Pad.Listen()
         if Pads.check(GPAD, PAD_RIGHT) then UI.MainMenu.OPT = CLAMP(UI.MainMenu.OPT+1, 1, profcnt) GPAD = 0 end
         if Pads.check(GPAD, PAD_LEFT)  then UI.MainMenu.OPT = CLAMP(UI.MainMenu.OPT-1, 1, profcnt) GPAD = 0 end
         if Pads.check(GPAD, PAD_START) then UI.SceneChange(UI.SCENES.MPROFILE) end
-        if Pads.check(GPAD, PAD_SELECT)then UI.SceneChange(UI.SCENES.CREDITS)end
+        if Pads.check(GPAD, PAD_SELECT)then UI.SceneChange(UI.SCENES.CREDITS) end
         if Pads.check(GPAD, PAD_CROSS) then
-          print("Chose ", UI.MainMenu.OPT)
           if UI.MainMenu.OPT == 1 then
             PLDR.CleanupGameList()
             if PLDR.GetPS1GameLists("mass"..PLDR.USB.MASSINDX..":/POPS/", true) == nil then
@@ -157,7 +156,7 @@ UI = {
             end
           elseif UI.MainMenu.OPT == 3 then
             if UI.LASTSCENE == UI.SCENES.GHDD then
-              print("last scene was HDD, skipping cache cleanup")
+              LOG("last scene was HDD, skipping cache cleanup")
               return -- last device was HDD? dont discard cache
             else
               PLDR.CleanupGameList()
