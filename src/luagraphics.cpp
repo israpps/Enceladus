@@ -140,8 +140,8 @@ static int lua_ftend(lua_State *L) {
 static int lua_fmload(lua_State *L) {
 	int argc = lua_gettop(L);
 	if (argc != 0) return luaL_error(L, "wrong number of arguments");
-	loadFontM();
-	return 0;
+	lua_pushboolean(L, (loadFontM() == 0));
+	return 1;
 }
 
 static int lua_fmprint(lua_State *L) {

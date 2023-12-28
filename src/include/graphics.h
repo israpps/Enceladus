@@ -111,7 +111,7 @@ extern void printFontText(GSFONT* font, const char* text, float x, float y, floa
 
 extern void unloadFont(GSFONT* font);
 
-extern void loadFontM();
+extern int loadFontM();
 
 extern void printFontMText(const char* text, float x, float y, float scale, Color color);
 

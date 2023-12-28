@@ -805,11 +805,13 @@ void clearScreen(Color color)
 	
 }
 
-void loadFontM()
+int loadFontM()
 {
+	int ret;
 	gsFontM = gsKit_init_fontm();
-	gsKit_fontm_upload(gsGlobal, gsFontM);
+	ret = gsKit_fontm_upload(gsGlobal, gsFontM);
 	gsFontM->Spacing = 0.70f;
+	return ret;
 }
 
 void printFontMText(const char* text, float x, float y, float scale, Color color)
