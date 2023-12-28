@@ -1,6 +1,0 @@
-LUA ERR.
-1: (Nil)
-2: (Number) 20.000000
-3: (Number) 415.000000
-4: number expected, got nil
-5: ./POPSLDR/ui.lua:144: bad argument #1 to 'drawImage' (number expected, got nil)

@@ -16,7 +16,6 @@ UI = {
       YELLOW = Color.new(128,128,0,128);
       RED = Color.new(128,0,0);
       TRANSP_BLACK = Color.new(0,0,0,40);
-      DARK_PURPLE = Color.new(32,0,32);
     };
     --- UI Constants
     SCR = {
@@ -25,7 +24,7 @@ UI = {
       Y = 480;
       Y_MID = 480/2;
       VMODE = _480p;
-      BGCOL = UI.CCOL.DARK_PURPLE;
+      BGCOL = Color.new(32,0,32);
     };
     --- Notifications queue handler
     Notif_queue = {
@@ -97,11 +96,15 @@ UI = {
           local Y = 20+((i-STARTUP)*21)
           Font.ftPrint(BFONT, 30, Y, 0, UI.SCR.X, 16, string.sub(PLDR.GAMES[i],1, -5), i == UI.GameList.CURR and UI.CCOL.YELLOW or UI.CCOL.GREY)
         end
+        if ammount <= 0 then
+          Font.ftPrintMultiLineAligned(LFONT, UI.SCR.X_MID, UI.SCR.Y_MID, 20, UI.SCR.X, 32, "No games found", UI.CCOL.YELLOW)
+          Font.ftPrintMultiLineAligned(LFONT, UI.SCR.X_MID+1, UI.SCR.Y_MID+1, 20, UI.SCR.X, 32, "No games found", UI.CCOL.TRANSP_BLACK)
+        end
         UI.Pad.Listen()
         if Pads.check(GPAD, PAD_CIRCLE) then UI.SceneChange(UI.SCENES.MMAIN) end
         if Pads.check(GPAD, PAD_DOWN) then UI.GameList.CURR = CLAMP(UI.GameList.CURR+1, 1, ammount) GPAD = 0 end
         if Pads.check(GPAD, PAD_UP) then UI.GameList.CURR = CLAMP(UI.GameList.CURR-1, 1, ammount) GPAD = 0 end
-        if Pads.check(GPAD, PAD_CROSS) then
+        if Pads.check(GPAD, PAD_CROSS) and ammount > 0 then
           if not doesFileExist(PLDR.POPSTARTER_PATH) then
             UI.Notif_queue.add("Cant find POPSTARTER ELF\n"..PLDR.POPSTARTER_PATH)
           else
@@ -120,7 +123,7 @@ UI = {
       curopt = 1;
       Play = function ()
         local profcnt = #PLDR.PROFILES
-        Font.ftPrint(BFONT, UI.SCR.X_MID, 30, 8, UI.SCR.X, 16, "Choose POPStarter Profile", UI.CCOL.GREY)
+        Font.ftPrint(LFONT, UI.SCR.X_MID, 30, 8, UI.SCR.X, 16, "Choose POPStarter Profile", UI.CCOL.GREY)
         Font.ftPrint(BFONT, UI.SCR.X_MID, 60, 8, UI.SCR.X, 16, "Profile "..UI.ProfileQuery.curopt, UI.CCOL.GREY)
         Font.ftPrint(BFONT, UI.SCR.X_MID, 190, 8, UI.SCR.X, 16, PLDR.PROFILES[UI.ProfileQuery.curopt].DESC, UI.CCOL.GREY)
         Font.ftPrint(BFONT, UI.SCR.X_MID, 280, 8, UI.SCR.X, 16, PLDR.PROFILES[UI.ProfileQuery.curopt].ELF, Color.new(128,128,128, 110))
@@ -143,7 +146,7 @@ UI = {
       opts = {"USB", "SMB", "HDD"};
       Play = function ()
         local profcnt = 3
-        Font.ftPrint(BFONT, UI.SCR.X_MID, 30, 8, UI.SCR.X, 16, "Welcome to POPStarter Loader", UI.CCOL.GREY)
+        Font.ftPrint(LFONT, UI.SCR.X_MID, 30, 8, UI.SCR.X, 16, "Welcome to POPStarter Loader", UI.CCOL.GREY)
         for x = 1, #UI.MainMenu.opts do
           Graphics.drawImage(IMG[UI.MainMenu.opts[x]], 256+(110*(x-1))-64, x == UI.MainMenu.OPT and (UI.SCR.Y_MID-65) or (UI.SCR.Y_MID-64),
             x == UI.MainMenu.OPT and UI.CCOL.YELLOW or UI.CCOL.GREY)
@@ -159,13 +162,10 @@ UI = {
         if Pads.check(GPAD, PAD_CROSS) then
           if UI.MainMenu.OPT == 1 then
             PLDR.CleanupGameList()
-            if PLDR.GetPS1GameLists("mass"..PLDR.USB.MASSINDX..":/POPS/", true) == nil then
-              UI.Notif_queue.add("No games found on '"..PLDR.GAMEPATH.."'")
-            end
+            PLDR.GetPS1GameLists("mass"..PLDR.USB.MASSINDX..":/POPS/", true)
           elseif UI.MainMenu.OPT == 3 then
             if UI.LASTSCENE == UI.SCENES.GHDD then
-              LOG("last scene was HDD, skipping cache cleanup")
-              return -- last device was HDD? dont discard cache
+              LOG("skipping cache cleanup")
             else
               PLDR.CleanupGameList()
             end
@@ -220,7 +220,7 @@ UI = {
         end
         local currcol = Color.new(128, 128, 128, UI.Credits.Q)
         UI.Credits.Q = CLAMP(UI.Credits.Q-UI.Credits.INCR, 0, 128)
-        Font.ftPrintMultiLineAligned(BFONT, UI.SCR.X_MID, 040, 20, UI.SCR.X, 40, "POPStarter Loader", currcol)
+        Font.ftPrintMultiLineAligned(LFONT, UI.SCR.X_MID, 040, 20, UI.SCR.X, 40, "POPStarter Loader", currcol)
         Graphics.drawRect(0, 20, UI.SCR.X, 2, currcol)
         Font.ftPrintMultiLineAligned(BFONT, UI.SCR.X_MID, 100, 20, UI.SCR.X, 40, "Coded By El_isra", currcol)
         Font.ftPrintMultiLineAligned(BFONT, UI.SCR.X_MID, 120, 20, UI.SCR.X, UI.SCR.Y, "Based on Enceladus by Daniel santos\n\nSpecial thanks to:\nkrHACKen: for making POPStarter\nuyjulian, fjtrujy, HWC and others for always helping me\n\nThis program is free and open source\nif you bought it you've been scammed", currcol)

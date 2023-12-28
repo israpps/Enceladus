@@ -114,7 +114,7 @@ end
 
 ---DONT TOUCH ME
 function PLDR.GetVCDGameID(path)
-  local RET = nil
+  local RET = "ERR"
   local fd = System.openFile(path, FREAD)
   if System.sizeFile(fd) < 0x10d900 then
     LOG("ERROR: VCD Size is not big enough to pull ID")
@@ -190,7 +190,7 @@ function PLDR.LoadHDDModules()
     if SUCCESS ~= 0 then
       PLDR.HDD.LOADSTATE = -1
       if SUCCESS == 1 then
-        UI.Notif_queue.add(string.format("ERROR: HDD has no APA format", MODULE, ID, RET))
+        UI.Notif_queue.add(string.format("WARNING: HDD has no APA format", MODULE, ID, RET))
       elseif SUCCESS == 2 then
         UI.Notif_queue.add(string.format("ERROR: HDD is not accessible", MODULE, ID, RET))
       elseif SUCCESS == 3 then
@@ -212,7 +212,7 @@ end
 
 ---DONT TOUCH ME
 function PLDR.RunPOPStarterGame(gamelocation, game)
-  local PREFIX = ""
+  local PREFIX = "" --HDD has no prefix
   if UI.CURSCENE == UI.SCENES.GUSB then PREFIX = "XX."
   elseif UI.CURSCENE == UI.SCENES.GSMB then PREFIX = "SB." end
   local BOOTPARAM = PLDR.replace_device(gamelocation, "isra")..PREFIX..PLDR.replace_extension(game, "ELF")
