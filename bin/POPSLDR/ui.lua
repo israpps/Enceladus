@@ -10,6 +10,14 @@ UI = {
     UpdateVmode = function ()
       Screen.setMode(UI.SCR.VMODE, UI.SCR.X, UI.SCR.Y, CT24, INTERLACED, FIELD)
     end;
+    --- Color Constants
+    CCOL = {
+      GREY = Color.new(128,128,128,128);
+      YELLOW = Color.new(128,128,0,128);
+      RED = Color.new(128,0,0);
+      TRANSP_BLACK = Color.new(0,0,0,40);
+      DARK_PURPLE = Color.new(32,0,32);
+    };
     --- UI Constants
     SCR = {
       X = 702;
@@ -17,7 +25,7 @@ UI = {
       Y = 480;
       Y_MID = 480/2;
       VMODE = _480p;
-      BGCOL = Color.new(32, 0, 32);
+      BGCOL = UI.CCOL.DARK_PURPLE;
     };
     --- Notifications queue handler
     Notif_queue = {
@@ -71,7 +79,7 @@ UI = {
         Screen.clear(UI.SCR.BGCOL)
         Graphics.drawScaleImage(IMG.PSL, UI.SCR.X_MID-(Graphics.getImageWidth(IMG.PSL)),
         UI.SCR.Y_MID-(Graphics.getImageHeight(IMG.PSL)), Graphics.getImageWidth(IMG.PSL)*2, Graphics.getImageHeight(IMG.PSL)*2)
-          Graphics.drawRect(0, 20, UI.SCR.X, 398, Color.new(0, 0, 0, 40))
+          Graphics.drawRect(0, 20, UI.SCR.X, 398, UI.CCOL.TRANSP_BLACK)
       end;
     };
     GameList = {
@@ -87,7 +95,7 @@ UI = {
         for i = STARTUP, ammount do
           if i >= (STARTUP+UI.GameList.MAXDRAW) then break end
           local Y = 20+((i-STARTUP)*21)
-          Font.ftPrint(BFONT, 30, Y, 0, UI.SCR.X, 16, string.sub(PLDR.GAMES[i],1, -5), i == UI.GameList.CURR and Color.new(128, 128, 0, 128) or Color.new(128, 128, 128, 128))
+          Font.ftPrint(BFONT, 30, Y, 0, UI.SCR.X, 16, string.sub(PLDR.GAMES[i],1, -5), i == UI.GameList.CURR and UI.CCOL.YELLOW or UI.CCOL.GREY)
         end
         UI.Pad.Listen()
         if Pads.check(GPAD, PAD_CIRCLE) then UI.SceneChange(UI.SCENES.MMAIN) end
@@ -112,9 +120,9 @@ UI = {
       curopt = 1;
       Play = function ()
         local profcnt = #PLDR.PROFILES
-        Font.ftPrint(BFONT, UI.SCR.X_MID, 30, 8, UI.SCR.X, 16, "Choose POPStarter Profile", Color.new(128,128,128))
-        Font.ftPrint(BFONT, UI.SCR.X_MID, 60, 8, UI.SCR.X, 16, "Profile "..UI.ProfileQuery.curopt, Color.new(128,128,128))
-        Font.ftPrint(BFONT, UI.SCR.X_MID, 190, 8, UI.SCR.X, 16, PLDR.PROFILES[UI.ProfileQuery.curopt].DESC, Color.new(128,128,128))
+        Font.ftPrint(BFONT, UI.SCR.X_MID, 30, 8, UI.SCR.X, 16, "Choose POPStarter Profile", UI.CCOL.GREY)
+        Font.ftPrint(BFONT, UI.SCR.X_MID, 60, 8, UI.SCR.X, 16, "Profile "..UI.ProfileQuery.curopt, UI.CCOL.GREY)
+        Font.ftPrint(BFONT, UI.SCR.X_MID, 190, 8, UI.SCR.X, 16, PLDR.PROFILES[UI.ProfileQuery.curopt].DESC, UI.CCOL.GREY)
         Font.ftPrint(BFONT, UI.SCR.X_MID, 280, 8, UI.SCR.X, 16, PLDR.PROFILES[UI.ProfileQuery.curopt].ELF, Color.new(128,128,128, 110))
         UI.Pad.Listen()
         if Pads.check(GPAD, PAD_DOWN) then UI.ProfileQuery.curopt = CLAMP(UI.ProfileQuery.curopt+1, 1, profcnt) GPAD = 0 end
@@ -135,14 +143,14 @@ UI = {
       opts = {"USB", "SMB", "HDD"};
       Play = function ()
         local profcnt = 3
-        Font.ftPrint(BFONT, UI.SCR.X_MID, 30, 8, UI.SCR.X, 16, "Welcome to POPStarter Loader", Color.new(128,128,128))
+        Font.ftPrint(BFONT, UI.SCR.X_MID, 30, 8, UI.SCR.X, 16, "Welcome to POPStarter Loader", UI.CCOL.GREY)
         for x = 1, #UI.MainMenu.opts do
           Graphics.drawImage(IMG[UI.MainMenu.opts[x]], 256+(110*(x-1))-64, x == UI.MainMenu.OPT and (UI.SCR.Y_MID-65) or (UI.SCR.Y_MID-64),
-            x == UI.MainMenu.OPT and Color.new(128, 128, 0) or Color.new(128,128,128))
+            x == UI.MainMenu.OPT and UI.CCOL.YELLOW or UI.CCOL.GREY)
         end
         Graphics.drawImage(IMG["start"], 20, UI.SCR.Y-65) Font.ftPrint(SFONT, 55, UI.SCR.Y-60, 0, UI.SCR.X, 16, "POPStarter profiles")
         Graphics.drawImage(IMG["select"], 20, UI.SCR.Y-85) Font.ftPrint(SFONT, 55, UI.SCR.Y-80, 0, UI.SCR.X, 16, "About")
-        if UI.MainMenu.OPT == 2 then Font.ftPrint(BFONT, UI.SCR.X_MID, UI.SCR.Y_MID+UI.SCR.Y_MID/2, 8, UI.SCR.X, 16, "COMMING SOON", Color.new(128,0,0)) end
+        if UI.MainMenu.OPT == 2 then Font.ftPrint(BFONT, UI.SCR.X_MID, UI.SCR.Y_MID+UI.SCR.Y_MID/2, 8, UI.SCR.X, 16, "COMMING SOON", UI.CCOL.RED) end
         UI.Pad.Listen()
         if Pads.check(GPAD, PAD_RIGHT) then UI.MainMenu.OPT = CLAMP(UI.MainMenu.OPT+1, 1, profcnt) GPAD = 0 end
         if Pads.check(GPAD, PAD_LEFT)  then UI.MainMenu.OPT = CLAMP(UI.MainMenu.OPT-1, 1, profcnt) GPAD = 0 end

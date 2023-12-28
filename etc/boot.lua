@@ -57,11 +57,7 @@ Font.ftSetCharSize(BFONT, 800, 800)
 Font.ftSetCharSize(SFONT, 600, 600)
 function STOP() LOG("PROGRAM STOP") Screen.clear(Color.new(255,0,0)) Screen.flip() while true do end end
 function RunScript(S)
-  local A, ERR = dofile_protected(S)
-  if not A then
-    LOG(ERR)
-    STOP()
-  end
+  dofile(S)
 end
 
 if doesFileExist("POPSLDR/System.lua") then
