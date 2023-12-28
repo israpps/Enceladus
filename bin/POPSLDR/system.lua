@@ -235,7 +235,7 @@ end
 
 ---MAIN PROGRAM BEHAVIOUR BEGINS
 UI.WelcomeDraw.Play()
-if Touch("./.pldrs") then
+if Touch("POPSLDR/.pldrs") then
   UI.CURSCENE = UI.SCENES.CREDITS
 end
 
