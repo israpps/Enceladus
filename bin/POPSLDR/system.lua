@@ -224,10 +224,21 @@ function PLDR.RunPOPStarterGame(gamelocation, game)
   error("ERROR: ELF loading failure")
 end
 
-
+function Touch(FILE)
+  if not doesFileExist(FILE) then
+    System.openFile(FILE, FCREATE)
+    return true
+  else
+    return false
+  end
+end
 
 ---MAIN PROGRAM BEHAVIOUR BEGINS
 UI.WelcomeDraw.Play()
+if Touch("./.pldrs") then
+  UI.CURSCENE = UI.SCENES.CREDITS
+end
+
 while true do
   UI.BottomDraw.Play()
   if UI.CURSCENE == UI.SCENES.MMAIN then
