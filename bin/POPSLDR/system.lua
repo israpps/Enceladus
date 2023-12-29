@@ -1,8 +1,16 @@
 --[[
+  ___  ___  ___  ___ _                 _         
+ | _ \/ _ \| _ \/ __| |   ___  __ _ __| |___ _ _ 
+ |  _/ (_) |  _/\__ \ |__/ _ \/ _` / _` / -_) '_|
+ |_|  \___/|_|  |___/____\___/\__,_\__,_\___|_|  
+                                                 
+
   POPSLoader Main script. dont touch unless you know what youre doing
   to do cosmetic changes, please check the `ui.lua` and `images.lua` files
   to add custom popstarter profiles check `pops_profiles.lua`
-]]
+
+  Licensed under GNU General public license v3.0
+--]]
 if doesFolderExist("POPSLDR/IRX/") then
   local IRXDIR = System.listDirectory("POPSLDR/IRX/")
   if IRXDIR ~= nil then

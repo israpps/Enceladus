@@ -1,3 +1,10 @@
+--[[
+  ___  ___  ___  ___ _                 _         
+ | _ \/ _ \| _ \/ __| |   ___  __ _ __| |___ _ _ 
+ |  _/ (_) |  _/\__ \ |__/ _ \/ _` / _` / -_) '_|
+ |_|  \___/|_|  |___/____\___/\__,_\__,_\___|_|  
+  Licensed under GNU General public license v3.0
+--]]
 LOG("Registering POPStarter profiles...")
 local DEFAULT_PROFILE = 0 -- change this if you want a default profile. list starts counting from 1
 PLDR.PROFILES = {

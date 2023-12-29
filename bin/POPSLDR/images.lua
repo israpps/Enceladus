@@ -1,3 +1,11 @@
+--[[
+  ___  ___  ___  ___ _                 _         
+ | _ \/ _ \| _ \/ __| |   ___  __ _ __| |___ _ _ 
+ |  _/ (_) |  _/\__ \ |__/ _ \/ _` / _` / -_) '_|
+ |_|  \___/|_|  |___/____\___/\__,_\__,_\___|_|  
+  Licensed under GNU General public license v3.0
+--]]
+
 LOG("Loading images")
 --- Add your images to this table, just write the name of the file, all images go into POPSLDR/IMG/*
 --- FILES MUST HAVE EXTENSION. filename is parsed to create the access key: USB.PNG will be accesed by typing `IMG["USB"]`
