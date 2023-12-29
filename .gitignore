@@ -40,3 +40,5 @@ asm/
 *.vcd
 bin/lua_crashlog.txt
 *.7z
+bin/POPSLDR/.pldrs
+bin/LICENSE
