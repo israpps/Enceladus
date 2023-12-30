@@ -234,7 +234,8 @@ end
 
 function Touch(FILE)
   if not doesFileExist(FILE) then
-    System.openFile(FILE, FCREATE)
+    local FD = System.openFile(FILE, FCREATE)
+    System.closeFile(FD)
     return true
   else
     return false
