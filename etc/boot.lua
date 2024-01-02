@@ -6,7 +6,7 @@ function LOGF(S, ...)
   print_uart(string.format(S, ...))
 end
 
-POPSLDR_VER = "v1.0.0 - rev1"
+POPSLDR_VER = "v1.0.0 - rev2"
 
 --- Processes a HDD full path into its components. (eg: `hdd0:__system:pfs:/osd110/hosdsys.elf`)
 ---@param PATH string

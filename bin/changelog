@@ -9,3 +9,6 @@
 - Remotion of enceladus stock code that changes program behaviour if parameters are passed (fixes booting from OPL apps tab and similar launchers)
 - Fixed issue with case mismatch on certain filepaths (fixes booting from HDD)
 - disabled debug colors on ELF Loader (forgot to remove them before release ^^)
+
+[v1.0.0 - rev2]
+- Fix gamelist render when there are more than 36 games listed
