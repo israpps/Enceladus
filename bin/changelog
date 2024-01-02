@@ -1,0 +1,11 @@
+[v1.0.0]
+- Initial release
+- USB support
+- HDD support
+- POPStarter profiles system
+- Custom IGR textures
+
+[v1.0.0 - rev1]
+- Remotion of enceladus stock code that changes program behaviour if parameters are passed (fixes booting from OPL apps tab and similar launchers)
+- Fixed issue with case mismatch on certain filepaths (fixes booting from HDD)
+- disabled debug colors on ELF Loader (forgot to remove them before release ^^)

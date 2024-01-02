@@ -87,12 +87,12 @@ EE_ASM_DIR = asm/
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%) # remap all EE_OBJ to obj subdir
 
 #------------------------------------------------------------------#
-all: $(EXT_LIBS) $(EE_BIN)
+all: $(EXT_LIBS) $(EE_BIN_PKD)
 	@echo "$$HEADER"
 
-	$(EE_STRIP) $(EE_BIN)
-
-	ps2-packer $(EE_BIN) $(EE_BIN_PKD) > /dev/null
+$(EE_BIN_PKD): $(EE_BIN)
+	$(EE_STRIP) $<
+	ps2-packer $< $@ > /dev/null
 #--------------------- Embedded ressources ------------------------#
 
 $(EE_ASM_DIR)boot.s: etc/boot.lua | $(EE_ASM_DIR)
@@ -139,6 +139,7 @@ $(EE_ASM_DIR)ds34usb.s: modules/ds34usb/iop/ds34usb.irx | $(EE_ASM_DIR)
 elf_loader: src/elf_loader/libcustom-elf-loader.a
 
 src/elf_loader/libcustom-elf-loader.a: src/elf_loader
+	@$(MAKE) cleanbin
 	@$(MAKE) -C $</src/loader/ clean all
 	@$(MAKE) -C $< clean all
 
@@ -169,6 +170,11 @@ run:
        
 reset:
 	ps2client -h $(PS2LINK_IP) reset   
+
+POPSLDR_PKG = POPSLoader.7z
+package: $(EE_BIN_PKD)
+	rm -f $(POPSLDR_PKG)
+	7z a $(POPSLDR_PKG) $(EE_BIN_PKD) bin/changelog bin/POPSLDR/* LICENSE README.md
 
 dummys:
 	touch $(BINDIR)A.vcd

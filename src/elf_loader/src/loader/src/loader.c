@@ -22,7 +22,7 @@
 #ifdef LOADER_ENABLE_DEBUG_COLORS
 #define SET_GS_BGCOLOUR(colour) {*((volatile unsigned long int *)0x120000E0) = colour;}
 #else
-#define SET_GS_BGCOLOUR(colour) {*((volatile unsigned long int *)0x120000E0) = colour;}
+#define SET_GS_BGCOLOUR(colour)
 #endif
 
 // Color status helper in BGR format

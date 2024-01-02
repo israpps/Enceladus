@@ -5,6 +5,9 @@ end
 function LOGF(S, ...)
   print_uart(string.format(S, ...))
 end
+
+POPSLDR_VER = "v1.0.0 - rev1"
+
 --- Processes a HDD full path into its components. (eg: `hdd0:__system:pfs:/osd110/hosdsys.elf`)
 ---@param PATH string
 ---@return string mountpart: will return partition path for mounting (`hdd0:__system`)
@@ -31,7 +34,7 @@ end
 
 local ARGV0 = System.GetArgv0()
 if string.find(ARGV0, "^hdd0:") then
-  LOG("Booting from HDD!")
+  LOG("Booting from HDD!", ARGV0)
   local MNTPART
   BOOTPATH = nil
   MNTPART, _, BOOTPATH = GetMountData(ARGV0)
@@ -44,7 +47,7 @@ if string.find(ARGV0, "^hdd0:") then
       if HDD.MountPartition(MNTPART, 0) then -- mount to "pfs3:" and NEVER USE IT FOR ANYTHING ELSE
         BOOTPATH, _, _ = string.match(BOOTPATH, "(.-)([^/]-([^%.]+))$")
         System.currentDirectory(BOOTPATH)
-        LOG("new bootpath:", BOOTPATH)
+        LOGF("new bootpath: '%s'\n", BOOTPATH)
       end
     end
   end
@@ -61,8 +64,8 @@ function RunScript(S)
   dofile(S)
 end
 
-if doesFileExist("POPSLDR/System.lua") then
-	RunScript("POPSLDR/System.lua");
+if doesFileExist("POPSLDR/system.lua") then
+	RunScript("POPSLDR/system.lua");
 else
-  error("Cant access POPSLDR/System.lua\n\n\tcurrent_bootpath: "..System.currentDirectory())
+  error("Cant access POPSLDR/system.lua\n\n\tcurrent_bootpath: "..System.currentDirectory())
 end
