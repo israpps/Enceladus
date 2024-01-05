@@ -43,7 +43,10 @@ PLDR = {
     MASSINDX = 0
   }
 }
-if BOOTPATH ~= nil then PLDR.HDD.LOADSTATE = 1 end
+if BOOTPATH ~= nil then
+  PLDR.HDD.LOADSTATE = 1
+  PLDR.HDD.STATUS = HDD.GetHDDStatus()
+end
 
 require("pops_profiles")
 require("ui")
