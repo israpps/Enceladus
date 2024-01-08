@@ -172,6 +172,7 @@ UI = {
             PLDR.CleanupGameList()
             PLDR.GetPS1GameLists("mass"..PLDR.USB.MASSINDX..":/POPS/", true)
           elseif UI.MainMenu.OPT == 3 then
+            PLDR.LoadHDDModules()
             if UI.LASTSCENE == UI.SCENES.GHDD then
               LOG("skipping cache cleanup")
             else
