@@ -788,22 +788,23 @@ static const luaL_Reg Sif_functions[] = {
 static bool init_sio = false;
 
 static int lua_sio_print(lua_State *L) {
-	int argc = lua_gettop(L);
 	if (!init_sio) {
 		sio_init(38400,0,0,0,0);
 		init_sio = true;
 		sio_puts("EE UART Initialized at 38400 BAUD");
 	}
-	
-	for (int i = 1; i <= argc; i++)
-	{
-		const char* A = luaL_checkstring(L, i);
-		if (i != 1) sio_putc('\t');
-		sio_putsn((A != NULL) ? A : "(NULL)");
-		
-	}
-	if (argc > 0) sio_putc('\n');
-	return 0;
+  	int n = lua_gettop(L);
+  	int i;
+  	for (i = 1; i <= n; i++) {
+  	  size_t l;
+  	  const char *s = luaL_tolstring(L, i, &l); 
+  	  if (i > 1)  
+  	    sio_putc('\t');
+	  sio_putsn(s);
+  	  lua_pop(L, 1);
+  	}
+	if (n > 0) sio_putc('\n');
+  	return 0;
 }
 void luaSystem_init(lua_State *L) {
 
