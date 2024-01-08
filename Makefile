@@ -136,12 +136,12 @@ $(EE_ASM_DIR)ds34usb.s: modules/ds34usb/iop/ds34usb.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ ds34usb_irx
 
 #------------------------------------------------------------------#
-elf_loader: src/elf_loader/libcustom-elf-loader.a
+elfloader: src/elf_loader/libcustom-elf-loader.a
 
-src/elf_loader/libcustom-elf-loader.a: elf_loader
+src/elf_loader/libcustom-elf-loader.a: src/elf_loader
 	@$(MAKE) cleanbin
-	@$(MAKE) -C $</src/loader/ clean all
-	@$(MAKE) -C $< clean all
+	@$(MAKE) -C src/elf_loader/src/loader/ clean all
+	@$(MAKE) -C src/elf_loader clean all
 
 $(EE_OBJS_DIR):
 	@mkdir -p $@
