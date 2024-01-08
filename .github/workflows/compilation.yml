@@ -30,7 +30,7 @@ jobs:
 
     - name: Compile project
       run: |
-        make clean elf_loader all package
+        make clean elfloader all package
 
     - name: Upload artifacts
       if: ${{ success() }}
