@@ -1,4 +1,3 @@
-
 .vscode/settings.json
 .vscode/launch.json
 *.ttf
@@ -42,3 +41,4 @@ bin/lua_crashlog.txt
 *.7z
 bin/POPSLDR/.pldrs
 bin/LICENSE
+!EMBED/*
