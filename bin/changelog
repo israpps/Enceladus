@@ -15,3 +15,4 @@
 
 [v1.0.0 - rev3]
 - Fix HDD IRX modules loading
+- gamelist: move on list faster via right and left dpads
