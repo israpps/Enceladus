@@ -12,3 +12,6 @@
 
 [v1.0.0 - rev2]
 - Fix gamelist render when there are more than 36 games listed
+
+[v1.0.0 - rev3]
+- Fix HDD IRX modules loading
