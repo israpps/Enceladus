@@ -117,7 +117,8 @@ EMBED/%.s: EMBED/%.png
 
 
 #-------------------- Embedded IOP Modules ------------------------#
-vpath %.irx embed/iop/
+vpath fileXio.irx $(PS2SDK)/iop/debug_irx/
+vpath %.irx EMBED/iop/
 vpath %.irx modules/ds34bt/iop/
 vpath %.irx modules/ds34usb/iop/
 vpath %.irx $(PS2SDK)/iop/irx/

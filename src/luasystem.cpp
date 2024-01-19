@@ -4,6 +4,7 @@
 #include <sys/fcntl.h>
 #include <dirent.h>
 #include <sys/stat.h>
+#include <errno.h>
 #include "include/luaplayer.h"
 #include "include/md5.h"
 #include "include/graphics.h"
@@ -13,7 +14,6 @@
 #define NEWLIB_PORT_AWARE
 #include <fileXio_rpc.h>
 #include <fileio.h>
-
 #define MAX_DIR_FILES 512
 
 static int lua_getCurrentDirectory(lua_State *L)
@@ -187,13 +187,13 @@ static int lua_dir(lua_State *L)
         	lua_pushstring(L, dir->d_name);
         	lua_settable(L, -3);
         		
-        	lua_pushstring(L, "size");
-        	lua_pushnumber(L, dir->d_stat.st_size);
-        	lua_settable(L, -3);
+        	// lua_pushstring(L, "size");
+        	// lua_pushnumber(L, dir->d_stat.st_size);
+        	// lua_settable(L, -3);
         	        
-        	lua_pushstring(L, "directory");
-        	lua_pushboolean(L, S_ISDIR(dir->d_stat.st_mode));
-        	lua_settable(L, -3);
+        	// lua_pushstring(L, "directory");
+        	// lua_pushboolean(L, S_ISDIR(dir->d_stat.st_mode));
+        	// lua_settable(L, -3);
 			lua_settable(L, -3);
 	    }
 	    closedir(d);
@@ -699,6 +699,143 @@ static int lua_getfileprogress(lua_State *L) {
 	return 1;
 }
 
+#define OSD_HISTORY_GET_YEAR(datestamp)         ((datestamp) >> 9 & 0x7F)
+#define OSD_HISTORY_GET_MONTH(datestamp)        ((datestamp) >> 5 & 0xF)
+#define OSD_HISTORY_GET_DATE(datestamp)         ((datestamp)&0x1F)
+#define OSD_HISTORY_SET_DATE(year, month, date) (((unsigned short int)(year)) << 9 | ((unsigned short int)(month)&0xF) << 5 | ((date)&0x1F))
+struct HistoryEntry
+{
+    char name[16];
+    unsigned char LaunchCount;
+    unsigned char bitmask;
+    unsigned char ShiftAmount;
+    unsigned char padding;
+    unsigned short int DateStamp;
+};
+#define MAX_HISTORY_ENTRIES 21
+#define HISTORY_ENTRY_SIZE sizeof(HistoryEntry)
+#define MAIN_HISTORY_SIZE sizeof(MAIN_HISTORY)
+HistoryEntry MAIN_HISTORY[MAX_HISTORY_ENTRIES];
+#define NEXT_MULTIPLE(VALUE, BASE) (VALUE + (BASE - VALUE % BASE))
+#define PREV_MULTIPLE(VALUE, BASE) (VALUE - (VALUE % BASE))
+#define IS_MULTIPLE(VALUE, BASE) ((VALUE%BASE)==0)
+#define DPRINTF(x...) //printf(x)
+static int lua_parsehistory(lua_State *L) {
+	int argc = lua_gettop(L);
+	if (argc != 1) return luaL_error(L, "%s(string) expected", __FUNCTION__);
+	const char* hpath = luaL_checkstring(L, 1);
+	DPRINTF("parsing '%s'\n", hpath);
+	bool has_abnormal_size = false;
+ 	int fd, result;
+
+    if ((fd = open(hpath, O_RDONLY)) >= 0) {
+		uint32_t cur_off = lseek(fd, 0, SEEK_CUR);
+		uint32_t size = lseek(fd, 0, SEEK_END);
+		lseek(fd, cur_off, SEEK_SET);
+		DPRINTF("fd:%d, size:%ld\n", fd, size);
+		if (size != MAIN_HISTORY_SIZE) has_abnormal_size = true;
+        result = read(fd, (char*)MAIN_HISTORY, MAIN_HISTORY_SIZE) == MAIN_HISTORY_SIZE ? 0 : -EIO;
+        close(fd);
+    } else {
+        result = fd;
+	}
+	if (result == 0) {
+		DPRINTF("parsing now...\n");
+	    int cpt = 1;
+	    lua_newtable(L);
+		int x;
+		for (x = 0; x < MAX_HISTORY_ENTRIES; x++)
+		{
+            lua_pushnumber(L, cpt++);  // push key for file entry
+
+			DPRINTF("%d: %s %u %d-%d-%d\n", x, MAIN_HISTORY[x].name, MAIN_HISTORY[x].LaunchCount,
+								OSD_HISTORY_GET_DATE(MAIN_HISTORY[x].DateStamp),
+								OSD_HISTORY_GET_MONTH(MAIN_HISTORY[x].DateStamp),
+								2000+OSD_HISTORY_GET_YEAR(MAIN_HISTORY[x].DateStamp));
+	        lua_newtable(L);
+            lua_pushstring(L, "ELF");
+			if (MAIN_HISTORY[x].name[0] != '\0')
+            	lua_pushstring(L, (const char *)MAIN_HISTORY[x].name);
+			else
+            	lua_pushstring(L, "<EMPTY>");
+
+            lua_settable(L, -3);
+        
+            lua_pushstring(L, "LaunchCount");
+            lua_pushnumber(L, MAIN_HISTORY[x].LaunchCount);
+            lua_settable(L, -3);
+    
+            lua_pushstring(L, "date");
+            lua_pushfstring(L, "%d/%d/%d",
+								OSD_HISTORY_GET_DATE(MAIN_HISTORY[x].DateStamp),
+								OSD_HISTORY_GET_MONTH(MAIN_HISTORY[x].DateStamp),
+								2000+OSD_HISTORY_GET_YEAR(MAIN_HISTORY[x].DateStamp));
+            lua_settable(L, -3);
+	        lua_settable(L, -3);
+
+		}
+		printf("Checked %d entries\n", x);
+	} else {lua_pushnil(L); printf("I/O ERR\n");}
+	// lua_pushboolean(L, has_abnormal_size);
+	return 1;
+}
+
+static int lua_parsehistoryOLD(lua_State *L) {
+	int argc = lua_gettop(L);
+	if (argc != 1) return luaL_error(L, "%s(string) expected", __FUNCTION__);
+	const char* hpath = luaL_checkstring(L, 1);
+ 	int fd, result = 0;
+	uint32_t size;
+	bool has_abnormal_size = false;
+    if ((fd = open(hpath, O_RDONLY)) >= 0) {
+		uint32_t cur_off = lseek(fd, 0, SEEK_CUR);
+		size = lseek(fd, 0, SEEK_END);
+		lseek(fd, cur_off, SEEK_SET);
+		has_abnormal_size = IS_MULTIPLE(size, HISTORY_ENTRY_SIZE);
+		if (has_abnormal_size) size = PREV_MULTIPLE(size, HISTORY_ENTRY_SIZE); // reduce the reported size so the following loop can discard the incomplete entry
+    } else {
+        result = fd;
+	}
+	if (result == 0) {
+		int chunks = (size / HISTORY_ENTRY_SIZE); // how many iterations?
+		HistoryEntry chunk;
+	    int cpt = 1;
+	    lua_newtable(L);
+		for (int x = 0; x < chunks; x++)
+		{
+			if (read(fd, &chunk, HISTORY_ENTRY_SIZE) == HISTORY_ENTRY_SIZE) {
+            	lua_pushnumber(L, cpt++);  // push key for file entry
+				DPRINTF("%d:%s %u %d-%d-%d", x, chunk.name, chunk.LaunchCount,
+									OSD_HISTORY_GET_DATE(chunk.DateStamp),
+									OSD_HISTORY_GET_MONTH(chunk.DateStamp),
+									2000+OSD_HISTORY_GET_YEAR(chunk.DateStamp));
+	        	lua_newtable(L);
+            	lua_pushstring(L, "ELF");
+            	lua_pushstring(L, (const char *)chunk.name);
+            	lua_settable(L, -3);
+	
+            	lua_pushstring(L, "LaunchCount");
+            	lua_pushnumber(L, chunk.LaunchCount);
+            	lua_settable(L, -3);
+	
+            	lua_pushstring(L, "date");
+            	lua_pushfstring(L, "%d/%d/%d",
+									OSD_HISTORY_GET_DATE(chunk.DateStamp),
+									OSD_HISTORY_GET_MONTH(chunk.DateStamp),
+									2000+OSD_HISTORY_GET_YEAR(chunk.DateStamp));
+            	lua_settable(L, -3);
+	        	lua_settable(L, -3);
+			} else {
+				close(fd);
+				luaL_error(L, "%s: I/O error on file:\n%s", __FUNCTION__, hpath);
+				break;
+			}
+		}
+	}
+	if (fd >= 0) close(fd);
+	// lua_pushboolean(L, has_abnormal_size);
+	return 1;
+}
 static const luaL_Reg System_functions[] = {
 	{"openFile",                   lua_openfile},
 	{"readFile",                   lua_readfile},
@@ -727,6 +864,8 @@ static const luaL_Reg System_functions[] = {
 	{"checkValidDisc",       lua_checkValidDisc},
 	{"getDiscType",             lua_getDiscType},
 	{"checkDiscTray",         lua_checkDiscTray},
+	{"ParseOSDHistory",        lua_parsehistory},
+	{"ParseOldOsdHistory",  lua_parsehistoryOLD},
 	{0, 0}
 };
 
