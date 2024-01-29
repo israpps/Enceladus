@@ -80,7 +80,7 @@ function PLDR.CheckPOPStarterDEPS(device)
   if device == UI.SCENES.GUSB then
     return doesFileExist("mass:/POPS/POPS_IOX.PAK")
   elseif device == UI.SCENES.GHDD then
-    local a = HDD.MountPartition("hdd0:__common", 1)
+    local a = HDD.MountPartition("hdd0:__common", 1, FIO_MT_RDONLY)
     if a then
       return a, doesFileExist("pfs1:/POPS/POPS.ELF"), doesFileExist("pfs1:/POPS/IOPRP252.IMG")
     else
