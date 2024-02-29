@@ -36,6 +36,8 @@ RESET_IOP = 1
 DEBUG = 0
 #----------------------- Set IP for PS2Client ---------------------#
 PS2LINK_IP = 192.168.1.10
+#----------------------- Support COH-H models ---------------------#
+COH ?= 0
 #--------------------- Reset IOP with an image? -------------------#
 IOPRP ?= 0
 #------------------------------------------------------------------#
@@ -62,6 +64,14 @@ endif
 
 ifeq ($(DEBUG),1)
 EE_CXXFLAGS += -DDEBUG
+endif
+
+ifeq ($(COH),1)
+  EE_CXXFLAGS += -DSUPPORT_SYSTEM_2x6
+  EE_CFLAGS += -DSUPPORT_SYSTEM_2x6
+  #replace FILEIO and IOMAN
+  IOPRP = 1
+  IOPRP_BIN = iop/__precompiled/IOPRP_FILEIO.IMG
 endif
 
 
