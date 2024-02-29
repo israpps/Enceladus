@@ -36,6 +36,8 @@ RESET_IOP = 1
 DEBUG = 0
 #----------------------- Set IP for PS2Client ---------------------#
 PS2LINK_IP = 192.168.1.10
+#--------------------- Reset IOP with an image? -------------------#
+IOPRP ?= 0
 #------------------------------------------------------------------#
 F_KEYBOARD ?= 1
 
@@ -43,13 +45,13 @@ BINDIR = bin/
 EE_BIN = $(BINDIR)enceladus.elf
 EE_BIN_PKD = $(BINDIR)enceladus_pkd.elf
 
-EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Lmodules/ds34bt/ee/ -Lmodules/ds34usb/ee/ \
+EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Liop/ds34bt/ee/ -Liop/ds34usb/ee/ \
 	-lpatches -lfileXio -lpad -ldebug -llua -lmath3d -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit \
 	-lpng -lz -lmc -laudsrv -lelf-loader -lds34bt -lds34usb
 
 EE_INCS += -I$(PS2DEV)/gsKit/include -I$(PS2SDK)/ports/include -I$(PS2SDK)/ports/include/freetype2 -I$(PS2SDK)/ports/include/zlib
 
-EE_INCS += -Imodules/ds34bt/ee -Imodules/ds34usb/ee
+EE_INCS += -Iiop/ds34bt/ee -Iiop/ds34usb/ee
 
 EE_CFLAGS   += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
 EE_CXXFLAGS += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
@@ -66,7 +68,7 @@ endif
 BIN2S = $(PS2SDK)/bin/bin2c
 
 #-------------------------- App Content ---------------------------#
-EXT_LIBS = modules/ds34usb/ee/libds34usb.a modules/ds34bt/ee/libds34bt.a
+EXT_LIBS = iop/ds34usb/ee/libds34usb.a iop/ds34bt/ee/libds34bt.a
 
 APP_CORE = main.o system.o pad.o graphics.o render.o \
 		   calc_3d.o gsKit3d_sup.o atlas.o fntsys.o md5.o \
@@ -88,6 +90,15 @@ ifeq ($(F_KEYBOARD),1)
   EE_LIBS += -lkbd
   IOP_MODULES += ps2kbd.o
   LUA_LIBS +=  luaKeyboard.o
+endif
+
+ifeq ($(IOPRP),1)
+  EE_CXXFLAGS += -DUSE_IOPRP
+  EE_LIBS += -liopreboot
+  APP_CORE +=  ioprp_img.o
+  ifeq (_$(IOPRP_BIN)_,__)
+  $(error IOPRP image requested but location not specified on IOPRP_BIN)
+  endif
 endif
 
 EE_OBJS = $(APP_CORE) $(LUA_LIBS) $(IOP_MODULES) $(EMBEDDED_RSC)
@@ -118,27 +129,27 @@ EMBED/%.s: EMBED/%.png
 
 #-------------------- Embedded IOP Modules ------------------------#
 vpath %.irx embed/iop/
-vpath %.irx modules/ds34bt/iop/
-vpath %.irx modules/ds34usb/iop/
+vpath %.irx iop/ds34bt/iop/
+vpath %.irx iop/ds34usb/iop/
 vpath %.irx $(PS2SDK)/iop/irx/
 IRXTAG = $(notdir $(addsuffix _irx, $(basename $<)))
 $(EE_ASM_DIR)%.c: %.irx
 	$(DIR_GUARD)
 	$(BIN2S) $< $@ $(IRXTAG)
 
-$(EE_ASM_DIR)ps2kbd.c: $(PS2SDK)/iop/irx/ps2kbd.irx | $(EE_ASM_DIR)
-	$(BIN2S) $< $@ ps2kbd_irx
+$(EE_ASM_DIR)ioprp_img.c: $(IOPRP_BIN) | $(EE_ASM_DIR)
+	$(BIN2S) $< $@ ioprp_img
 
-modules/ds34bt/ee/libds34bt.a: modules/ds34bt/ee
+iop/ds34bt/ee/libds34bt.a: iop/ds34bt/ee
 	$(MAKE) -C $<
 
-modules/ds34bt/iop/ds34bt.irx: modules/ds34bt/iop
+iop/ds34bt/iop/ds34bt.irx: iop/ds34bt/iop
 	$(MAKE) -C $<
 
-modules/ds34usb/ee/libds34usb.a: modules/ds34usb/ee
+iop/ds34usb/ee/libds34usb.a: iop/ds34usb/ee
 	$(MAKE) -C $<
 
-modules/ds34usb/iop/ds34usb.irx: modules/ds34usb/iop
+iop/ds34usb/iop/ds34usb.irx: iop/ds34usb/iop
 	$(MAKE) -C $<
 #------------------------------------------------------------------#
 
@@ -154,8 +165,8 @@ debug: $(EE_BIN)
 clean:
 	@rm -rf $(EE_OBJS_DIR)
 	@rm -rf $(EE_ASM_DIR)
-	$(MAKE) -C modules/ds34usb clean
-	$(MAKE) -C modules/ds34bt clean
+	$(MAKE) -C iop/ds34usb clean
+	$(MAKE) -C iop/ds34bt clean
 	rm -f $(BINDIR)$(EE_BIN)
 	rm -f $(BINDIR)$(EE_BIN_PKD)
 	rm -f $(EMBEDDED_RSC)

@@ -53,6 +53,11 @@ IMPORT_BIN2C(audsrv_irx);
 IMPORT_BIN2C(ds34usb_irx);
 IMPORT_BIN2C(ds34bt_irx);
 
+#ifdef USE_IOPRP
+#include <iopcontrol_special.h>
+IMPORT_BIN2C(ioprp_img);
+#endif
+
 char boot_path[255];
 
 void initMC(void)
@@ -89,17 +94,26 @@ int HAVE_FILEXIO = 0;
     printf("%s: id:%d, ret:%d\n", #_irx, ID, RET)
 #define LOAD_IRX_NARG(_irx) LOAD_IRX(_irx, 0, NULL)
 
+#define LOAD_IRX_FILE(_FILE, argc, arglist) \
+    ID = SifLoadStartModule(_FILE, argc, arglist, &RET); \
+    printf("'%s': id:%d, ret:%d\n", _FILE, ID, RET)
+#define LOAD_IRX_FILE_NARG(_FILE) LOAD_IRX_FILE(_FILE, 0, NULL)
+
 int main(int argc, char * argv[])
 {
     int ID, RET;
     const char * errMsg;
 
-    #ifdef RESET_IOP  
+#ifdef RESET_IOP  
     SifInitRpc(0);
+#ifdef USE_IOPRP
+    while (!SifIopRebootBuffer(ioprp_img, size_ioprp_img)){};
+#else
     while (!SifIopReset("", 0)){};
+#endif
     while (!SifIopSync()){};
     SifInitRpc(0);
-    #endif
+#endif
     
     // install sbv patch fix
     printf("Installing SBV Patches...\n");
@@ -143,7 +157,11 @@ int main(int argc, char * argv[])
     LOAD_IRX_NARG(bdm_irx);
     LOAD_IRX_NARG(bdmfs_fatfs_irx);
     LOAD_IRX_NARG(usbmass_bd_irx);
+#ifdef SUPPORT_SYSTEM_2x6
+    LOAD_IRX_FILE_NARG("rom0:CDVDFSV");
+#else
     LOAD_IRX_NARG(cdfs_irx);
+#endif
     LOAD_IRX_NARG(audsrv_irx);
 
     //waitUntilDeviceIsReady by fjtrujy
