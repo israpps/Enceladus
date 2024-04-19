@@ -1,8 +1,8 @@
 local M = Screen.getMode()
 Font.fmLoad()
-local GMIDZ_PATH = "CDVDMAN_PATTERNS.TPR"
+local GMIDZ_PATH = "mao.ogg"
 local GMIDZ = nil
-local TRLL_PATH = "PS1DVR_PATCH.UDNL"
+local TRLL_PATH = "john.png"
 local TRLL_PNG = nil
 function AERR(file)
 	Screen.clear()
