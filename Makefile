@@ -157,9 +157,6 @@ cleanbin:
 clean: cleanbin
 	rm -rf $(EE_OBJS_DIR)
 	rm -rf $(EE_ASM_DIR)
-	
-	$(MAKE) -C modules/ds34usb clean
-	$(MAKE) -C modules/ds34bt clean
 
 	rm -f $(EMBEDDED_RSC)
 

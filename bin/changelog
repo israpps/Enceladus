@@ -16,3 +16,6 @@
 [v1.0.0 - rev3]
 - Fix: HDD IRX modules loading
 - gamelist: move on list faster via right and left dpads
+
+[v1.0.0 - rev4]
+- Fix: Fix detection of `__POPS#` Partitions on internal HDD
