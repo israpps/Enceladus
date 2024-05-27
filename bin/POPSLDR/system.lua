@@ -11,6 +11,7 @@
 
   Licensed under GNU General public license v3.0
 --]]
+LOG(System.currentDirectory())
 if doesFolderExist("POPSLDR/IRX/") then
   local IRXDIR = System.listDirectory("POPSLDR/IRX/")
   if IRXDIR ~= nil then
@@ -154,13 +155,17 @@ end
 function PLDR.HDD.CheckAvailableHddPopsParts()
   if not PLDR.HDD.HAS_CHECKED then --HDD is checked only once since it cannot be removed/replaced without damaging the console
     LOG("Checking available __.POPS Partitions")
-    PLDR.HDD.MAINPART = doesFileExist("hdd0:__.POPS")
-    PLDR.HDD.FOUNDANY = PLDR.HDD.MAINPART
+    if HDD.MountPartition("hdd0:__.POPS", 1, FIO_MT_RDONLY) then
+      PLDR.HDD.MAINPART = true
+      HDD.UMountPartition(1)
+    end
     LOG("__.POPS", PLDR.HDD.MAINPART)
+    PLDR.HDD.FOUNDANY = PLDR.HDD.MAINPART
     for i=1, 9 do
-      if doesFileExist(("hdd0:__.POPS%d"):format(i)) then
+      if HDD.MountPartition(("hdd0:__.POPS%d"):format(i), 1, FIO_MT_RDONLY) then
         PLDR.HDD.EXTRAPARTS[i] = true
         PLDR.HDD.FOUNDANY = true
+        HDD.UMountPartition(1)
       end
       LOG("__.POPS"..i, PLDR.HDD.EXTRAPARTS[i])
     end
