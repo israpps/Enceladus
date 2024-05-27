@@ -6,23 +6,30 @@
   Licensed under GNU General public license v3.0
 --]]
 LOG("Registering POPStarter profiles...")
-local DEFAULT_PROFILE = 0 -- change this if you want a default profile. list starts counting from 1
+local DEFAULT_PROFILE = 1 -- change this for a different default profile. default package points to classic popstarter path
+-- to register an ELF that is stored on the same folder than POPSLOADER, please do it this way:
+-- System.currentDirectory().."/POPSLDR/PROFILES/YOUR_CUSTOM_PROFILE/POPSTARTER.ELF"
+
 PLDR.PROFILES = {
   {
-    ELF="mass:/POPSLDR/PROFILES/MAIN/POPSTARTER.ELF";
+    ELF=System.currentDirectory().."/POPSLDR/PROFILES/MAIN/POPSTARTER.ELF";
     DESC="Latest popstarter without any modifications";
   },
   {
-    ELF="mass:/POPSLDR/PROFILES/DEBUG/POPSTARTER.ELF";
+    ELF=System.currentDirectory().."/POPSLDR/PROFILES/DEBUG/POPSTARTER.ELF";
     DESC="Latest popstarter with debug menus enabled";
   },
   {
-    ELF="mass:/POPSLDR/PROFILES/USBDELAY/POPSTARTER.ELF";
+    ELF=System.currentDirectory().."/POPSLDR/PROFILES/USBDELAY/POPSTARTER.ELF";
     DESC="Latest popstarter with increased USB delay";
   },
   {
-    ELF="mass:/POPSLDR/PROFILES/USBDELAY_DEBUG/POPSTARTER.ELF";
+    ELF=System.currentDirectory().."POPSLDR/PROFILES/USBDELAY_DEBUG/POPSTARTER.ELF";
     DESC="Latest popstarter with increased USB delay & debug menus enabled";
+  },
+  {
+    ELF="mass:/POPS/POPSTARTER.ELF";
+    DESC="the POPSTARTER ELF located on the POPS folder";
   },
 }
 
