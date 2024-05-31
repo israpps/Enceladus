@@ -52,7 +52,7 @@
     "Z16S",
     "Sound",
     "System",
-    "Sif",
+    "IOP",
     "FREAD",
     "FWRITE",
     "FCREATE",
@@ -63,6 +63,6 @@
     "READ_ONLY",
     "READ_WRITE",
     "Timer",
-    "doesFileExist"
+    "GetBDMDeviceType"
   ]
 }

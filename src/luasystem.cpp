@@ -9,6 +9,7 @@
 #include "include/graphics.h"
 
 #include "include/system.h"
+#include <usbhdfsd-common.h> // for BDM device check
 
 #define NEWLIB_PORT_AWARE
 #include <fileXio_rpc.h>
@@ -775,9 +776,80 @@ static const luaL_Reg Sif_functions[] = {
 	{0, 0}
 };
 
+
+#include <sio.h>
+static bool init_sio = false;
+/**
+ * @brief clone of lua `print()` that prints to Emotion Engine UART instead of STDOUT
+*/
+static int lua_sio_print(lua_State *L) {
+	if (!init_sio) {
+		sio_init(38400,0,0,0,0);
+		init_sio = true;
+		sio_putsn("EE UART Initialized at 38400 BAUD\n");
+	}
+  	int n = lua_gettop(L);
+  	int i;
+  	for (i = 1; i <= n; i++) {
+  	  size_t l;
+  	  const char *s = luaL_tolstring(L, i, &l); 
+  	  if (i > 1)  
+  	    sio_putc('\t');
+	  sio_putsn(s);
+  	  lua_pop(L, 1);
+  	}
+	if (n > 0) sio_putc('\n');
+  	return 0;
+}
+
+enum DEVS{
+	UNKNOWN = -1,
+	USB = 0,
+	MX4SIO,
+	UDPBD,
+	ILINK,
+	HDD,
+
+	COUNT
+};
+
+const char* BDM_DEVS[DEVS::COUNT] = { // to make compiler complain if they dont match
+	"usb",
+	"sdc",
+	"udp",
+	"sd",
+	"ata"
+};
+
+static int bdm_get_devtype(lua_State *L) {
+	if (lua_gettop(L) < 1) return luaL_error(L, "GetBDMDeviceType(int): wrong args");
+	char mass_path[8] = "mass0:/";
+	mass_path[4] += luaL_checkinteger(L, 1);
+	static char DEVID[5];
+	int dd;
+    if ((dd = fileXioDopen(mass_path)) >= 0) {
+        int *intptr_ctl = (int *)DEVID;
+        *intptr_ctl = fileXioIoctl(dd, USBMASS_IOCTL_GET_DRIVERNAME, (void*)"");
+        fileXioDclose(dd);
+		dd = -1;
+		for (int i = DEVS::USB; i < DEVS::COUNT; i++)
+		{
+			if (!strcmp(DEVID, BDM_DEVS[i]))
+			{
+				dd = i;
+				break;
+			}
+		}
+	}
+	lua_pushinteger(L, dd);
+	return 1;
+}
+
 void luaSystem_init(lua_State *L) {
 
 	lua_register(L, "doesFileExist", lua_checkexist);
+	lua_register(L, "print_uart", lua_sio_print);
+	lua_register(L, "GetBDMDeviceType", bdm_get_devtype);
 
 	setModulePath();
 	lua_newtable(L);
@@ -786,7 +858,7 @@ void luaSystem_init(lua_State *L) {
 
 	lua_newtable(L);
 	luaL_setfuncs(L, Sif_functions, 0);
-	lua_setglobal(L, "Sif");
+	lua_setglobal(L, "IOP");
 
 	lua_pushinteger(L, O_RDONLY);
 	lua_setglobal(L, "FREAD");
@@ -815,8 +887,9 @@ void luaSystem_init(lua_State *L) {
 	lua_pushinteger(L, 2);
 	lua_setglobal(L, "READ_WRITE");
 
-
-
-	
+	for (int i = DEVS::USB; i < DEVS::COUNT; i++) {
+		lua_pushinteger(L, i);
+		lua_setglobal(L, BDM_DEVS[i]);
+	}
 }
 
