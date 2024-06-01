@@ -13,6 +13,7 @@ UI = {
   end;
 
   flip = function ()
+    UI.Notif_queue.display()
     Screen.flip()
   end;
   SCR = {
@@ -20,7 +21,34 @@ UI = {
   Y = 480;
   X_MID = (704/2);
   Y_MID = (480/2);
-  }
+  };
+  --- Notifications queue handler
+  Notif_queue = {
+    display = function ()
+      local Q
+      if #UI.Notif_queue.msg < 1 then return end
+      if #UI.Notif_queue.msg > 1 then
+        Q = 0x50
+      elseif UI.Notif_queue.ALFA > 0x50 then
+        Q = 0x50
+      else
+        Q = math.floor(UI.Notif_queue.ALFA)
+      end
+      Graphics.drawRect(30, 30, UI.SCR.X_MID-30, 40, Color.new(0, 0, 0, Q))
+      Font.ftPrint(BFONT, 32, 32, 0, UI.SCR.X_MID-30, 32, UI.Notif_queue.msg[1], Color.new(0, 100, 255, math.floor(UI.Notif_queue.ALFA)))
+      UI.Notif_queue.ALFA = UI.Notif_queue.ALFA-.4
+      if UI.Notif_queue.ALFA < 1 then
+        UI.Notif_queue.ALFA = 0x90
+        table.remove(UI.Notif_queue.msg, 1)
+      end
+    end;
+    ALFA = 0x80;
+    add = function (NOTIF)
+      LOG(NOTIF)
+      table.insert(UI.Notif_queue.msg, NOTIF)
+    end;
+    msg = {};
+  };
 }
 
 GPAD = 0
@@ -56,4 +84,5 @@ function UI.UpdateVmode()
   Screen.setMode(C.mode, UI.SCR.X, UI.SCR.Y, C.colorMode, C.interlace, C.field)
   LOGF(">> Screen size changed to %dx%d", UI.SCR.X, UI.SCR.Y)
 end
+
 UI.UpdateVmode()

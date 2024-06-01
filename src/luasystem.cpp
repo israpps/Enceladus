@@ -763,10 +763,11 @@ static int lua_sifloadmodulebuffer(lua_State *L){
 		arg_len = luaL_checkinteger(L, 3);
 		args = luaL_checkstring(L, 4);
 	}
-
-	int result = SifExecModuleBuffer((void*)ptr, size, arg_len, args, NULL);
+	int result;
+	int irx_id = SifExecModuleBuffer((void*)ptr, size, arg_len, args, &result);
 	lua_pushinteger(L, result);
-	return 1;
+	lua_pushinteger(L, irx_id);
+	return 2;
 }
 
 static const luaL_Reg Sif_functions[] = {
@@ -886,10 +887,5 @@ void luaSystem_init(lua_State *L) {
 
 	lua_pushinteger(L, 2);
 	lua_setglobal(L, "READ_WRITE");
-
-	for (int i = DEVS::USB; i < DEVS::COUNT; i++) {
-		lua_pushinteger(L, i);
-		lua_setglobal(L, BDM_DEVS[i]);
-	}
 }
 
