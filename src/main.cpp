@@ -38,7 +38,7 @@ extern unsigned int size_bootString;
     extern unsigned int size_##_T
 
 IMPORT_BIN2C(iomanX_irx);
-IMPORT_BIN2C(fileXio_irx);
+IMPORT_BIN2C(fileXio_verbose_irx);
 IMPORT_BIN2C(sio2man_irx);
 IMPORT_BIN2C(mcman_irx);
 IMPORT_BIN2C(mcserv_irx);
@@ -113,7 +113,7 @@ int main(int argc, char * argv[])
 	if (directorytoverify==NULL) {
 #endif
 		LOAD_IRX_NARG(iomanX_irx);
-		LOAD_IRX_NARG(fileXio_irx);
+		LOAD_IRX_NARG(fileXio_verbose_irx);
 		fileXioInit();
         if (ID > 0 && RET != 1) HAVE_FILEXIO = 1;
 #ifdef DONT_LOAD_FILEXIO_ON_HOST_DEVICE

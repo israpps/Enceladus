@@ -76,7 +76,7 @@ LUA_LIBS =	luaplayer.o luasound.o luacontrols.o \
 			luatimer.o luaScreen.o luagraphics.o \
 			luasystem.o luaRender.o
 
-IOP_MODULES = iomanX.o fileXio.o \
+IOP_MODULES = iomanX.o fileXio_verbose.o \
 			  sio2man.o mcman.o mcserv.o padman.o libsd.o \
 			  usbd.o audsrv.o bdm.o bdmfs_fatfs.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o
