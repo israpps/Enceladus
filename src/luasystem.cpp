@@ -823,6 +823,7 @@ const char* BDM_DEVS[DEVS::COUNT] = { // to make compiler complain if they dont 
 };
 
 static int bdm_get_devtype(lua_State *L) {
+	if (!HAVE_FILEXIO) luaL_error(L, "GetBDMDeviceType(int): cant use fileXio functions if fileXio is not loaded!!!");
 	if (lua_gettop(L) < 1) return luaL_error(L, "GetBDMDeviceType(int): wrong args");
 	char mass_path[8] = "mass0:/";
 	mass_path[4] += luaL_checkinteger(L, 1);

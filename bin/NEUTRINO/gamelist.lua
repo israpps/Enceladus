@@ -1,10 +1,12 @@
 
+require("ui") -- make sure dependencies are there
 GameList = {
   CURR = 1;
   MAXDRAW = 18;
 };
 
 BDM = {
+  DEVS = {USB = 0, MX4SIO = 1, UDPBD = 2, ILINK = 3, HDD = 4};
   DeviceList = {};
   DevAlias = {};
   MAX_BD = 6;
@@ -33,30 +35,37 @@ function GameList.display(L)
   for i = STARTUP, ammount do
     if i >= (STARTUP+GameList.MAXDRAW) then break end
     local Y = 30+((i-STARTUP)*21)
-    Font.ftPrint(BFONT, 30, Y, 0, UI.SCR.X, 16, L[i], i == GameList.CURR and YELLOW or GREY)
+    Font.ftPrint(BFONT, 30, Y, 0, UI.SCR.X, 16, L[i].name, i == GameList.CURR and YELLOW or GREY)
   end
   if ammount <= 0 then
     Font.ftPrintMultiLineAligned(LFONT, UI.SCR.X_MID, UI.SCR.Y_MID, 20, UI.SCR.X, 32, "No games found")
     Font.ftPrintMultiLineAligned(LFONT, UI.SCR.X_MID+1, UI.SCR.Y_MID+1, 20, UI.SCR.X, 32, "No games found")
   end
   if PADListen() then
-    if Pads.check(GPAD, PAD_DOWN) then GameList.CURR = CLAMP(GameList.CURR+1, 1, ammount) end
-    if Pads.check(GPAD, PAD_UP  ) then GameList.CURR = CLAMP(GameList.CURR-1, 1, ammount) end
+    if Pads.check(GPAD, PAD_DOWN)  then GameList.CURR = CLAMP(GameList.CURR+1, 1, ammount) end
+    if Pads.check(GPAD, PAD_UP)    then GameList.CURR = CLAMP(GameList.CURR-1, 1, ammount) end
+    if Pads.check(GPAD, PAD_CROSS) then return GameList.CURR end
+    if Pads.check(GPAD, PAD_CIRCLE) then return -1 end
   end
+  return 0
 end
 
 function GameList.ParseMassDevice(index, subfolder, ret2)
-  local basepath = string.format("host%d:/%s", index, subfolder)
+  local basepath = string.format("%s%d:/%s", "host", index, subfolder)
   local DIR = System.listDirectory(basepath)
   local ret = {}
   if type(ret2) == "table" then ret = ret2 end
+  if DIR == nil then
+    --UI.Notif_queue.add(("Failed to parse directory\n'%s'"):format(basepath))
+    return nil
+  end
   for i = 1, #DIR do
-    if string.lower(string.sub(DIR[i].name, -4)) == ".iso" then
-      table.insert(ret, DIR[i].name)
-      LOG("> PARSE: ADD", DIR[i].name)
+    local T = {name = DIR[i].name; loc = "/"..subfolder; massindx = "mass"..index..":/"}
+    if CheckExtension(DIR[i].name, ".iso") then
+      table.insert(ret, T)
     end
   end
-  LOG("parsed", basepath)
+  return ret
 end
 
 function BDM.UpdateDeviceList()
@@ -69,8 +78,6 @@ function BDM.UpdateDeviceList()
     end
   end
 end
-
-BDM.UpdateDeviceList()
 
 local cur = 0
 function BDM.DeviceListPrompt()
@@ -89,3 +96,5 @@ function BDM.DeviceListPrompt()
   end
   return -1
 end
+
+BDM.UpdateDeviceList()

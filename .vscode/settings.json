@@ -63,6 +63,7 @@
     "READ_ONLY",
     "READ_WRITE",
     "Timer",
-    "GetBDMDeviceType"
+    "GetBDMDeviceType",
+    "doesFileExist"
   ]
 }

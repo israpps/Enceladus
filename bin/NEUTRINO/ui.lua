@@ -1,3 +1,5 @@
+require("utils") -- make sure dependencies are there
+
 LOG("-- Initializing UI")
 Font.ftInit()
 
@@ -8,14 +10,6 @@ Font.ftSetCharSize(BFONT, 800, 800)
 Font.ftSetCharSize(SFONT, 600, 600)
 
 UI = {
-  clear = function ()
-    Screen.clear()
-  end;
-
-  flip = function ()
-    UI.Notif_queue.display()
-    Screen.flip()
-  end;
   SCR = {
   X = 704;
   Y = 480;
@@ -50,6 +44,17 @@ UI = {
     msg = {};
   };
 }
+
+---  UI code done at the begining of main loop. place here all the drawing that must be done BEFORE UI Draw
+function UI.Pre()
+  Screen.clear() -- DONT DELETE
+end
+
+--- UI code done AFTER UI Draw.
+function UI.Top()
+  UI.Notif_queue.display() -- DONT DELETE
+  Screen.flip() -- DONT DELETE
+end
 
 GPAD = 0
 OPAD = 0

@@ -11,3 +11,11 @@ function CYCLE_CLAMP(a, MIN, MAX)
   if a > MAX then return MIN end
   return a
 end
+
+function CheckExtension(buf, ext)
+  if string.lower(string.sub(buf, -ext:len())) == ext:lower() then
+    return true
+  else
+    return false
+  end
+end
