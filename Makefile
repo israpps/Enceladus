@@ -37,7 +37,7 @@ DEBUG = 0
 #----------------------- Set IP for PS2Client ---------------------#
 PS2LINK_IP = 192.168.1.10
 #------------------------------------------------------------------#
-F_KEYBOARD ?= 1
+F_KEYBOARD ?= 0
 
 BINDIR = bin/
 EE_BIN = $(BINDIR)enceladus.elf
