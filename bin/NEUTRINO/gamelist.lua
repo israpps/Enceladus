@@ -1,4 +1,7 @@
-
+--[[
+NEUTRINO Launcher by El_isra                                                         
+LICENSE: GNU GPL v3
+--]]
 require("ui") -- make sure dependencies are there
 GameList = {
   CURR = 1;

@@ -1,3 +1,8 @@
+
+--[[
+NEUTRINO Launcher by El_isra                                                         
+LICENSE: GNU GPL v3
+--]]
 LOG("-- Initializing UTILS")
 
 function CLAMP(a, MIN, MAX)

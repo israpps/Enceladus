@@ -29,6 +29,9 @@ extern "C"{
 #include <libds34bt.h>
 #include <libds34usb.h>
 }
+#ifndef __GIT_HASH__
+#define __GIT_HASH__ "UNKNOWN"
+#endif
 
 extern char bootString[];
 extern unsigned int size_bootString;
@@ -100,7 +103,9 @@ int main(int argc, char * argv[])
     while (!SifIopSync()){};
     SifInitRpc(0);
     #endif
-    
+    printf("> IOP Reboot done\n");
+    printf("> neutrino launcher v%d-%d-%d\n", _MAJOR, _MINOR, _PATCH);
+    printf("> Build %s %s %s\n", __DATE__, __TIME__, __GIT_HASH__);
     // install sbv patch fix
     printf("Installing SBV Patches...\n");
     sbv_patch_enable_lmb();

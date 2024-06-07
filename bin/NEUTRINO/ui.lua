@@ -1,8 +1,12 @@
+
+--[[
+NEUTRINO Launcher by El_isra                                                         
+LICENSE: GNU GPL v3
+--]]
 require("utils") -- make sure dependencies are there
-
 LOG("-- Initializing UI")
-Font.ftInit()
 
+Font.ftInit()
 BFONT = Font.ftLoad("NEUTRINO/font.ttf")
 SFONT = Font.ftLoad("NEUTRINO/font.ttf")
 LFONT = Font.ftLoad("NEUTRINO/font.ttf")

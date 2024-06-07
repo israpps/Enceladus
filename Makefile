@@ -26,6 +26,10 @@ define HEADER
                                                                                 
 endef
 export HEADER
+MAJ = 0
+MIN = 0
+PATCH = 0
+VER = v$(MAJ).$(MIN).$(PATCH)
 
 #------------------------------------------------------------------#
 #----------------------- Configuration flags ----------------------#
@@ -41,7 +45,7 @@ F_KEYBOARD ?= 0
 
 BINDIR = bin/
 EE_BIN = $(BINDIR)enceladus.elf
-EE_BIN_PKD = $(BINDIR)enceladus_pkd.elf
+EE_BIN_PKD = $(BINDIR)neutrino_launcher.elf
 
 EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Lmodules/ds34bt/ee/ -Lmodules/ds34usb/ee/ \
 	-lpatches -lfileXio -lpad -ldebug -llua -lmath3d -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit \
@@ -51,20 +55,20 @@ EE_INCS += -I$(PS2DEV)/gsKit/include -I$(PS2SDK)/ports/include -I$(PS2SDK)/ports
 
 EE_INCS += -Imodules/ds34bt/ee -Imodules/ds34usb/ee
 
-EE_CFLAGS   += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
-EE_CXXFLAGS += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2
+EE_GFLAGS += -Wno-sign-compare -fno-strict-aliasing -fno-exceptions -DLUA_USE_PS2 -D_MAJOR=$(MAJ) -D_MINOR=$(MIN) -D_PATCH=$(PATCH)
 
 ifeq ($(RESET_IOP),1)
-EE_CXXFLAGS += -DRESET_IOP
+EE_GFLAGS += -DRESET_IOP
 endif
 
 ifeq ($(DEBUG),1)
-EE_CXXFLAGS += -DDEBUG
+EE_GFLAGS += -DDEBUG
 endif
 
 
 BIN2S = $(PS2SDK)/bin/bin2c
-
+GITHASH =$(shell git rev-parse --short HEAD)
+EE_GFLAGS += -D__GIT_HASH__=\"$(GITHASH)\"
 #-------------------------- App Content ---------------------------#
 EXT_LIBS = modules/ds34usb/ee/libds34usb.a modules/ds34bt/ee/libds34bt.a
 
@@ -84,11 +88,15 @@ IOP_MODULES = iomanX.o fileXio_verbose.o \
 EMBEDDED_RSC = boot.o
 
 ifeq ($(F_KEYBOARD),1)
-  EE_CXXFLAGS += -DPS2KBD
+  EE_GFLAGS += -DPS2KBD
   EE_LIBS += -lkbd
   IOP_MODULES += ps2kbd.o
   LUA_LIBS +=  luaKeyboard.o
 endif
+
+
+EE_CXXFLAGS += $(EE_GFLAGS)
+EE_CFLAGS += $(EE_GFLAGS)
 
 EE_OBJS = $(APP_CORE) $(LUA_LIBS) $(IOP_MODULES) $(EMBEDDED_RSC)
 
@@ -104,7 +112,13 @@ all: $(EXT_LIBS) $(EE_BIN)
 	$(EE_STRIP) $(EE_BIN)
 
 	ps2-packer $(EE_BIN) $(EE_BIN_PKD) > /dev/null
-	
+
+RELDIR = releasepack/
+REL_PKG = $(RELDIR)Neutrino-Launcher-$(VER)-$(GITHASH).7z
+package: $(EE_BIN_PKD)
+	mkdir -p $(RELDIR)
+	rm -f $(REL_PKG)
+	7z a $(REL_PKG) $(EE_BIN_PKD) bin/changelog bin/NEUTRINO/* LICENSE README.md
 #--------------------- Embedded ressources ------------------------#
 
 $(EE_ASM_DIR)boot.c: etc/boot.lua | $(EE_ASM_DIR)

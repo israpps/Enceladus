@@ -1,3 +1,7 @@
+--[[
+NEUTRINO Launcher by El_isra                                                         
+LICENSE: GNU GPL v3
+--]]
 LOG("> loader.lua begins")
 LOG("CWD:", System.currentDirectory())
 
