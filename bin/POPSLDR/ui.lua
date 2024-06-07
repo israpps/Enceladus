@@ -119,7 +119,6 @@ UI = {
         if Pads.check(GPAD, PAD_UP) then UI.GameList.CURR = CLAMP(UI.GameList.CURR-1, 1, ammount) GPAD = 0 end
         if Pads.check(GPAD, PAD_LEFT) then UI.GameList.CURR = CLAMP(UI.GameList.CURR-UI.GameList.MAXDRAW, 1, ammount) GPAD = 0 end
         if Pads.check(GPAD, PAD_CROSS) and ammount > 0 then
-          LOG(PLDR.GAMES[UI.GameList.CURR])
           if not doesFileExist(PLDR.POPSTARTER_PATH) then
             UI.Notif_queue.add("Cant find POPSTARTER ELF\n"..PLDR.POPSTARTER_PATH)
           else

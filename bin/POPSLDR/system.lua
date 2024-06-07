@@ -30,8 +30,10 @@ PLDR = {
   CHECK_POPSTARTER_FILES = false;
   GAMEPATH = ".";
   GAMES = {};
+  HDDCACHE = nil;
   PROFILES = {};
   HDD = {
+    USECACHE = true;
     LOADSTATE = 0; -- 0:NOT_LOADED, 1:LOADED, -1:LOADED_BUT_FAILED
     EXTRAPARTS = {false, false, false, false, false, false, false, false, false};
     MAINPART = false;
@@ -175,6 +177,7 @@ end
 
 function PLDR.HDD.BuildGameList()
   PLDR.GAMES = {}
+  if type(PLDR.HDDCACHE) == "table" and PLDR.HDD.USECACHE then PLDR.GAMES = PLDR.HDDCACHE end
   if not PLDR.HDD.FOUNDANY then return end
   if PLDR.HDD.MAINPART then
     if HDD.MountPartition("hdd0:__.POPS", 1, FIO_MT_RDONLY) then
@@ -217,6 +220,7 @@ function PLDR.LoadHDDModules()
     end
     PLDR.HDD.LOADSTATE = 1
     PLDR.HDD.CheckAvailableHddPopsParts()
+    PLDR.HDD.CreateCache()
   end
 end
 
@@ -224,6 +228,40 @@ function PLDR.CleanupGameList()
   LOG("gamelist cleanup")
   local count = #PLDR.GAMES
   for i=0, count do PLDR.GAMES[i]=nil end
+end
+
+function PLDR.HDD.CreateCache()
+  if not PLDR.HDD.USECACHE then return end
+  LOG("> HDD Cache Create")
+  local C = "POPSLDR/hdd_gamecache.lua"
+  local temp = "LOG(\">HDD CACHE LOAD\")\nPLDR.HDDCACHE = {\n"
+  PLDR.HDD.BuildGameList()
+  for i = 1, #PLDR.GAMES do
+    temp = temp..("  \"%s\",\n"):format(PLDR.GAMES[i])
+  end
+  temp = temp.."\n}\n"
+  local fd = System.openFile(C, FCREATE)
+  System.writeFile(fd, temp, temp:len())
+  System.closeFile(fd)
+  PLDR.HDD.HAS_CHECKED = true
+end
+
+function PLDR.HDD.ReadCache()
+  LOG("> HDD Cache Read")
+  local C = "POPSLDR/hdd_gamecache.lua"
+  if doesFileExist(C) then
+    dofile(C)
+    PLDR.HDD.HAS_CHECKED = true
+  end
+end
+
+function PLDR.HDD.WipeCache(CACHE)
+  LOG("> HDD Cache Wipe")
+  local C = "POPSLDR/hdd_gamecache.lua"
+  if doesFileExist(C) then
+    System.removeFile(C)
+    PLDR.HDD.HAS_CHECKED = false
+  end
 end
 
 ---DONT TOUCH ME

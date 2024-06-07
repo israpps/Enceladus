@@ -42,3 +42,4 @@ bin/lua_crashlog.txt
 bin/POPSLDR/.pldrs
 bin/LICENSE
 !EMBED/*
+bin/POPSLDR/hdd_gamecache.lua
