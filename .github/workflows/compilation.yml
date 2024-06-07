@@ -22,7 +22,7 @@ jobs:
     steps:
     - name: Install dependencies
       run: |
-        apk add build-base git bash
+        apk add build-base git bash p7zip
 
     - name: Workaround permission issue
       run: |
@@ -41,7 +41,7 @@ jobs:
 
     - name: Compile project
       run: |
-        make clean all
+        make clean package
 
     - name: Get short SHA
       id: slug
@@ -52,7 +52,7 @@ jobs:
       uses: actions/upload-artifact@v2
       with:
         name: Enceladus-${{ steps.slug.outputs.sha8 }}
-        path: bin
+        path: releasepack/*
 
     - name: Compress & Rename bin folder
       run: |

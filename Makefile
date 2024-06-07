@@ -106,12 +106,12 @@ EE_ASM_DIR = asm/
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%) # remap all EE_OBJ to obj subdir
 
 #------------------------------------------------------------------#
-all: $(EXT_LIBS) $(EE_BIN)
+all: ds43 $(EE_BIN_PKD)
 	@echo "$$HEADER"
 
+$(EE_BIN_PKD): $(EE_BIN)
 	$(EE_STRIP) $(EE_BIN)
-
-	ps2-packer $(EE_BIN) $(EE_BIN_PKD) > /dev/null
+	ps2-packer $(EE_BIN) $(EE_BIN_PKD)
 
 RELDIR = releasepack/
 REL_PKG = $(RELDIR)Neutrino-Launcher-$(VER)-$(GITHASH).7z
@@ -143,6 +143,8 @@ $(EE_ASM_DIR)%.c: %.irx
 $(EE_ASM_DIR)ps2kbd.c: $(PS2SDK)/iop/irx/ps2kbd.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ ps2kbd_irx
 
+ds43: modules/ds34bt/ee/libds34bt.a modules/ds34usb/ee/libds34usb.a modules/ds34bt/iop/ds34bt.irx modules/ds34usb/iop/ds34usb.irx
+
 modules/ds34bt/ee/libds34bt.a: modules/ds34bt/ee
 	$(MAKE) -C $<
 
@@ -170,8 +172,8 @@ clean:
 	@rm -rf $(EE_ASM_DIR)
 	$(MAKE) -C modules/ds34usb clean
 	$(MAKE) -C modules/ds34bt clean
-	rm -f $(BINDIR)$(EE_BIN)
-	rm -f $(BINDIR)$(EE_BIN_PKD)
+	rm -f $(EE_BIN)
+	rm -f $(EE_BIN_PKD)
 	rm -f $(EMBEDDED_RSC)
 
 rebuild: clean all
