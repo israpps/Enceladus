@@ -92,16 +92,20 @@ UI = {
     GameList = {
       MAXDRAW = 18;
       CURR = 1;
+      STARTUP = 1;
       Reset = function ()
         UI.GameList.CURR = 1;
       end;
       Play = function()
         local ammount = #PLDR.GAMES
-        local STARTUP = 1
-        if (UI.GameList.CURR > UI.GameList.MAXDRAW) then STARTUP = (UI.GameList.CURR-UI.GameList.MAXDRAW+1) end
-        for i = STARTUP, ammount do
-          if i >= (STARTUP+UI.GameList.MAXDRAW) then break end
-          local Y = 20+((i-STARTUP)*21)
+        if (UI.GameList.CURR > (UI.GameList.STARTUP+(UI.GameList.MAXDRAW-1))) then
+          UI.GameList.STARTUP = (UI.GameList.CURR-UI.GameList.MAXDRAW+1)
+        elseif (UI.GameList.CURR < UI.GameList.STARTUP) then
+          UI.GameList.STARTUP = CLAMP(UI.GameList.CURR-1, 1, ammount)
+        end
+        for i = UI.GameList.STARTUP, ammount do
+          if i >= (UI.GameList.STARTUP+UI.GameList.MAXDRAW) then break end
+          local Y = 20+((i-UI.GameList.STARTUP)*21)
           Font.ftPrint(BFONT, 30, Y, 0, UI.SCR.X, 16, string.sub(PLDR.GAMES[i],1, -5), i == UI.GameList.CURR and UI.CCOL.YELLOW or UI.CCOL.GREY)
         end
         if ammount <= 0 then
@@ -115,6 +119,7 @@ UI = {
         if Pads.check(GPAD, PAD_UP) then UI.GameList.CURR = CLAMP(UI.GameList.CURR-1, 1, ammount) GPAD = 0 end
         if Pads.check(GPAD, PAD_LEFT) then UI.GameList.CURR = CLAMP(UI.GameList.CURR-UI.GameList.MAXDRAW, 1, ammount) GPAD = 0 end
         if Pads.check(GPAD, PAD_CROSS) and ammount > 0 then
+          LOG(PLDR.GAMES[UI.GameList.CURR])
           if not doesFileExist(PLDR.POPSTARTER_PATH) then
             UI.Notif_queue.add("Cant find POPSTARTER ELF\n"..PLDR.POPSTARTER_PATH)
           else
