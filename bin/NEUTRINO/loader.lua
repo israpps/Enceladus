@@ -102,6 +102,7 @@ end
 local SCENES = {
   MAIN = 0,
   GAMELIST = 1,
+  CREDITS = 2,
 }
 
 local CURSCENE = SCENES.MAIN
@@ -132,6 +133,8 @@ while true do
         Main.LaunchNeutrino(GameList.clist[G].loc.."/"..GameList.clist[G].name)
       end
     end
+  elseif CURSCENE == SCENES.CREDITS then
+    if UI.Credits.Play() then CURSCENE = SCENES.MAIN end
   end
   UI.Top()
 end
