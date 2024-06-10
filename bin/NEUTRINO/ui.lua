@@ -49,6 +49,24 @@ UI = {
   };
 }
 
+local IMGS = {
+  "background.png",
+  "dev_ide.png",
+  "dev_ilink.png",
+  "dev_mx4sio.png",
+  "dev_udpbd.png",
+  "dev_usb.png",
+  "splash_logo.png",
+}
+IMG = {}
+LOGF("%d images registered", #IMGS)
+for x=1, #IMGS do
+  local INDX = IMGS[x]:match("(.+)%..+$")
+  IMG[INDX] = Graphics.loadImage("NEUTRINO/ui/"..IMGS[x])
+  if IMG[INDX] == nil then error("Could not load 'NEUTRINO/ui/"..IMGS[x].."'") end
+  Graphics.setImageFilters(IMG[INDX], LINEAR)
+end
+
 ---  UI code done at the begining of main loop. place here all the drawing that must be done BEFORE UI Draw
 function UI.Pre()
   Screen.clear() -- DONT DELETE
