@@ -54,7 +54,7 @@ function GameList.display(L)
 end
 
 function GameList.ParseMassDevice(index, subfolder, ret2)
-  local basepath = string.format("%s%d:/%s", "host", index, subfolder)
+  local basepath = string.format("%s%d:/%s", "mass", index, subfolder)
   local DIR = System.listDirectory(basepath)
   local ret = {}
   if type(ret2) == "table" then ret = ret2 end
