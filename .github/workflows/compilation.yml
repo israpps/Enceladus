@@ -41,7 +41,7 @@ jobs:
 
     - name: Compile project
       run: |
-        make clean package
+        make clean ds34 package
 
     - name: Get short SHA
       id: slug

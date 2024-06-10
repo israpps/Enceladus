@@ -106,7 +106,7 @@ EE_ASM_DIR = asm/
 EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%) # remap all EE_OBJ to obj subdir
 
 #------------------------------------------------------------------#
-all: ds43 $(EE_BIN_PKD)
+all: ds34 $(EE_BIN_PKD)
 	@echo "$$HEADER"
 
 $(EE_BIN_PKD): $(EE_BIN)
@@ -143,7 +143,7 @@ $(EE_ASM_DIR)%.c: %.irx
 $(EE_ASM_DIR)ps2kbd.c: $(PS2SDK)/iop/irx/ps2kbd.irx | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ ps2kbd_irx
 
-ds43: modules/ds34bt/ee/libds34bt.a modules/ds34usb/ee/libds34usb.a modules/ds34bt/iop/ds34bt.irx modules/ds34usb/iop/ds34usb.irx
+ds34: modules/ds34bt/ee/libds34bt.a modules/ds34usb/ee/libds34usb.a modules/ds34bt/iop/ds34bt.irx modules/ds34usb/iop/ds34usb.irx
 
 modules/ds34bt/ee/libds34bt.a: modules/ds34bt/ee
 	$(MAKE) -C $<
@@ -170,8 +170,6 @@ debug: $(EE_BIN)
 clean:
 	@rm -rf $(EE_OBJS_DIR)
 	@rm -rf $(EE_ASM_DIR)
-	$(MAKE) -C modules/ds34usb clean
-	$(MAKE) -C modules/ds34bt clean
 	rm -f $(EE_BIN)
 	rm -f $(EE_BIN_PKD)
 	rm -f $(EMBEDDED_RSC)

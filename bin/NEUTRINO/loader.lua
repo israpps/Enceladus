@@ -41,10 +41,10 @@ end
 function Main.LoadModule(M)
   local RET, ID
   local modname
-  if M == 1 and not Main.Devs[M+1] then
+  if M == BDM.DEVS.MX4SIO and not Main.Devs[M+1] then
     modname = "mx4sio_bd_mini.irx"
     RET, ID = IOP.loadModule(Main.modloc..modname)
-  elseif M == 2 and not Main.Devs[M+1] then --
+  elseif M == BDM.DEVS.UDPBD and not Main.Devs[M+1] then --
     modname = "dev9_ns.irx"
     if LoadDev9(Main.modloc..modname) < 0 then
       ID = Main.irx.DEV9.id
@@ -53,13 +53,13 @@ function Main.LoadModule(M)
     end
     modname = "smap_udpbd.irx"
     RET, ID = IOP.loadModule(Main.modloc..modname)
-  elseif M == 3 and not Main.Devs[M+1] then --
+  elseif M == BDM.DEVS.ILINK and not Main.Devs[M+1] then --
     modname = "iLinkman.irx"
     RET, ID = IOP.loadModule(Main.modloc..modname)
     if RET == 1 or ID < 0 then goto quit end
     modname = "IEEE1394_bd_mini.irx"
     RET, ID = IOP.loadModule(Main.modloc..modname)
-  elseif M == 4 and not Main.Devs[M+1] then --
+  elseif M == BDM.DEVS.HDD and not Main.Devs[M+1] then --
     modname = "dev9_ns.irx"
     if LoadDev9(Main.modloc..modname) < 0 then
       ID = Main.irx.DEV9.id
@@ -105,7 +105,7 @@ local SCENES = {
   CREDITS = 2,
 }
 
-local CURSCENE = SCENES.MAIN
+local CURSCENE = SCENES.CREDITS
 local x
 while true do
   UI.Pre()
