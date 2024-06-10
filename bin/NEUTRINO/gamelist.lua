@@ -12,7 +12,7 @@ BDM = {
   DEVS = {USB = 0, MX4SIO = 1, UDPBD = 2, ILINK = 3, HDD = 4};
   DeviceList = {};
   DevAlias = {};
-  MAX_BD = 6;
+  MAX_BD = 5;
   CURRBD = 0;
 }
 BDM.DevAlias[0] = "USB"
@@ -84,18 +84,21 @@ end
 
 local cur = 0
 function BDM.DeviceListPrompt()
-  local col
   for i = 0, BDM.MAX_BD, 1 do
-    if i == cur then col = YELLOW elseif BDM.DeviceList[i] < 0 then col = Color.new(0xcc,0,0) else col = Color.new(0,0xcc,0) end
-    Graphics.drawRect(50+(60*i), UI.SCR.Y_MID-30, 30, 30, col)
+    local I = IMG.dev_usb
+    local C = i == cur and 128 or 100
+    if BDM.DeviceList[i] == BDM.DEVS.HDD then I = IMG.dev_ide
+    elseif BDM.DeviceList[i] == BDM.DEVS.MX4SIO then I = IMG.dev_mx4sio
+    elseif BDM.DeviceList[i] == BDM.DEVS.ILINK then I = IMG.dev_ilink
+    elseif BDM.DeviceList[i] == BDM.DEVS.UDPBD then I = IMG.dev_udpbd
+    elseif BDM.DeviceList[i] < 0 then C = C- 0x30 end
+    Graphics.drawImage(I, 100, 64+(64*i), Color.new(128, 128, 128, C))
   end
-  Font.ftPrintMultiLineAligned(BFONT, UI.SCR.X_MID, UI.SCR.Y_MID+60, 20, 300, 64, ("mass%d:/"):format(cur), GREY)
-  Font.ftPrintMultiLineAligned(BFONT, UI.SCR.X_MID, UI.SCR.Y_MID+90, 20, 300, 64, 
-    BDM.DeviceList[cur] < 0 and "no device assigned" or BDM.DevAlias[BDM.DeviceList[cur]], GREY)
   if PADListen() then
-    if Pads.check(GPAD, PAD_LEFT)  then cur = CLAMP(cur-1, 0, BDM.MAX_BD) end
-    if Pads.check(GPAD, PAD_RIGHT) then cur = CLAMP(cur+1, 0, BDM.MAX_BD) end
+    if Pads.check(GPAD, PAD_UP)  then cur = CLAMP(cur-1, 0, BDM.MAX_BD) end
+    if Pads.check(GPAD, PAD_DOWN) then cur = CLAMP(cur+1, 0, BDM.MAX_BD) end
     if Pads.check(GPAD, PAD_CROSS) then return cur end
+    if Pads.check(GPAD, PAD_SELECT) then BDM.UpdateDeviceList() GPAD=1 end
   end
   return -1
 end
