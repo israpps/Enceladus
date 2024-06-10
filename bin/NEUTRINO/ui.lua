@@ -70,6 +70,7 @@ end
 ---  UI code done at the begining of main loop. place here all the drawing that must be done BEFORE UI Draw
 function UI.Pre()
   Screen.clear() -- DONT DELETE
+  Graphics.drawScaleImage(IMG.background, 0, 0, UI.SCR.X, UI.SCR.Y)
 end
 
 --- UI code done AFTER UI Draw.
@@ -80,7 +81,7 @@ end
 
 GPAD = 0
 OPAD = 0
-PADC = 7
+local PADC = 7
 function PADListen()
   PADC = CYCLE_CLAMP(PADC-1, 0, 7)
   if PADC == 0 then
