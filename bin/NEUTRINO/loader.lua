@@ -10,14 +10,19 @@ IOP.loadModule(System.currentDirectory().."/tty.irx")
 require("utils")
 require("ui")
 require("gamelist")
+require("dialogue")
+
+IOP.LDFAIL = -1
+IOP.NLOAD = 0
+IOP.LOADED = 1
 
 Main = {
   Devs = {
-    true, -- usb
-    false, -- sdc (mx4sio)
-    false, -- udp
-    false, -- sd (iLink)
-    false, -- ata (bdm_hdd)
+    IOP.LOADED, -- usb
+    IOP.NLOAD, -- sdc (mx4sio)
+    IOP.NLOAD, -- udp
+    IOP.NLOAD, -- sd (iLink)
+    IOP.NLOAD, -- ata (bdm_hdd)
   };
   irx = {
     DEV9 = {ld = false, id=0, ret=0};
@@ -41,10 +46,10 @@ end
 function Main.LoadModule(M)
   local RET, ID
   local modname
-  if M == BDM.DEVS.MX4SIO and not Main.Devs[M+1] then
+  if M == BDM.DEVS.MX4SIO and Main.Devs[M+1] == IOP.NLOAD then
     modname = "mx4sio_bd_mini.irx"
     RET, ID = IOP.loadModule(Main.modloc..modname)
-  elseif M == BDM.DEVS.UDPBD and not Main.Devs[M+1] then --
+  elseif M == BDM.DEVS.UDPBD and Main.Devs[M+1] == IOP.NLOAD then --
     modname = "dev9_ns.irx"
     if LoadDev9(Main.modloc..modname) < 0 then
       ID = Main.irx.DEV9.id
@@ -53,13 +58,13 @@ function Main.LoadModule(M)
     end
     modname = "smap_udpbd.irx"
     RET, ID = IOP.loadModule(Main.modloc..modname)
-  elseif M == BDM.DEVS.ILINK and not Main.Devs[M+1] then --
+  elseif M == BDM.DEVS.ILINK and Main.Devs[M+1] == IOP.NLOAD then --
     modname = "iLinkman.irx"
     RET, ID = IOP.loadModule(Main.modloc..modname)
     if RET == 1 or ID < 0 then goto quit end
     modname = "IEEE1394_bd_mini.irx"
     RET, ID = IOP.loadModule(Main.modloc..modname)
-  elseif M == BDM.DEVS.HDD and not Main.Devs[M+1] then --
+  elseif M == BDM.DEVS.HDD and Main.Devs[M+1] == IOP.NLOAD then --
     modname = "dev9_ns.irx"
     if LoadDev9(Main.modloc..modname) < 0 then
       ID = Main.irx.DEV9.id
@@ -74,7 +79,10 @@ function Main.LoadModule(M)
   end
 
   ::quit::
+  BDM.DEVSTAT[M].ID = ID
+  BDM.DEVSTAT[M].RET = RET
   if RET == 1 or ID < 0 then
+    Main.Devs[M+1] = IOP.LDFAIL
     local extra = ""
     if ID == -200 then extra ="\nMissing module dependency"
     elseif ID == -203 then extra ="\nFile not found"
@@ -84,11 +92,9 @@ function Main.LoadModule(M)
     UI.Notif_queue.add(("Failed to load module %s (%d|%d)"..extra):format(modname, RET, ID))
   else
     LOG("Module successful startup")
-    Main.Devs[M+1] = true
+    Main.Devs[M+1] = IOP.LOADED
   end
 end
-
-Main.LoadModule(BDM.DEVS.UDPBD)
 
 
 ---@param GAME string Game image location, full path.
@@ -103,9 +109,10 @@ local SCENES = {
   MAIN = 0,
   GAMELIST = 1,
   CREDITS = 2,
+  MODLOAD = 3,
 }
 
-local CURSCENE = SCENES.CREDITS
+local CURSCENE = SCENES.MODLOAD
 local x
 while true do
   UI.Pre()
@@ -120,6 +127,7 @@ while true do
       if T ~= nil then GameList.clist = T end
       T = GameList.ParseMassDevice(BDM.CURRBD, "DVD", GameList.clist)
       if T ~= nil then GameList.clist = T end
+    elseif x == -2 then CURSCENE = SCENES.MODLOAD
     end
   elseif CURSCENE == SCENES.GAMELIST then
     local G = GameList.display(GameList.clist)
@@ -135,6 +143,8 @@ while true do
     end
   elseif CURSCENE == SCENES.CREDITS then
     if UI.Credits.Play() then CURSCENE = SCENES.MAIN end
+  elseif CURSCENE == SCENES.MODLOAD then
+    if ModLoadUI() ~= -1 then CURSCENE = SCENES.MAIN end
   end
   UI.Top()
 end

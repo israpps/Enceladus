@@ -10,6 +10,8 @@ GameList = {
 
 BDM = {
   DEVS = {USB = 0, MX4SIO = 1, UDPBD = 2, ILINK = 3, HDD = 4};
+  DEVA = 4;
+  DEVSTAT = {};
   DeviceList = {};
   DevAlias = {};
   MAX_BD = 5;
@@ -20,6 +22,9 @@ BDM.DevAlias[1] = "MX4SIO"
 BDM.DevAlias[2] = "UDPBD"
 BDM.DevAlias[3] = "iLink"
 BDM.DevAlias[4] = "HDD"
+for i = 0, BDM.DEVA do
+  BDM.DEVSTAT[i] = {ID = -160, RET = -6}
+end
 
 --initialize BDM device table
 for i = 0, BDM.MAX_BD, 1 do
@@ -42,8 +47,8 @@ function GameList.display(L)
   end
   if ammount <= 0 then
     Font.ftPrintMultiLineAligned(LFONT, UI.SCR.X_MID, UI.SCR.Y_MID, 20, UI.SCR.X, 32, "No games found")
-    Font.ftPrintMultiLineAligned(LFONT, UI.SCR.X_MID+1, UI.SCR.Y_MID+1, 20, UI.SCR.X, 32, "No games found")
   end
+  Font.ftPrint(SFONT, 100, UI.SCR.Y-50, 0, 400, 64, "X: Run Game   O: Go Back")
   if PADListen() then
     if Pads.check(GPAD, PAD_DOWN)  then GameList.CURR = CLAMP(GameList.CURR+1, 1, ammount) end
     if Pads.check(GPAD, PAD_UP)    then GameList.CURR = CLAMP(GameList.CURR-1, 1, ammount) end
@@ -86,18 +91,24 @@ local cur = 0
 function BDM.DeviceListPrompt()
   for i = 0, BDM.MAX_BD, 1 do
     local I = IMG.dev_usb
-    local C = i == cur and 128 or 100
+    local C = i == cur and 128 or 99
+    local col = Color.new(128, 128, 128, C)
     if BDM.DeviceList[i] == BDM.DEVS.HDD then I = IMG.dev_ide
     elseif BDM.DeviceList[i] == BDM.DEVS.MX4SIO then I = IMG.dev_mx4sio
     elseif BDM.DeviceList[i] == BDM.DEVS.ILINK then I = IMG.dev_ilink
     elseif BDM.DeviceList[i] == BDM.DEVS.UDPBD then I = IMG.dev_udpbd
-    elseif BDM.DeviceList[i] < 0 then C = C- 0x30 end
-    Graphics.drawImage(I, 100, 64+(64*i), Color.new(128, 128, 128, C))
+    elseif BDM.DeviceList[i] < 0 then
+      col = Color.new(40, 0, 40, C-28)
+      if i == cur then Font.ftPrint(SFONT, 180, 50+16+(64*i), 0, UI.SCR.X, 64, ("no device detected (%d)"):format(BDM.DeviceList[i])) end
+    end
+    Graphics.drawImage(I, 100, 50+(64*i), col)
   end
+  Font.ftPrint(SFONT, 100, UI.SCR.Y-50, 0, UI.SCR.X, 64, "X: Enter Device   SELECT: Refresh   ▲:Driver Manager")
   if PADListen() then
     if Pads.check(GPAD, PAD_UP)  then cur = CLAMP(cur-1, 0, BDM.MAX_BD) end
     if Pads.check(GPAD, PAD_DOWN) then cur = CLAMP(cur+1, 0, BDM.MAX_BD) end
-    if Pads.check(GPAD, PAD_CROSS) then return cur end
+    if Pads.check(GPAD, PAD_CROSS) and BDM.DeviceList[cur] >= 0 then return cur end
+    if Pads.check(GPAD, PAD_TRIANGLE) then return -2 end
     if Pads.check(GPAD, PAD_SELECT) then BDM.UpdateDeviceList() GPAD=1 end
   end
   return -1
