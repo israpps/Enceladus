@@ -45,14 +45,14 @@ function GameList.display(L)
     local Y = 30+((i-STARTUP)*21)
     Font.ftPrint(BFONT, 30, Y, 0, UI.SCR.X, 16, L[i].name, i == GameList.CURR and YELLOW or GREY)
   end
-  if ammount <= 0 then
+  if ammount < 1 then
     Font.ftPrintMultiLineAligned(LFONT, UI.SCR.X_MID, UI.SCR.Y_MID, 20, UI.SCR.X, 32, "No games found")
   end
   Font.ftPrint(SFONT, 100, UI.SCR.Y-50, 0, 400, 64, "X: Run Game   O: Go Back")
   if PADListen() then
-    if Pads.check(GPAD, PAD_DOWN)  then GameList.CURR = CLAMP(GameList.CURR+1, 1, ammount) end
-    if Pads.check(GPAD, PAD_UP)    then GameList.CURR = CLAMP(GameList.CURR-1, 1, ammount) end
-    if Pads.check(GPAD, PAD_CROSS) then return GameList.CURR end
+    if Pads.check(GPAD, PAD_DOWN) then GameList.CURR = CLAMP(GameList.CURR+1, 1, ammount) end
+    if Pads.check(GPAD, PAD_UP) then GameList.CURR = CLAMP(GameList.CURR-1, 1, ammount) end
+    if Pads.check(GPAD, PAD_CROSS) and ammount > 0 then return GameList.CURR end
     if Pads.check(GPAD, PAD_CIRCLE) then return -1 end
   end
   return 0
