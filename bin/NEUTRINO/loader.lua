@@ -43,6 +43,18 @@ function LoadDev9(path)
   return 1 -- loaded
 end
 
+function IOP.GetModuleErr(ID, RET)
+  if ID == -200 then return "Missing driver dependency"
+  elseif ID == -203 then return "File not found"
+  elseif ID == -400 then return "Not enough memory"
+  elseif ID == -100 then return "Illegal context"
+  elseif ID == -431 then return "Illegal type"
+  elseif ID == -432 then return "Illegal size"
+  elseif RET == 1 then return "Driver startup aborted"
+  end
+  return ""
+end
+
 function Main.LoadModule(M)
   local RET, ID
   local modname
@@ -81,15 +93,11 @@ function Main.LoadModule(M)
   ::quit::
   BDM.DEVSTAT[M].ID = ID
   BDM.DEVSTAT[M].RET = RET
+  BDM.DEVSTAT[M].CUL = modname
   if RET == 1 or ID < 0 then
     Main.Devs[M+1] = IOP.LDFAIL
-    local extra = ""
-    if ID == -200 then extra ="\nMissing module dependency"
-    elseif ID == -203 then extra ="\nFile not found"
-    elseif ID == -400 then extra ="\nNOT ENOUGH FREE IOP RAM"
-    elseif RET == 1 then extra ="\nDriver startup aborted"
-    end
-    UI.Notif_queue.add(("Failed to load module %s (%d|%d)"..extra):format(modname, RET, ID))
+    local extra = IOP.GetModuleErr()
+    UI.Notif_queue.add(("Failed to load module %s (%d|%d)\n"..extra):format(modname, RET, ID))
   else
     LOG("Module successful startup")
     Main.Devs[M+1] = IOP.LOADED

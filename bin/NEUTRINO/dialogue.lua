@@ -14,7 +14,8 @@ function ModLoadUI()
     elseif i == BDM.DEVS.ILINK then I = IMG.dev_ilink
     elseif i == BDM.DEVS.UDPBD then I = IMG.dev_udpbd end
     if Main.Devs[i+1] == IOP.LDFAIL then
-      Font.ftPrint(BFONT, 180, 70+32+(70*i), 0, 300, 64, ("Driver startup error (id:%d | ret:%d)"):format(BDM.DEVSTAT[i].ID, BDM.DEVSTAT[i].RET), Color.new(200,0,0,C))
+      Font.ftPrint(BFONT, 180, 70+16+(70*i), 0, 300, 64, ("Driver startup error: '%s'  id:%d  ret:%d\n\"%s\""):format(
+        BDM.DEVSTAT[i].CUL, BDM.DEVSTAT[i].ID, BDM.DEVSTAT[i].RET, IOP.GetModuleErr(BDM.DEVSTAT[i].ID, BDM.DEVSTAT[i].RET)), Color.new(128, 128, 128, C))
     elseif Main.Devs[i+1] == IOP.NLOAD then
       C = C-50
     end
@@ -22,7 +23,7 @@ function ModLoadUI()
     if Main.Devs[i+1] == IOP.LDFAIL then col = Color.new(200, 0, 0, C)
     elseif Main.Devs[i+1] == IOP.LOADED then col = Color.new(0, 128, 40, C)
     end
-    Font.ftPrint(BFONT, 180, 70+16+(70*i), 0, 128, 64, BDM.DevAlias[i], col)
+    Font.ftPrint(BFONT, 180, 70+(70*i), 0, 128, 64, BDM.DevAlias[i], col)
     Graphics.drawImage(I, 100, 70+(70*i), col)
   end
   if lding > 0 then

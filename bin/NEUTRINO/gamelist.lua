@@ -23,7 +23,7 @@ BDM.DevAlias[2] = "UDPBD"
 BDM.DevAlias[3] = "iLink"
 BDM.DevAlias[4] = "HDD"
 for i = 0, BDM.DEVA do
-  BDM.DEVSTAT[i] = {ID = -160, RET = -6}
+  BDM.DEVSTAT[i] = {ID = -160, RET = -6, CUL = ""}
 end
 
 --initialize BDM device table
