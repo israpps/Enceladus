@@ -11,7 +11,7 @@ BFONT = Font.ftLoad("NEUTRINO/font.ttf")
 SFONT = Font.ftLoad("NEUTRINO/font.ttf")
 LFONT = Font.ftLoad("NEUTRINO/font.ttf")
 Font.ftSetCharSize(BFONT, 800, 800)
-Font.ftSetCharSize(SFONT, 600, 600)
+Font.ftSetCharSize(SFONT, 620, 620)
 
 UI = {
   SCR = {
@@ -57,6 +57,7 @@ local IMGS = {
   "dev_udpbd.png",
   "dev_usb.png",
   "splash_logo.png",
+  "nodev.png",
 }
 IMG = {}
 LOGF("%d images registered", #IMGS)

@@ -119,8 +119,15 @@ local SCENES = {
   CREDITS = 2,
   MODLOAD = 3,
 }
+local CURSCENE = SCENES.MAIN
 
-local CURSCENE = SCENES.MODLOAD
+local fbt = "NEUTRINO/.nldr"
+if not doesFileExist(fbt) then
+  local fd = System.openFile(fbt, FCREATE)
+  System.closeFile(fd)
+  CURSCENE = SCENES.CREDITS
+end
+
 local x
 while true do
   UI.Pre()
@@ -136,6 +143,7 @@ while true do
       T = GameList.ParseMassDevice(BDM.CURRBD, "DVD", GameList.clist)
       if T ~= nil then GameList.clist = T end
     elseif x == -2 then CURSCENE = SCENES.MODLOAD
+    elseif x == -3 then CURSCENE = SCENES.CREDITS
     end
   elseif CURSCENE == SCENES.GAMELIST then
     local G = GameList.display(GameList.clist)

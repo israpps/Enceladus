@@ -117,7 +117,7 @@ RELDIR = releasepack/
 REL_PKG = $(RELDIR)Neutrino-Launcher-$(VER)-$(GITHASH).7z
 package: $(EE_BIN_PKD)
 	mkdir -p $(RELDIR)
-	rm -f $(REL_PKG)
+	rm -f $(REL_PKG) bin/NEUTRINO/.nldr
 	7z a $(REL_PKG) $(EE_BIN_PKD) bin/changelog bin/NEUTRINO/* LICENSE README.md
 #--------------------- Embedded ressources ------------------------#
 

@@ -1,4 +1,7 @@
-
+--[[
+NEUTRINO Launcher by El_isra                                                         
+LICENSE: GNU GPL v3
+--]]
 package.path = "./?.lua;./LUA/?.lua;./NEUTRINO/?.lua"
 
 function LOG(...)

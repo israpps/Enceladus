@@ -1,0 +1,7 @@
+# Name of loaded config, to show to user
+name = "UART IOP Logging for PowerPC"
+
+# Modules to load
+[[module]]
+file = "ppctty.irx"
+env = ["LE", "EE"]

@@ -1,5 +1,8 @@
+--[[
+NEUTRINO Launcher by El_isra                                                         
+LICENSE: GNU GPL v3
+--]]
 LOG("> Registering extra diags")
-
 
 local cur = 0
 local lding = 0
