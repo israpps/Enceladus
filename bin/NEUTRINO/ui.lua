@@ -93,7 +93,7 @@ UI.Credits = {
     Font.ftPrintMultiLineAligned(BFONT, UI.SCR.X_MID, 300, 20, UI.SCR.X, 40, "Coded By El_isra", currcol)
     Font.ftPrintMultiLineAligned(BFONT, UI.SCR.X_MID, 320, 20, UI.SCR.X, UI.SCR.Y, "Based on Enceladus by Daniel santos\nUI GFX by Berion\nSpecial thanks to Maximus32 for making Neutrino\n\nThis program is free and open source\nif you bought it you've been scammed", currcol)
     PADListen()
-    if GPAD ~= 0 then UI.Credits.INCR = 1 end
+    if GPAD ~= 0 and UI.Credits.Q > 100 then UI.Credits.INCR = 1 end
     return false
   end
 };
