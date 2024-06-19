@@ -127,10 +127,18 @@ if not doesFileExist(fbt) then
   System.closeFile(fd)
   CURSCENE = SCENES.CREDITS
 end
+---debug
+local time = Timer.new()
+local prev=0
+local cur=0
+--debug
 
 local x
 while true do
   UI.Pre()
+  prev = cur
+  cur = Timer.getTime(time)
+  Font.ftPrint(BFONT, UI.SCR.X_MID, 20, 8, UI.SCR.X, 16, ("test stage build - %s - free vram:%d - %dFPS"):format(GitHash, Screen.getFreeVRAM(), Screen.getFPS(cur-prev)), Color.new(128,128,128,50))
   if CURSCENE == SCENES.MAIN then
     x = BDM.DeviceListPrompt()
     if x > -1 then
