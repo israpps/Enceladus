@@ -15,3 +15,4 @@ LOG("- NEUTRINO LAUNCHER -")
 LOG("By El_isra. GFX by Berion. based on Enceladus")
 
 require("loader")
+error("end of builtin script reached") -- to avoid enceladus returning an error without message after builtin script ends

@@ -113,7 +113,7 @@ function BDM.DeviceListPrompt()
     if Pads.check(GPAD, PAD_CROSS) and BDM.DeviceList[cur] >= 0 then GPAD=1 return cur end
     if Pads.check(GPAD, PAD_TRIANGLE) then return -2 end
     if Pads.check(GPAD, PAD_START) then return -3 end
-    if Pads.check(GPAD, PAD_SELECT) then BDM.UpdateDeviceList() GPAD=1 end
+    if Pads.check(GPAD, PAD_SELECT) then BDM.UpdateDeviceList() end
   end
   return -1
 end
