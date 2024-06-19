@@ -8,7 +8,7 @@ local cur = 0
 local lding = 0
 function ModLoadUI()
   Font.ftPrint(BFONT, 40, 40, 0, 128, 64, "Driver Manager")
-  Graphics.drawRect(0, 60, UI.SCR.X, 2, GREY)
+  Graphics.drawRect(0, 60, UI.SCR.X, 2, WHITE)
   for i = 0, BDM.DEVA, 1 do
     local I = IMG.dev_usb
     local C = i == cur and 127 or 100
@@ -44,7 +44,7 @@ function ModLoadUI()
     if Pads.check(GPAD, PAD_UP)  then cur = CLAMP(cur-1, 0, BDM.DEVA) end
     if Pads.check(GPAD, PAD_DOWN) then cur = CLAMP(cur+1, 0, BDM.DEVA) end
     if Pads.check(GPAD, PAD_CIRCLE) then return cur end
-    if Pads.check(GPAD, PAD_CROSS) then lding = 1 end
+    if Pads.check(GPAD, PAD_CROSS) and Main.Devs[cur+1] == IOP.NLOAD then lding = 1 end
   end
   return -1
 end

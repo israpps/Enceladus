@@ -121,6 +121,7 @@ end
 
 YELLOW = Color.new(0xff, 0xff, 0)
 GREY = Color.new(0x80, 0x80, 0x80)
+WHITE = Color.new(0xff, 0xff, 0xff)
 
 function Font.ftPrintMultiLineAligned(font, x, y, spacing, width, height, text, color)
   local internal_y = y
