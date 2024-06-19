@@ -16,3 +16,5 @@ asm/
 /bin/NEUTRINO/config
 /releasepack
 bin/NEUTRINO/.nldr
+bin/NEUTRINO/README.md
+neutrino.temp.7z

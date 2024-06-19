@@ -109,14 +109,22 @@ EE_OBJS := $(EE_OBJS:%=$(EE_OBJS_DIR)%) # remap all EE_OBJ to obj subdir
 all: ds34 $(EE_BIN_PKD)
 	@echo "$$HEADER"
 
+NEUTRINO = bin/NEUTRINO/neutrino.elf
+$(NEUTRINO):
+	wget -q https://github.com/rickgaiser/neutrino/releases/download/v1.3.1/neutrino_v1.3.1.7z -O neutrino.temp.7z
+	7z x neutrino.temp.7z -o"bin/NEUTRINO/"
+	rm -f neutrino.temp.7z
+
 $(EE_BIN_PKD): $(EE_BIN)
 	$(EE_STRIP) $(EE_BIN)
 	ps2-packer $(EE_BIN) $(EE_BIN_PKD)
 
 RELDIR = releasepack/
-REL_PKG = $(RELDIR)Neutrino-Launcher-$(VER)-$(GITHASH).7z
-package: $(EE_BIN_PKD)
+$(RELDIR):
 	mkdir -p $(RELDIR)
+
+REL_PKG = $(RELDIR)Neutrino-Launcher-$(VER)-$(GITHASH).7z
+package: $(EE_BIN_PKD) $(RELDIR) $(NEUTRINO)
 	rm -f $(REL_PKG) bin/NEUTRINO/.nldr
 	7z a $(REL_PKG) $(EE_BIN_PKD) bin/changelog bin/NEUTRINO/* LICENSE README.md
 #--------------------- Embedded ressources ------------------------#
