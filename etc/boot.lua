@@ -3,7 +3,7 @@ NEUTRINO Launcher by El_isra
 LICENSE: GNU GPL v3
 --]]
 package.path = "./NEUTRINO/?.lua;./?.lua;./LUA/?.lua"
-
+GitHash = GetGitHash()
 function LOG(...)
   print_uart(...)
   end

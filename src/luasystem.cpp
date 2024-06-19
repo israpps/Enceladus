@@ -846,12 +846,17 @@ static int bdm_get_devtype(lua_State *L) {
 	lua_pushinteger(L, dd);
 	return 1;
 }
+static int get_githash(lua_State *L) {
+	lua_pushstring(L, __GIT_HASH__);
+	return 1;
+}
 
 void luaSystem_init(lua_State *L) {
 
 	lua_register(L, "doesFileExist", lua_checkexist);
 	lua_register(L, "print_uart", lua_sio_print);
 	lua_register(L, "GetBDMDeviceType", bdm_get_devtype);
+	lua_register(L, "GetGitHash", get_githash);
 
 	setModulePath();
 	lua_newtable(L);
