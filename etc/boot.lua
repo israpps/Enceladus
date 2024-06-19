@@ -2,7 +2,7 @@
 NEUTRINO Launcher by El_isra                                                         
 LICENSE: GNU GPL v3
 --]]
-package.path = "./?.lua;./LUA/?.lua;./NEUTRINO/?.lua"
+package.path = "./NEUTRINO/?.lua;./?.lua;./LUA/?.lua"
 
 function LOG(...)
   print_uart(...)
