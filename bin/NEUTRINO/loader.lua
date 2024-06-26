@@ -30,6 +30,7 @@ Main = {
   modloc = System.currentDirectory().."/NEUTRINO/modules/";
   neutrino_loc = System.currentDirectory().."/NEUTRINO/neutrino.elf";
   bsd = "usb";
+  compat = {false, false, false, false};
 }
 
 function LoadDev9(path)
@@ -110,7 +111,13 @@ end
 function Main.LaunchNeutrino(GAME, ...)
   local bsd = ("-bsd=%s"):format(Main.bsd)
   local gameloc = ("-dvd=mass:%s"):format(GAME)
-  System.loadELF(Main.neutrino_loc, 1, bsd, gameloc, ...)
+  local compat = "-gc="
+  if Main.compat[1] then compat=compat.."1" end
+  if Main.compat[2] then compat=compat.."2" end
+  if Main.compat[3] then compat=compat.."3" end
+  if Main.compat[4] then compat=compat.."5" end
+  if compat == "-gc=" then compat="-gc=0" end -- no compat modes? disable even neutrino builtin config
+  System.loadELF(Main.neutrino_loc, 1, bsd, gameloc, compat, ...)
 end
 
 local SCENES = {
@@ -118,6 +125,7 @@ local SCENES = {
   GAMELIST = 1,
   CREDITS = 2,
   MODLOAD = 3,
+  COMPATMOD = 4,
 }
 local CURSCENE = SCENES.MAIN
 
@@ -152,6 +160,7 @@ while true do
       if T ~= nil then GameList.clist = T end
     elseif x == -2 then CURSCENE = SCENES.MODLOAD
     elseif x == -3 then CURSCENE = SCENES.CREDITS
+    elseif x == -4 then CURSCENE = SCENES.COMPATMOD
     end
   elseif CURSCENE == SCENES.GAMELIST then
     local G = GameList.display(GameList.clist)
@@ -169,6 +178,8 @@ while true do
     if UI.Credits.Play() then CURSCENE = SCENES.MAIN end
   elseif CURSCENE == SCENES.MODLOAD then
     if ModLoadUI() ~= -1 then CURSCENE = SCENES.MAIN end
+  elseif CURSCENE == SCENES.COMPATMOD then
+    if CompatModesDisp() ~= -1 then CURSCENE = SCENES.MAIN end
   end
   UI.Top()
 end

@@ -106,13 +106,14 @@ function BDM.DeviceListPrompt()
     end
     Graphics.drawImage(I, 100, 50+(64*i), col)
   end
-  Font.ftPrint(SFONT, 100, UI.SCR.Y-50, 0, UI.SCR.X, 64, "X: Enter Device   START: Credits   SELECT: Refresh   ▲:Driver Manager")
+  Font.ftPrint(SFONT, 100, UI.SCR.Y-50, 0, UI.SCR.X, 64, "X: Enter Device   START: Credits   SELECT: Refresh   ▲:Driver Manager   ■:Compatibility modes")
   if PADListen() then
     if Pads.check(GPAD, PAD_UP) then cur = CLAMP(cur-1, 0, BDM.MAX_BD) end
     if Pads.check(GPAD, PAD_DOWN) then cur = CLAMP(cur+1, 0, BDM.MAX_BD) end
     if Pads.check(GPAD, PAD_CROSS) and BDM.DeviceList[cur] >= 0 then GPAD=1 return cur end
     if Pads.check(GPAD, PAD_TRIANGLE) then return -2 end
     if Pads.check(GPAD, PAD_START) then return -3 end
+    if Pads.check(GPAD, PAD_SQUARE) then return -4 end
     if Pads.check(GPAD, PAD_SELECT) then BDM.UpdateDeviceList() end
   end
   return -1

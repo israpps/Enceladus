@@ -43,8 +43,36 @@ function ModLoadUI()
   if PADListen() then
     if Pads.check(GPAD, PAD_UP)  then cur = CLAMP(cur-1, 0, BDM.DEVA) end
     if Pads.check(GPAD, PAD_DOWN) then cur = CLAMP(cur+1, 0, BDM.DEVA) end
-    if Pads.check(GPAD, PAD_CIRCLE) then return cur end
+    if Pads.check(GPAD, PAD_CIRCLE) then cur = 0 return 0 end
     if Pads.check(GPAD, PAD_CROSS) and Main.Devs[cur+1] == IOP.NLOAD then lding = 1 end
+  end
+  return -1
+end
+
+
+function CompatModesDisp()
+  local compatmodes = {
+    {t="Accurate reads";d="Limits the reading speed to the maximun speeds than a real disc could reach on PS2";};
+    {t="Sync reads";d="ISO Readings while in-game will be synchronized";};
+    {t="Unhook syscalls";d="Unhook all the syscalls from the EmotionEngine interfered by neutrino EE_Core";};
+    {t="Emulate Dual Layer DVD";d="Emulates CDVDMAN functions related to Dual Layer discs\nby responding with information from the first layer";};
+  }
+  Font.ftPrint(BFONT, 40, 40, 0, 128, 64, "Compatibility modes")
+  Graphics.drawRect(0, 60, UI.SCR.X, 2, WHITE)
+  for i = 1, #compatmodes, 1 do
+    --local g = 128
+    local t = 0x50
+    if i == (cur+1) then t = 0x80 end
+    --if Main.compat[i] then g = 0xff end
+    Font.ftPrint(BFONT, 110, 50+(30*i), 0, 200, 64, compatmodes[i].t, Main.compat[i] and Color.new(50, 128, 50, t) or Color.new(128, 128, 128, t))
+  end
+  Font.ftPrint(SFONT, 100, UI.SCR.Y-100, 0, 400, 64, compatmodes[cur+1].d, GREY)
+  Font.ftPrint(SFONT, 100, UI.SCR.Y-50 , 0, 400, 64, "X: switch mode   O: Go Back")
+  if PADListen() then
+    if Pads.check(GPAD, PAD_UP)  then cur = CLAMP(cur-1, 0, #compatmodes-1) end
+    if Pads.check(GPAD, PAD_DOWN) then cur = CLAMP(cur+1, 0, #compatmodes-1) end
+    if Pads.check(GPAD, PAD_CIRCLE) then cur=0 return 0 end
+    if Pads.check(GPAD, PAD_CROSS) then Main.compat[cur+1] = not Main.compat[cur+1]; end
   end
   return -1
 end
