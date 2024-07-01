@@ -1,0 +1,16 @@
+
+                            <!-- SECTIONS -->
+                          {% for id in page.sections %}
+                            {% assign section = site.doc | where: "id", id | first %}
+                            {% unless section %}
+                              {% assign url = id | append: '.html' %}
+                              {% assign section = site.pages | where: "url", url | first %}
+                            {% endunless %}
+                            {% unless section %}{% continue %}{% endunless %}
+                            <section id="{{ section.title | slugify }}" class="doc-section">
+                                <h2 class="section-title">{{ section.title }}</h2>
+                                <div class="section-block">
+                                    {{ section.content | markdownify }}
+                                </div>
+                            </section>
+                          {% endfor %}
