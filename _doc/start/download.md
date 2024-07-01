@@ -2,9 +2,8 @@
 title: Download
 ---
 
-Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi nec imperdiet turpis. Curabitur aliquet pulvinar ultrices.
-Etiam at posuere leo. Proin ultrices ex et dapibus feugiat [link example](#) aenean purus leo, faucibus at elit vel, aliquet scelerisque dui.
-Etiam quis elit euismod, imperdiet augue sit amet, imperdiet odio. Aenean sem erat, hendrerit  eu gravida id, dignissim ut ante.
-Nam consequat porttitor libero euismod congue.
+Downloading enceladus is pretty straightforward!
 
-[*&nbsp;*{: .fa .fa-download} Download PrettyDocs](http://themes.3rdwavemedia.com){: .btn .btn-green}
+You just need a way of unpacking .tar.gz files
+
+[*&nbsp;*{: .fa .fa-download} Download Enceladus](https://github.com/DanielSant0s/Enceladus/releases/download/latest/Enceladus.tar.gz){: .btn .btn-green}

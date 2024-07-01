@@ -2,11 +2,7 @@
 layout: home
 title: Home
 tagline: |
-  Free Bootstrap theme for your project documentation
-  
-  Designed with *&nbsp;*{: .fa .fa-heart} for developers
-  
-  Ready to use in *&nbsp;*{: .fa .fa-github} Github Pages
+  A Lua Engine for SCE PlayStation 2
 heading: Getting started is easy!
 navigation:
   - /start
@@ -20,16 +16,17 @@ navigation:
   - /legal
 ---
 
-Welcome to prettyDocs.
-This landing page is an example of how you can use a card view to present segments of your documentation.
-You can customise the icon fonts based on your needs.
+With enceladus, you will be able to create basic applications for the PlayStation2 without needing any knoledge in C/C++/ASM
+
+It may even prove useful for more experienced developers. since it helps to make the programs simpler to develop & maintain
+
 
 <div class="cta-container">
 
-[*&nbsp;*{: .fa .fa-cloud-download} Download Now][PRETTYDOCS]{: .btn .btn-primary .btn-cta}
-[*&nbsp;*{: .fa .fa-github} Use in GitHub Pages][GHPAGES]{: .btn .btn-green .btn-primary .btn-cta}
+[*&nbsp;*{: .fa .fa-cloud-download} Download Binary Distribution][PRETTYDOCS]{: .btn .btn-primary .btn-cta}
+[*&nbsp;*{: .fa .fa-github} Source Code][GHPAGES]{: .btn .btn-green .btn-primary .btn-cta}
 
 </div>
 
-[PRETTYDOCS]: https://themes.3rdwavemedia.com/website-templates/prettydocs-free-bootstrap-theme-developers-and-startups/
-[GHPAGES]: https://github.com/LeakyAbstractions/pretty-docs/tree/gh-pages
+[PRETTYDOCS]: https://github.com/DanielSant0s/Enceladus/releases/download/latest/Enceladus.tar.gz
+[GHPAGES]: https://github.com/DanielSant0s/Enceladus
