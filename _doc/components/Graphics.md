@@ -12,33 +12,33 @@ sections:
 ### Primitive shapes
 Draw the most basic shapes on screen
 
-#### Graphics.drawPixel(x, y, color)
+<h4 style="color:red">Graphics.drawPixel(x, y, color)</h4>
 Sets a screen pixel on a given color
 ##### Parameters:
 `x` & `y`: Screen coordinates for drawing the pixel  
 `color`: the color of the pixel, in GS RGBA (see `Color.new()`)
-#### Graphics.drawRect(x, y, width, height, color)
+<h4 style="color:red">Graphics.drawRect(x, y, width, height, color)</h4>
 Draws a rectangle
 ##### Parameters:
 `x` & `y`: Screen coordinates for the top left edge of the rectangle.  
-`width` & `height`: width and height of the rectangle.
-`color`: the color of the pixel, in GS RGBA (see `Color.new()`)
-#### Graphics.drawLine(x, y, x2, y2, color)
+`width` & `height`: width and height of the rectangle.  
+`color`: the color of the pixel, in GS RGBA (see `Color.new()`)  
+<h4 style="color:red">Graphics.drawLine(x, y, x2, y2, color)</h4>
 Draws a line
 ##### Parameters:
 `x` & `y`: Screen coordinates for line begining.  
 `x2` & `y2`: Screen coordinates for line ending.  
 `color`: the color of the pixel, in GS RGBA (see `Color.new()`)
-#### Graphics.drawCircle(x, y, radius, color, filled)
+<h4 style="color:red">Graphics.drawCircle(x, y, radius, color, filled)</h4>
 Draws a circle
 ##### Parameters:
 `x` & `y`: Screen coordinates for circle center.  
 `radius`: Circle radius.  
-`color`: the color of the pixel, in GS RGBA (see `Color.new()`)
-`filled`: if the whole circle surface is drawn or only the permiter. **This parameter is not mandatory**
-#### Graphics.drawTriangle(x, y, x2, y2, x3, y3, color, color2, color3) 
+`color`: the color of the pixel, in GS RGBA (see `Color.new()`)  
+`filled`: if the whole circle surface is drawn or only the permiter. **This parameter is not mandatory**  
+<h4 style="color:red">Graphics.drawTriangle(x, y, x2, y2, x3, y3, color, color2, color3) </h4>
 color2 and color3 parameters are not mandatory
-#### Graphics.drawQuad(x, y, x2, y2, x3, y3, x4, y4 color, color2, color3, color4) 
+<h4 style="color:red">Graphics.drawQuad(x, y, x2, y2, x3, y3, x4, y4 color, color2, color3, color4) </h4>
 color2, color3 and color4 parameters are not mandatory
 
 --------
@@ -46,7 +46,7 @@ color2, color3 and color4 parameters are not mandatory
 Load and display images on screen
 
 
-#### image = Graphics.loadImage(path) 
+<h4 style="color:red">image = Graphics.loadImage(path) </h4>
 Loads an image and uploads it to the GS VRAM. Supports __BMP__, __JPG__ and __PNG__.
 
 > small tip: to avoid wasting VRAM. make sure the images width and height are ALWAYS a power of 2  
@@ -55,51 +55,51 @@ Loads an image and uploads it to the GS VRAM. Supports __BMP__, __JPG__ and __PN
 ##### Parameters:
 `path`: relative or absolute path to the image to be loaded.    
 if something fails, it returns nil.   
-#### Graphics.drawImage(image, x, y, color)
+<h4 style="color:red">Graphics.drawImage(image, x, y, color)</h4>
 Draws an image on the screen.
 ##### Parameters:
 `image`: the desired image to be displayed. (the return value of `Graphics.loadImage(path)`)  
 `x` & `y`: screen coordinates for the top left corner of the image  
 `color`: color mask for altering the image color **This parameter is not mandatory**  
-#### Graphics.drawRotateImage(image, x, y, angle, color)
+<h4 style="color:red">Graphics.drawRotateImage(image, x, y, angle, color)</h4>
 ##### Parameters:
 same than `Graphics.drawImage()`.  
 `angle`: indicates the image rotation
-#### Graphics.drawScaleImage(image, x, y, witdh, height, color)
+<h4 style="color:red">Graphics.drawScaleImage(image, x, y, witdh, height, color)</h4>
 Draws an image on the screen, but with custom witdh and height.
 ##### Parameters:
 `image`: the desired image to be displayed. (the return value of `Graphics.loadImage(path)`)  
 `x` & `y`: screen coordinates for the top left corner of the image  
 `witdh` & `height`: on-screen witdh and height for the image.  
 `color`: color mask for altering the image color **This parameter is not mandatory**  
-#### Graphics.drawPartialImage(image, x, y, start_x, start_y, width, height, color)
+<h4 style="color:red">Graphics.drawPartialImage(image, x, y, start_x, start_y, width, height, color)</h4>
 ##### Parameters:
 `image`: the desired image to be displayed. (the return value of `Graphics.loadImage(path)`)  
 `x` & `y`: screen coordinates for the top left corner of the image  
 `start_x` & `start_y`: coordinates inside the image for the portion to be drawn  
 `witdh` & `height`: width and height of the image portion to be drawn.  
 `color`: color mask for altering the image color **This parameter is not mandatory**  
-#### Graphics.drawImageExtended(image, x, y, start_x, start_y, width, height, scale_x, scale_y, angle, color)
+<h4 style="color:red">Graphics.drawImageExtended(image, x, y, start_x, start_y, width, height, scale_x, scale_y, angle, color)</h4>
 same than `Graphics.drawPartialImage()` but with parameters for rotation and altering the image portion width and height on screen
 ##### Parameters:
 `scale_x` & `scale_y`: on-screen width and height for the image portion drawn  
 `angle`: rotation of the image portion
-#### Graphics.setImageFilters(image, filter)
+<h4 style="color:red">Graphics.setImageFilters(image, filter)</h4>
 Applies a filter to the image when drawing.
 ##### Parameters:
 `image`: the desired image to apply the filter into. (the return value of `Graphics.loadImage(path)`)  
 `filter`: filter type:
 - `NEAREST`
 - `LINEAR`
-#### width = Graphics.getImageWidth(image)
+<h4 style="color:red">width = Graphics.getImageWidth(image)</h4>
 obtain the width of an image
 ##### Parameters:
 `image`: the desired image to obtain Width from. (the return value of `Graphics.loadImage(path)`)  
-#### height = Graphics.getImageHeight(image)
+<h4 style="color:red">height = Graphics.getImageHeight(image)</h4>
 obtain the Height of an image
 ##### Parameters:
 `image`: the desired image to obtain Height from. (the return value of `Graphics.loadImage(path)`)  
-#### Graphics.freeImage(image)
+<h4 style="color:red">Graphics.freeImage(image)</h4>
 Frees the image from both the RAM and VRAM. use this when the image will no longer be used. of it you need to make space on VRAM
 ##### Parameters:
 `image`: the desired image to be freed. (the return value of `Graphics.loadImage(path)`)  
@@ -108,21 +108,21 @@ Frees the image from both the RAM and VRAM. use this when the image will no long
 --------
 ### Screen
 Screen related functions
-#### Screen.clear(color) 
+<h4 style="color:red">Screen.clear(color) </h4>
 Clears the screen from any drawn object
 ##### Parameters:
 `color`: Color of the background, generated with `Color.new()`. **this parameter isn't mandatory, defaults to Black**
-#### Screen.flip()
+<h4 style="color:red">Screen.flip()</h4>
 Performs the screen drawing.
-#### freevram = Screen.getFreeVRAM()
+<h4 style="color:red">freevram = Screen.getFreeVRAM()</h4>
 Returns the ammount of free VRAM from the GS chip (in kbytes)
-#### fps = Screen.getFPS(frame_interval)
+<h4 style="color:red">fps = Screen.getFPS(frame_interval)</h4>
 Measure FPS based on frame interval
-#### Screen.setVSync(bool)
+<h4 style="color:red">Screen.setVSync(bool)</h4>
 Set Vertical Sync
-#### Screen.waitVblankStart()
+<h4 style="color:red">Screen.waitVblankStart()</h4>
 
-#### Screen.setMode(mode, width, height, colormode, interlace, field, zbuffering, zbuf_colormode)
+<h4 style="color:red">Screen.setMode(mode, width, height, colormode, interlace, field, zbuffering, zbuf_colormode)</h4>
 Sets the video mode, screen size and other parameters  
 
 > Default NTSC mode(3D disabled): `Screen.setMode(NTSC, 640, 448, CT24, INTERLACED, FIELD)`  
@@ -137,7 +137,7 @@ Sets the video mode, screen size and other parameters
 `field`: `FIELD`, `FRAME`  
 `zbuffering`: bool **This parameter is not mandatory**, defaults to `false`
 `zbuf_colormode`: `Z16`, `Z16S`, `Z24`, `Z32` **This parameter is not mandatory**  
-#### modetable = Screen.getMode()
+<h4 style="color:red">modetable = Screen.getMode()</h4>
 returns currently set video mode parameters
 ##### Return value
 Table:
@@ -156,39 +156,39 @@ Table:
 ### 3D
 - Remember to enable zbuffering on screen mode
 
-#### Render.init(aspect)
+<h4 style="color:red">Render.init(aspect)</h4>
 Initializes the render aspect ratio.
 ##### Parameters:
 `aspect`: render aspect ratio. `4/3` for default, `16/9` for widescreen.
-#### model = Render.loadOBJ(path, texture)
+<h4 style="color:red">model = Render.loadOBJ(path, texture)</h4>
 ##### Parameters:
 `path`: location of the wavefront OBJ file to load. either relative or absolute path.
 `texture`: path to the texture for the 3D model. (the return value of `Graphics.loadImage(path)`) **This parameter is not mandatory**
 ##### Return value
 The loaded 3D model, to be used later.
-#### Render.drawOBJ(model, pos_x, pos_y, pos_z, rot_x, rot_y, rot_z)
+<h4 style="color:red">Render.drawOBJ(model, pos_x, pos_y, pos_z, rot_x, rot_y, rot_z)</h4>
 Draws the 3D model.
 ##### Parameters:
 `model`: the 3D model to draw. (the return value of `Render.loadOBJ()`)
 `pos_x`, `pos_y`, `pos_z`: __X__, __Y__ and __Z__ axis position of the model on-screen
 `rot_x`, `rot_y`, `rot_z`: __X__, __Y__ and __Z__ axis rotation of the model on-screen
-#### Render.freeOBJ(model)
+<h4 style="color:red">Render.freeOBJ(model)</h4>
 Free a 3d model from the EE RAM
 ##### Parameters:
 `model`: the 3D model to free. (the return value of `Render.loadOBJ()`)
 
 > Camera functions:
 
-#### Camera.position(x, y, z)
+<h4 style="color:red">Camera.position(x, y, z)</h4>
 Sets the camera position on the 3D space
-#### Camera.rotation(x, y, z)
+<h4 style="color:red">Camera.rotation(x, y, z)</h4>
 Set the camera rotation on its current position
 > Lights functions:
 
-#### Lights.create(count)
+<h4 style="color:red">Lights.create(count)</h4>
 ##### Parameters:
 `count`: ammount of lights to be created.
-#### Lights.set(light, dir_x, dir_y, dir_z, r, g, b, type)
+<h4 style="color:red">Lights.set(light, dir_x, dir_y, dir_z, r, g, b, type)</h4>
 `light`: the light index
 `dir_x`, `dir_y`, `dir_z`: light positions on the 3D space.
 `r`, `g`, `b`: red, green and blue colors of the light. integer 0-255
@@ -199,15 +199,16 @@ Set the camera rotation on its current position
 Font drawing. splitted into 3 categories, image font, ROM Font and Freetype fonts
 
 > Freetype fonts:
-#### Font.ftInit()
+
+<h4 style="color:red">Font.ftInit()</h4>
 Initialize the Freetype font system
-#### font = Font.ftLoad(font)
+<h4 style="color:red">font = Font.ftLoad(font)</h4>
 loads a font into EE RAM
-#### Parameters:
+<h4 style="color:red">Parameters:</h4>
 `font`: path to a TTF or OTF font file to be loaded.
-#### Return value:
+<h4 style="color:red">Return value:</h4>
 if font is successfully loaded, a font ID number will be returned, for using on the font drawing functions. if an error ocurrs a negative number is returned
-#### Font.ftPrint(font, x, y, align, width, height, text, color)
+<h4 style="color:red">Font.ftPrint(font, x, y, align, width, height, text, color)</h4>
 Print on screen with the font
 ##### Parameters:
 `font`: the Font ID to be used (return value of `Font.ftLoad()`)
@@ -217,20 +218,20 @@ Print on screen with the font
   - `8`: centered text (has issues handling multiline text)
 `text`: text to write
 `color`: Color generated by `Color.new()` **This parameter is not mandatory**
-#### Font.ftSetPixelSize(font, width, height)
+<h4 style="color:red">Font.ftSetPixelSize(font, width, height)</h4>
 Changes the font size
-#### Font.ftUnload(font)
+<h4 style="color:red">Font.ftUnload(font)</h4>
 Unloads the font from EE side.
-#### Font.ftEnd()
+<h4 style="color:red">Font.ftEnd()</h4>
 De-inits the font system
 > Image font functions:
-#### font = Font.load(font)
+<h4 style="color:red">font = Font.load(font)</h4>
 Loads a font from an image. expects format to be __FNT__, __PNG__ or __BMP__
 ##### Parameters:
 `font`: path to the image to load as font
 ##### Return value:
 Font ID for further use.
-#### Font.print(font, x, y, scale, text, color)
+<h4 style="color:red">Font.print(font, x, y, scale, text, color)</h4>
 Print text with an image font
 ##### Parameters:
 `font`: ID of the image font
@@ -238,22 +239,22 @@ Print text with an image font
 `scale`: general scale of the font size
 `text`: text to be written
 `color`: text color generated by `Color.new()`. **This parameter is not Mandatory**
-#### Font.unload(font)
+<h4 style="color:red">Font.unload(font)</h4>
 Unloads the Image font linked to that font ID
-#### Parameters:
+<h4 style="color:red">Parameters:</h4>
 `font`: the font ID returned by `Font.load()`
 
 > ROM Font Functions
 
 the following functions are related to the PlayStation2 Builtin font: `rom0:FONTM`. this file is not present on some special PS2 variants such as PSX-DESR models. so keep it in mind.
 
-#### Font.fmLoad()
+<h4 style="color:red">Font.fmLoad()</h4>
 Initializes the ROM Font system, reading and preparing the `rom0:FONTM` file
-#### Font.fmPrint(x, y, scale, text, color) color isn't mandatory
+<h4 style="color:red">Font.fmPrint(x, y, scale, text, color) color isn't mandatory</h4>
 Prints text with the console builtin font
 `x`, `y`: coordinates of the text position
 `scale`: general scale of the font size (can be a float number)
 `text`: text to be written
 `color`: text color generated by `Color.new()`. **This parameter is not Mandatory**
-#### Font.fmUnload()
+<h4 style="color:red">Font.fmUnload()</h4>
 Unload the `rom0:FONTM` font from EE RAM

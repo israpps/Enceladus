@@ -12,7 +12,7 @@ sections:
 
 ### Executables Launching
 
-#### System.loadELF(path, reboot_iop, args...)
+<h4 style="color:red">System.loadELF(path, reboot_iop, args...)</h4>
 tries to load an EE ELF program from the specified path
 
 ##### Parameters:
@@ -24,7 +24,7 @@ tries to load an EE ELF program from the specified path
 
 ### File Handling
 
-#### fd = System.openFile(path, type)
+<h4 style="color:red">fd = System.openFile(path, type)</h4>
 Opens a file.
 ##### Parameters:
 `path`: path to be opened. either absolute or relative.  
@@ -35,7 +35,7 @@ Opens a file.
 - `FRDWR`: Read and Write
 - `FTRUNCATE`: Write Only, _if file exist it's content will be wiped_
 
-#### buffer = System.readFile(fd, size)
+<h4 style="color:red">buffer = System.readFile(fd, size)</h4>
 Reads from a file
 ##### Parameters:
 `fd`: Integer. File descriptor returned by `System.openFile()`  
@@ -43,20 +43,20 @@ Reads from a file
 ##### return value
 a buffer with the data.
 
-#### System.writeFile(fd, data, size)
+<h4 style="color:red">System.writeFile(fd, data, size)</h4>
 Writes to a file
 ##### Parameters:
 `fd`: Integer. File descriptor returned by `System.openFile()`  
 `data`: The buffer containing the data to be written  
 `size`: The ammount of bytes to write
 
-#### System.closeFile(fd)
+<h4 style="color:red">System.closeFile(fd)</h4>
 Closes a file
 ##### Parameters:
 `fd`: Integer. File descriptor returned by `System.openFile()`
 
 
-#### System.seekFile(fd, pos, type)
+<h4 style="color:red">System.seekFile(fd, pos, type)</h4>
 Changes the file pointer of this opened file
 ##### Parameters:
 `fd`: Integer. File descriptor returned by `System.openFile()`  
@@ -66,51 +66,51 @@ Changes the file pointer of this opened file
 - `CUR`: seeks from the position indicated in `pos`
 - `END`: seeks from the end of file
 
-#### size = System.sizeFile(fd)
+<h4 style="color:red">size = System.sizeFile(fd)</h4>
 Returns the size of the file associated to the file descriptor
 ##### Parameters:
 `fd`: Integer. File descriptor returned by `System.openFile()`
 ##### return value
 Size of file
 
-#### doesFileExist(path)
+<h4 style="color:red">doesFileExist(path)</h4>
 Checks if the specified file exists
 ##### Parameters:
 `path`: Location of the file. either relative of absolute path
 ##### return value
 Boolean
 
-#### System.removeFile(path)
+<h4 style="color:red">System.removeFile(path)</h4>
 Removes specified file
 ##### Parameters:
 `path`: Location of the file. either relative of absolute path
 
-#### System.copyFile(source, dest)
+<h4 style="color:red">System.copyFile(source, dest)</h4>
 Copy the specified file to another location
 ##### Parameters:
 `source`: Location of the file. either relative of absolute path  
 `dest`: Location of the new copy of the source file.
 
-#### System.moveFile(source, dest)
+<h4 style="color:red">System.moveFile(source, dest)</h4>
 Moves the file from one location to another
 ##### Parameters:
 `source`: Current location of the file. either relative of absolute path  
 `dest`: New location of the file
 
-#### System.rename(source, dest)
+<h4 style="color:red">System.rename(source, dest)</h4>
 Renames a file
 ##### Parameters:
 `source`: Location of the file. either relative of absolute path.  
 `dest`: New Location of the file
 
 
-#### System.threadCopyFile(source, dest)
+<h4 style="color:red">System.threadCopyFile(source, dest)</h4>
 Copy the specified file to another location asynchronously.
 ##### Parameters:
 `source`: Location of the file. either relative of absolute path  
 `dest`: Location of the new copy of the source file.
 
-#### progress = System.getFileProgress()
+<h4 style="color:red">progress = System.getFileProgress()</h4>
 Gets the transfer progress of the on-going transfer called by `System.threadCopyFile()`
 
 ##### return value
@@ -122,14 +122,14 @@ Table:
 
 ### Directories
 
-#### current_path = System.currentDirectory(path)
+<h4 style="color:red">current_path = System.currentDirectory(path)</h4>
 Checks if the specified file exists
 ##### Parameters:
 `path`: Specifies the path to be set as current directory. if no parameter is passed, this function returns the current directory
 ##### return value
 The current directory. this return value is only obtained if no parameters are passed
 
-#### listdir = System.listDirectory(path)
+<h4 style="color:red">listdir = System.listDirectory(path)</h4>
 Lists the contents of the specified path
 ##### Parameters:
 `path`: Path to scan. _if no path is specified, current directory is used_
@@ -138,12 +138,12 @@ a table array, containing information of the path contents. __if the operation f
 - `listdir[index].name:` file name on indicated index (_string_)
 - `listdir[index].directory`: if indicated index is a file or a directory (_bool_)
 
-#### System.createDirectory(path)
+<h4 style="color:red">System.createDirectory(path)</h4>
 Creates a folder
 ##### Parameters:
 `path`: Path to create
 
-#### System.removeDirectory(path)
+<h4 style="color:red">System.removeDirectory(path)</h4>
 Removes a folder
 ##### Parameters:
 `path`: Path to remove
@@ -152,30 +152,30 @@ Removes a folder
 
 ### Miscelaneous
 
-#### checksum = System.md5sum(string)
+<h4 style="color:red">checksum = System.md5sum(string)</h4>
 Calculate MD5 checksum
 ##### Parameters:
 `string`: String or buffer to obtain an MD5 Checksum
 ##### return value
 A string containing the MD5 checksum
 
-#### System.sleep(sec)
+<h4 style="color:red">System.sleep(sec)</h4>
 Stop program for a defined ammount of time
 ##### Parameters:
 `sec`: Ammount of seconds to wait before continuing with script execution
 
-#### freemem = System.getFreeMemory()
+<h4 style="color:red">freemem = System.getFreeMemory()</h4>
 Returns the ammount of free RAM on the EmotionEngine CPU
 ##### return value
 Integer. free RAM on the EE CPU
 
-#### System.exitToBrowser()
+<h4 style="color:red">System.exitToBrowser()</h4>
 program execution stops and system jumps to the console browser straight away
 
 ### Peripherals
 Functions related to peripherals such as memory cards or discs
 
-#### info = System.getMCInfo(slot)
+<h4 style="color:red">info = System.getMCInfo(slot)</h4>
 Returns a table containing the information of the specified memory card
 ##### Parameters:
 `slot`: Integer. memory card slot. either `0` or `1`.
@@ -191,17 +191,17 @@ Table:
   + `1`: Formatted
 - `info.freemem`: free memory
 
-#### status = System.checkDiscTray()
+<h4 style="color:red">status = System.checkDiscTray()</h4>
 Returns if the disc tray is open or not
 ##### return value
 integer: `1` if open. `0` if closed.
 
-#### isValid = System.checkValidDisc()
+<h4 style="color:red">isValid = System.checkValidDisc()</h4>
 Returns if the current disc inside the PS2 is a valid disc
 ##### return value
 integer: `1` if valid. `0` if invalid.
 
-#### disctype = System.getDiscType()
+<h4 style="color:red">disctype = System.getDiscType()</h4>
 Returns a value identifying what type of disc is inside the PS2 right now
 ##### return value
 One of the following integer values can be returned:
