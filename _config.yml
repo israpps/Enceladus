@@ -3,9 +3,9 @@
 #
 remote_theme: LeakyAbstractions/pretty-docs
 url: https://leakyabstractions.github.io
-baseurl: /pretty-docs
-title: &site_title Pretty Docs
-description: &site_description Free Bootstrap theme for your project documentation
+baseurl: /Enceladus
+title: &site_title Enceladus
+description: &site_description Lua engine for PlayStation2
 branding:
   icon:
     name: icon_documents_alt
@@ -27,11 +27,11 @@ kramdown:
 # Owner
 #
 owner:
-  name: Guillermo Calvo
-  twitter: &site_owner_twitter gcalvo
-  copyright:
-    notice: Lorem Ipsum
-    author: "[Guillermo Calvo](https://guillermo.in/)"
+  name: Daniel Santos
+#  twitter: &site_owner_twitter gcalvo
+#  copyright:
+#    notice: Lorem Ipsum
+#    author: "[Guillermo Calvo](https://guillermo.in/)"
 
 
 #
