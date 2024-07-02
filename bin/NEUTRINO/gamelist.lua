@@ -94,7 +94,7 @@ function BDM.DeviceListPrompt()
   for i = 0, BDM.MAX_BD, 1 do
     local I = IMG.nodev
     local C = i == cur and 128 or 99
-    local col = Color.new(128, 128, 128, C)
+    local col = Color.new(128, 138, 158, C)
     if BDM.DeviceList[i] == BDM.DEVS.USB then I = IMG.dev_usb
     elseif BDM.DeviceList[i] == BDM.DEVS.HDD then I = IMG.dev_ide
     elseif BDM.DeviceList[i] == BDM.DEVS.MX4SIO then I = IMG.dev_mx4sio
