@@ -25,7 +25,7 @@ Main = {
     IOP.NLOAD, -- ata (bdm_hdd)
   };
   irx = {
-    DEV9 = {ld = false, id=0, ret=0};
+    DEV9 = {ld = 0, id=0, ret=0};
   };
   modloc = System.currentDirectory().."/NEUTRINO/modules/";
   neutrino_loc = System.currentDirectory().."/NEUTRINO/neutrino.elf";
@@ -34,11 +34,11 @@ Main = {
 }
 
 function LoadDev9(path)
-  if Main.irx.DEV9.ld then return 0 end -- already loaded
+  if Main.irx.DEV9.ld ~= 0 then return Main.irx.DEV9.ld end -- already loaded
   local RET, ID
   RET, ID = IOP.loadModule(path)
-  if (RET == 1 or ID < 0) then return -1 end -- failed
-  Main.irx.DEV9.ld = true
+  if (RET == 1 or ID < 0) then Main.irx.DEV9.ld = -1 return -1 end -- failed
+  Main.irx.DEV9.ld = 1
   Main.irx.DEV9.id = ID
   Main.irx.DEV9.ret = RET
   return 1 -- loaded
