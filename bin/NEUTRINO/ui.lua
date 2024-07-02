@@ -87,9 +87,8 @@ UI.Credits = {
     local currcol = Color.new(128, 128, 128, UI.Credits.Q)
     UI.Credits.Q = CLAMP(UI.Credits.Q-UI.Credits.INCR, 0, 128)
     Graphics.drawScaleImage(IMG.splash_logo, UI.SCR.X_MID-(Graphics.getImageWidth(IMG.splash_logo)/2),
-          UI.SCR.Y_MID-(Graphics.getImageHeight(IMG.splash_logo)/2), Graphics.getImageWidth(IMG.splash_logo),
+          UI.SCR.Y_MID-(Graphics.getImageHeight(IMG.splash_logo)/1.9), Graphics.getImageWidth(IMG.splash_logo),
           Graphics.getImageHeight(IMG.splash_logo), Color.new(128,128,128,UI.Credits.Q))
-    Font.ftPrintMultiLineAligned(LFONT, UI.SCR.X_MID, 040, 20, UI.SCR.X, 40, "NEUTRINO LAUNCHER", currcol)
     Font.ftPrintMultiLineAligned(BFONT, UI.SCR.X_MID, 300, 20, UI.SCR.X, 40, "Coded By El_isra", currcol)
     Font.ftPrintMultiLineAligned(BFONT, UI.SCR.X_MID, 320, 20, UI.SCR.X, UI.SCR.Y, "Based on Enceladus by Daniel santos\nUI GFX by Berion\nSpecial thanks to Maximus32 for making Neutrino\n\nThis program is free and open source\nif you bought it you've been scammed", currcol)
     PADListen()
