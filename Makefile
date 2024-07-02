@@ -112,7 +112,7 @@ all: ds34 $(EE_BIN_PKD)
 NEUTRINO = bin/NEUTRINO/neutrino.elf
 $(NEUTRINO):
 	wget -q https://github.com/rickgaiser/neutrino/releases/download/v1.3.1/neutrino_v1.3.1.7z -O neutrino.temp.7z
-	7z x neutrino.temp.7z -o"bin/NEUTRINO/"
+	7z x -y -bso0 neutrino.temp.7z -o"bin/NEUTRINO/"
 	rm -f neutrino.temp.7z
 
 $(EE_BIN_PKD): $(EE_BIN)
@@ -194,15 +194,15 @@ reset:
 	ps2client -h $(PS2LINK_IP) reset   
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.c | $(EE_OBJS_DIR)
-	@echo "  - $@"
+	@echo " - $<"
 	@$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_ASM_DIR)%.c | $(EE_OBJS_DIR)
-	@echo "  - $@"
+	@echo " - $<"
 	@$(EE_CC) $(EE_CFLAGS) $(EE_INCS) -c $< -o $@
 
 $(EE_OBJS_DIR)%.o: $(EE_SRC_DIR)%.cpp | $(EE_OBJS_DIR)
-	@echo "  - $@"
+	@echo " - $<"
 	$(EE_CXX) $(EE_CXXFLAGS) $(EE_INCS) -c $< -o $@
 
 include $(PS2SDK)/samples/Makefile.pref
