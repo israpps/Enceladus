@@ -695,6 +695,11 @@ static int lua_getfileprogress(lua_State *L) {
 	return 1;
 }
 
+static int lua_getConsoleID(lua_State *L);
+static int lua_getMechaVer(lua_State *L);
+static int lua_getEEPROMModel(lua_State *L);
+static int lua_getConsoleSerial(lua_State *L);
+
 static const luaL_Reg System_functions[] = {
 	{"openFile",                   lua_openfile},
 	{"readFile",                   lua_readfile},
@@ -723,6 +728,10 @@ static const luaL_Reg System_functions[] = {
 	{"checkValidDisc",       lua_checkValidDisc},
 	{"getDiscType",             lua_getDiscType},
 	{"checkDiscTray",         lua_checkDiscTray},
+	{"GetConsoleID",           lua_getConsoleID},
+	{"GetMECHACONVersion",      lua_getMechaVer},
+	{"GetEEPROMmodel",       lua_getEEPROMModel},
+	{"GetConsoleSerial",   lua_getConsoleSerial},
 	{0, 0}
 };
 
@@ -749,7 +758,7 @@ static int lua_sifloadmodule(lua_State *L){
 }
 
 
-static int lua_sifloadmodulebuffer(lua_State *L){
+static int lua_sifloadmodulebuffer(lua_State *L) {
 	int argc = lua_gettop(L);
 	if (argc != 2 && argc != 4) return luaL_error(L, "wrong number of arguments");
 	const char* ptr = luaL_checkstring(L, 1);
@@ -814,9 +823,155 @@ void luaSystem_init(lua_State *L) {
 
 	lua_pushinteger(L, 2);
 	lua_setglobal(L, "READ_WRITE");
-
-
-
 	
 }
 
+
+#define MODEL_NAME_MAX_LEN 64
+static char ModelName[MODEL_NAME_MAX_LEN];
+uint16_t ModelId = 0;
+uint32_t serial = 0x0000;
+uint8_t mechaver[4] = {0,0,0,0};
+bool got_mechaver = false, got_modelid = false, got_serial = false;
+
+//for some reason not part of the libcdvd code
+int sceCdRM(char *ModelName, uint32_t *stat)
+{
+    unsigned char rdata[9];
+    unsigned char sdata;
+    int result1, result2;
+
+    sdata = 0;
+    result1 = sceCdApplySCmd(0x17, &sdata, 1, rdata);
+    // result1 = sceCdApplySCmd(0x17, &sdata, 1, rdata, 9);
+
+    *stat = rdata[0];
+    memcpy(ModelName, &rdata[1], 8);
+
+    sdata = 8;
+    result2 = sceCdApplySCmd(0x17, &sdata, 1, rdata);
+    // result2 = sceCdApplySCmd(0x17, &sdata, 1, rdata, 9);
+
+    *stat |= rdata[0];
+    memcpy(&ModelName[8], &rdata[1], 8);
+
+    return ((result1 != 0 && result2 != 0) ? 1 : 0);
+}
+
+
+char ReadNVM(uint16_t offset, uint16_t *data)
+{
+	u8 input[2];
+	u8 output[16];
+	input[0] = offset >> 8;
+	input[1] = offset;
+	if (sceCdApplySCmd(0x0A, input, sizeof(input), output) != 1 || output[0] != 0)
+	{
+		scr_printf("Failed to send mechacon cmd 0x0A!\n");
+		return 0;
+	}
+	
+	*data = output[1];
+	*data <<= 8;
+	*data |= output[2];
+	
+	return 1;
+}
+
+int getMechaVersion(uint8_t *data) {
+    if (got_mechaver) return 1;
+	u8 input[1];
+	u8 output[16];
+	input[0] = 0x00;
+	if (sceCdApplySCmd(0x03, input, sizeof(input), output) != 1)
+	{
+		return 0;
+	}
+    got_mechaver = true;
+	memcpy(data, &output[0], 3);
+	
+	return 1;
+}
+
+uint16_t getConsoleID() {
+    if (!getMechaVersion(mechaver)){printf("ERROR\n");return 0;}
+    if (!got_modelid) {
+        if (mechaver[1] < 4)
+            ReadNVM(0xE4, &ModelId);
+        else
+            ReadNVM(0xF8, &ModelId);
+        got_modelid = true;
+    }
+    return ModelId;
+}
+
+bool getSerial()
+{
+	if (got_serial) return true;
+    uint16_t part1;
+    uint16_t part2;
+    uint8_t version[4];
+    if (!ReadNVM(0xFA, &part1))
+        return false;
+    if (!ReadNVM(0xFB, &part2))
+        return false;
+
+    if (getMechaVersion(version))
+    {
+        if (version[1] < 4)
+        {
+            if (!ReadNVM(0xE6, &part1))
+                return false;
+            if (!ReadNVM(0xE7, &part2))
+                return false;
+        }
+    }
+
+    serial = ((part2 & 0xff) << 16) | part1;
+    return true;
+}
+
+static int lua_getConsoleSerial(lua_State *L) {
+	bool success = getSerial();
+	printf("%s(%lu)\n", __FUNCTION__, serial);
+	lua_pushboolean(L, success);
+	lua_pushinteger(L, serial);
+	return 2;
+}
+
+static int lua_getConsoleID(lua_State *L) {
+	unsigned int a = getConsoleID();
+	printf("%s(%u)\n", __FUNCTION__, a);
+	lua_pushinteger(L, a);
+	return 1;
+}
+bool eepromread = false;
+static int lua_getEEPROMModel(lua_State *L) {
+	int ret = 0;
+	if (!eepromread) {
+		memset(ModelName, 0, MODEL_NAME_MAX_LEN);
+		uint32_t stat = 0;
+        if (sceCdRM(ModelName, &stat) == 1) { // Command issued successfully.
+            if (stat & 0x80)
+                ret = -2;
+            if ((stat & 0x40) || ModelName[0] == '\0')
+                strcpy(ModelName, "UNKNOWN");
+
+            ret =  0; // Original returned -1
+        } else
+            ret = -2;
+		eepromread = true;
+	}
+	printf("%s(%s)\n", __FUNCTION__, ModelName);
+	lua_pushinteger(L, ret);
+	lua_pushstring(L, ModelName);
+	return 2;
+}
+
+static int lua_getMechaVer(lua_State *L) {
+	getMechaVersion(mechaver);
+	printf("%s(%u, %u)\n", __FUNCTION__, mechaver[1], mechaver[2]);
+    lua_pushinteger(L, (unsigned int)mechaver[1]);
+    lua_pushinteger(L, (unsigned int)mechaver[2]);
+	return 2;
+}

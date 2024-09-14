@@ -62,5 +62,9 @@
     "_480p",
     "_576p",
     "_720p"
-  ]
+  ],
+  "files.associations": {
+    "*.make": "makefile",
+    "typeinfo": "cpp"
+  }
 }
