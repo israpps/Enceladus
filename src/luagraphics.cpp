@@ -501,13 +501,12 @@ static int lua_getloaddata(lua_State *L){
 		return 1;
 	}else return 0;
 }
-
+extern u8 qrcode[]; extern unsigned int size_qrcode;
 static int lua_load_embedded_png(lua_State *L) {
 	int argc = lua_gettop(L);
-	if (argc != 2) return luaL_error(L, "wrong number of arguments");
     lua_gc(L, LUA_GCCOLLECT, 0);
-	uint8_t* ptr = (uint8_t *)luaL_checkstring(L, 1);
-	size_t siz = luaL_checkinteger(L, 2);
+	uint8_t* ptr = (uint8_t *)qrcode;
+	size_t siz = size_qrcode;
 	GSTEXTURE* image = NULL;
 	image = loadEmbeddedPNG(ptr, siz, true);
 	lua_pushinteger(L, (uint32_t)(image));
@@ -515,7 +514,7 @@ static int lua_load_embedded_png(lua_State *L) {
 }
 //Register our Graphics Functions
 static const luaL_Reg Graphics_functions[] = {
-    {"loadImageEmbedded",         lua_load_embedded_png},
+    {"LoadQRCode",         lua_load_embedded_png},
   	{"drawPixel",           		   lua_pixel},
   //{"getPixel",            		  lua_gpixel},
   	{"drawRect",           				lua_rect},

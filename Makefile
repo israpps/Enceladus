@@ -81,7 +81,7 @@ IOP_MODULES = iomanX.o fileXio.o \
 			  usbd.o audsrv.o bdm.o bdmfs_fatfs.o \
 			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o
 
-EMBEDDED_RSC = boot.o
+EMBEDDED_RSC = boot.o qr.o
 
 ifeq ($(F_KEYBOARD),1)
   EE_CXXFLAGS += -DPS2KBD
