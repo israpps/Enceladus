@@ -95,6 +95,7 @@ GSTEXTURE* loadpng(FILE* File, bool delayed)
 
     tex->VramClut = 0;
     tex->Clut = NULL;
+	tex->ClutStorageMode = GS_CLUT_STORAGE_CSM1;
 
 	if(png_get_color_type(png_ptr, info_ptr) == PNG_COLOR_TYPE_RGB_ALPHA)
 	{
@@ -357,6 +358,7 @@ GSTEXTURE* loadbmp(FILE* File, bool delayed)
 		tex->PSM = GS_PSM_T4;
 		tex->Clut = (u32*)memalign(128, gsKit_texture_size_ee(8, 2, GS_PSM_CT32));
 		tex->ClutPSM = GS_PSM_CT32;
+		tex->ClutStorageMode = GS_CLUT_STORAGE_CSM1;
 
 		memset(tex->Clut, 0, gsKit_texture_size_ee(8, 2, GS_PSM_CT32));
 		fseek(File, 54, SEEK_SET);
@@ -666,6 +668,7 @@ static void  _ps2_load_JPEG_generic(GSTEXTURE *Texture, struct jpeg_decompress_s
 	Texture->Filter = GS_FILTER_NEAREST;
 	Texture->VramClut = 0;
 	Texture->Clut = NULL;
+	Texture->ClutStorageMode = GS_CLUT_STORAGE_CSM1;
 
 	textureSize = cinfo->output_width*cinfo->output_height*cinfo->out_color_components;
 	#ifdef DEBUG
