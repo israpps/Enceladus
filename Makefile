@@ -45,7 +45,7 @@ EE_BIN_PKD = $(BINDIR)enceladus_pkd.elf
 
 EE_LIBS = -L$(PS2SDK)/ports/lib -L$(PS2DEV)/gsKit/lib/ -Lmodules/ds34bt/ee/ -Lmodules/ds34usb/ee/ \
 	-lpatches -lfileXio -lpad -ldebug -llua -lmath3d -ljpeg -lfreetype -lgskit_toolkit -lgskit -ldmakit \
-	-lpng -lz -lmc -laudsrv -lelf-loader -lds34bt -lds34usb
+	-lpng -lz -lmc -laudsrv -lelf-loader -lds34bt -lds34usb -liopreboot
 
 EE_INCS += -I$(PS2DEV)/gsKit/include -I$(PS2SDK)/ports/include -I$(PS2SDK)/ports/include/freetype2 -I$(PS2SDK)/ports/include/zlib
 
@@ -74,12 +74,12 @@ APP_CORE = main.o system.o pad.o graphics.o render.o \
 
 LUA_LIBS =	luaplayer.o luasound.o luacontrols.o \
 			luatimer.o luaScreen.o luagraphics.o \
-			luasystem.o luaRender.o
+			luasystem.o luaRender.o luamechaemu.o
 
 IOP_MODULES = iomanX.o fileXio.o \
 			  sio2man.o mcman.o mcserv.o padman.o libsd.o \
 			  usbd.o audsrv.o bdm.o bdmfs_fatfs.o \
-			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o
+			  usbmass_bd.o cdfs.o ds34bt.o ds34usb.o ioprp.o
 
 EMBEDDED_RSC = boot.o
 
@@ -109,6 +109,10 @@ all: $(EXT_LIBS) $(EE_BIN)
 
 $(EE_ASM_DIR)boot.c: etc/boot.lua | $(EE_ASM_DIR)
 	$(BIN2S) $< $@ bootString
+
+
+$(EE_ASM_DIR)ioprp.c: IOPRP.IMG | $(EE_ASM_DIR)
+	$(BIN2S) $< $@ ioprp
 
 # Images
 EMBED/%.s: EMBED/%.png

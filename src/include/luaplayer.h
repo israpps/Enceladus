@@ -37,6 +37,7 @@ extern void luaTimer_init(lua_State *L);
 extern void luaSystem_init(lua_State *L);
 extern void luaSound_init(lua_State *L);
 extern void luaRender_init(lua_State *L);
+extern void luaMechaEmuInit(lua_State *L);
 #ifdef PS2KBD
 extern void luaKeyboardInit(lua_State *L);
 #endif

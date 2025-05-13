@@ -7,13 +7,11 @@
 #include <stdio.h>
 #include "include/luaplayer.h"
 #include "include/mechaemu_rpc.h"
-
-#define LUA_FUN(x) static int x(lua_State *L)
-
+#define RPCGUARD() if (!rpc_initialized) return luaL_error(L, "attempt to call %s while RPC service is not bound", __FUNCTION__)
 static SifRpcClientData_t MechaEmuRPC;
 static int rpc_initialized = false;
 
-LUA_FUN(lua_connect_rpc) {
+static int lua_connect_rpc(lua_State *L) {
     int retries = 100;
     if (!rpc_initialized) {
         int E;
@@ -37,7 +35,7 @@ LUA_FUN(lua_connect_rpc) {
 	return 1;
 }
 
-LUA_FUN(lua_disconnect_rpc) {
+static int lua_disconnect_rpc(lua_State *L) {
     memset(&MechaEmuRPC, 0, sizeof(SifRpcClientData_t));
 	return 1;
 }
@@ -45,9 +43,7 @@ LUA_FUN(lua_disconnect_rpc) {
 void* current_kelf = NULL;
 
 #define RPC_BUFPARAM(x) &x, sizeof(x)
-int mechaemu_downloadfile(int port, int slot, void* KELFPointer)
-{
-    CHECK_RPC_INIT();
+int mechaemu_downloadfile(int port, int slot, void* KELFPointer) {
 
     struct DownLoadFileParam pkt;
     memset(&pkt, 0, sizeof(pkt));
@@ -58,35 +54,49 @@ int mechaemu_downloadfile(int port, int slot, void* KELFPointer)
 
     if (SifCallRpc(&MechaEmuRPC, SECRME_DOWNLOADFILE, 0, RPC_BUFPARAM(pkt), RPC_BUFPARAM(pkt), NULL, NULL) < 0)
     {
-        DPRINTF("%s: RPC ERROR\n", __FUNCTION__);
+        printf("%s: RPC ERROR\n", __FUNCTION__);
         return -SCE_ECALLMISS;
     }
     if (pkt.result) memcpy(KELFPointer, pkt.buffer, sizeof(pkt.buffer)); //copy back the kilobyte from RPC to the original pointer, kbit and kc changed
     return pkt.result;
 }
 
-
-LUA_FUN(lua_ReadKELF) {
-
-}
-LUA_FUN(lua_WriteKELF) {
-
+static int lua_ReadKELF(lua_State *L) {
+    return 0;
 }
 
-LUA_FUN(lua_FreeKELF) {
+static int lua_WriteKELF(lua_State *L) {
+    return 0;
+}
+
+static int lua_FreeKELF(lua_State *L) {
     if (current_kelf)
     {
         free(current_kelf);
         current_kelf = NULL;
     }
+    return 0;
 }
 
-LUA_FUN(lua_BindKELF) {
-
+static int lua_BindKELF(lua_State *L) {
+    return 0;
 }
 
-LUA_FUN(lua_ChangeKeyset) {
-
+static int lua_ChangeKeyset(lua_State *L) {
+    RPCGUARD();
+    struct keyscontrol pkt;
+    memset(&pkt, 0, sizeof(pkt));
+	int argc = lua_gettop(L);
+	if (argc != 1) return luaL_error(L, "wrong number of arguments");
+    pkt.newkyey = luaL_checkinteger(L, 1);
+    if (SifCallRpc(&MechaEmuRPC, SECRME_CONTROLKEYS, 0, RPC_BUFPARAM(pkt), RPC_BUFPARAM(pkt), NULL, NULL) < 0)
+    {
+        printf("%s: RPC ERROR\n", __FUNCTION__);
+        lua_pushnil(L);
+        return 1;
+    }
+	lua_pushinteger(L, pkt.currentkey);
+    return 1;
 }
 
 //Register our Timer Functions
@@ -101,7 +111,7 @@ static const luaL_Reg Mecha_func[] = {
   {0, 0}
 };
 
-void luaTimer_init(lua_State *L){
+void luaMechaEmuInit(lua_State *L) {
 	lua_newtable(L);
 	luaL_setfuncs(L, Mecha_func, 0);
 	lua_setglobal(L, "Mecha");

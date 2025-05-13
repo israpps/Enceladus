@@ -7,6 +7,7 @@
 #include <libcdvd.h>
 #include <iopheap.h>
 #include <iopcontrol.h>
+#include <iopcontrol_special.h>
 #include <smod.h>
 #include <audsrv.h>
 #include <sys/stat.h>
@@ -89,17 +90,18 @@ int HAVE_FILEXIO = 0;
     printf("%s: id:%d, ret:%d\n", #_irx, ID, RET)
 #define LOAD_IRX_NARG(_irx) LOAD_IRX(_irx, 0, NULL)
 
+extern unsigned char ioprp[]; extern int size_ioprp;
+
 int main(int argc, char * argv[])
 {
     int ID, RET;
     const char * errMsg;
 
-    #ifdef RESET_IOP  
     SifInitRpc(0);
-    while (!SifIopReset("", 0)){};
+    //while (!SifIopReset("", 0)){};
+    while (!SifIopRebootBuffer(ioprp, size_ioprp)){};
     while (!SifIopSync()){};
     SifInitRpc(0);
-    #endif
     
     // install sbv patch fix
     printf("Installing SBV Patches...\n");
